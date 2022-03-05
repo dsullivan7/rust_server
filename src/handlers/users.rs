@@ -1,4 +1,8 @@
-use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
+#[cfg(test)]
+#[path = "users_test.rs"]
+mod users_test;
+
+use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 use sea_orm::entity::*;
 
 use crate::models;
@@ -16,22 +20,20 @@ async fn get_user(path: web::Path<String>) -> impl Responder {
 }
 
 #[post("/users")]
-async fn create_user(data: web::Data<AppState>) -> impl Responder {
-    println!("here");
-
+async fn create_user(data: web::Data<AppState>) -> Result<impl Responder, Error> {
     let conn = &data.conn;
-    let user = models::user::ActiveModel {
+    let user: models::user::Model = models::user::ActiveModel {
         user_id: NotSet,
         first_name: Set("first_name".to_owned()),
         last_name: Set("last_name".to_owned()),
+        created_at: NotSet,
+        updated_at: NotSet,
     }
-    .save(conn)
+    .insert(conn)
     .await
     .unwrap();
 
-    println!("Inserted: {:?}\n", user);
-
-    HttpResponse::Ok().body("saved")
+    Ok(web::Json(user))
 }
 
 #[put("/users/{user_id}")]

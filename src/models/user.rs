@@ -9,6 +9,8 @@ pub struct Model {
     pub user_id: Uuid,
     pub first_name: String,
     pub last_name: String,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

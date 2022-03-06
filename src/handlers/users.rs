@@ -1,5 +1,5 @@
-#[cfg(test)]
 #[path = "users_test.rs"]
+#[cfg(test)]
 mod users_test;
 
 use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
@@ -21,7 +21,7 @@ async fn get_user(path: web::Path<String>) -> impl Responder {
 
 #[post("/users")]
 async fn create_user(data: web::Data<AppState>) -> Result<impl Responder, Error> {
-    let conn = &data.conn;
+    let db = &data.db;
     let user: models::user::Model = models::user::ActiveModel {
         user_id: NotSet,
         first_name: Set("first_name".to_owned()),
@@ -29,7 +29,7 @@ async fn create_user(data: web::Data<AppState>) -> Result<impl Responder, Error>
         created_at: NotSet,
         updated_at: NotSet,
     }
-    .insert(conn)
+    .insert(db)
     .await
     .unwrap();
 

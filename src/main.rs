@@ -6,9 +6,8 @@ use std::env;
 mod handlers;
 mod models;
 
-#[derive(Debug, Clone)]
 struct AppState {
-    conn: DatabaseConnection,
+    db: DatabaseConnection,
 }
 
 #[actix_web::main]
@@ -25,8 +24,8 @@ async fn main() -> std::io::Result<()> {
 
     let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
 
-    let conn = sea_orm::Database::connect(&db_url).await.unwrap();
-    let state = web::Data::new(AppState { conn });
+    let db = sea_orm::Database::connect(&db_url).await.unwrap();
+    let state = web::Data::new(AppState { db });
 
     HttpServer::new(move || {
         App::new()

@@ -9,9 +9,10 @@ edition = "2021"
 actix-web = "4"
 actix-service = "2"
 dotenv = "0.15.0"
-sea-orm = { version = "^0.6", features = [ "sqlx-postgres", "runtime-actix-native-tls", "macros" ], default-features = false }
+sea-orm = { version = "^0.6", features = [ "sqlx-postgres", "runtime-actix-native-tls", "macros", "mock" ], default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 uuid = "0.8"
 tracing = "0.1"
 tracing-subscriber = "0.2"
+chrono = { version = "0.4", features = ["serde"] }

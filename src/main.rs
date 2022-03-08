@@ -1,9 +1,12 @@
 use actix_web::{middleware, web, App, HttpServer};
-use dotenv::dotenv;
+use actix_web_httpauth::middleware::HttpAuthentication;
 use sea_orm::DatabaseConnection;
 use std::env;
 
+mod authentication;
+mod errors;
 mod handlers;
+mod middlewares;
 mod models;
 
 struct AppState {
@@ -12,8 +15,6 @@ struct AppState {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok();
-
     tracing_subscriber::fmt::init();
 
     let db_name = env::var("DB_NAME").expect("DB_NAME must be set");
@@ -27,10 +28,13 @@ async fn main() -> std::io::Result<()> {
     let db = sea_orm::Database::connect(&db_url).await.unwrap();
     let state = web::Data::new(AppState { db });
 
+    let auth = HttpAuthentication::bearer(middlewares::authentication::validator);
+
     HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
             .wrap(middleware::Logger::default())
+            .wrap(auth.clone())
             .service(handlers::users::get_user)
             .service(handlers::users::create_user)
             .service(handlers::users::list_users)

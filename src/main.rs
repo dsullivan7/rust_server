@@ -4,7 +4,6 @@ use sea_orm::DatabaseConnection;
 use std::env;
 
 mod authentication;
-mod errors;
 mod handlers;
 mod middlewares;
 mod models;

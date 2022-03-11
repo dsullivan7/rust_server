@@ -1,5 +1,4 @@
 use actix_web::{test, App};
-use chrono::prelude::*;
 use sea_orm::{DatabaseBackend, MockDatabase};
 use uuid::Uuid;
 
@@ -26,12 +25,8 @@ async fn test_create_user() {
         user_id: user_id_1.to_owned(),
         first_name: "first_name".to_owned(),
         last_name: "last_name".to_owned(),
-        created_at: chrono::FixedOffset::east(5 * 3600)
-            .ymd(2016, 11, 08)
-            .and_hms(0, 0, 0),
-        updated_at: chrono::FixedOffset::east(5 * 3600)
-            .ymd(2016, 11, 08)
-            .and_hms(0, 0, 0),
+        created_at: chrono::Utc::now().naive_utc(),
+        updated_at: chrono::Utc::now().naive_utc(),
     };
 
     let db = MockDatabase::new(DatabaseBackend::Postgres)

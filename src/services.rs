@@ -1,9 +1,15 @@
+#[path = "services_test.rs"]
+#[cfg(test)]
+mod services_test;
+
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::models;
 
-pub struct PortfolioHolding {
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+struct PortfolioHolding {
     security_id: Uuid,
     amount: f64,
 }

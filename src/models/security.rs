@@ -2,8 +2,6 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::utils;
-
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Deserialize, Serialize)]
 #[sea_orm(table_name = "securities")]
 pub struct Model {
@@ -12,11 +10,9 @@ pub struct Model {
     pub symbol: String,
     pub name: String,
     #[sea_orm(column_type = "TimestampWithTimeZone")]
-    #[serde(with = "utils::date_format")]
-    pub created_at: chrono::DateTime<chrono::FixedOffset>,
+    pub created_at: chrono::NaiveDateTime,
     #[sea_orm(column_type = "TimestampWithTimeZone")]
-    #[serde(with = "utils::date_format")]
-    pub updated_at: chrono::DateTime<chrono::FixedOffset>,
+    pub updated_at: chrono::NaiveDateTime,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

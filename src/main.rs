@@ -7,7 +7,6 @@ mod authentication;
 mod handlers;
 mod middlewares;
 mod models;
-mod utils;
 mod services;
 
 struct AppState {

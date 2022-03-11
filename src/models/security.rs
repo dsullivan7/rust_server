@@ -5,12 +5,12 @@ use uuid::Uuid;
 use crate::utils;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Deserialize, Serialize)]
-#[sea_orm(table_name = "users")]
+#[sea_orm(table_name = "securities")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    pub user_id: Uuid,
-    pub first_name: String,
-    pub last_name: String,
+    pub security_id: Uuid,
+    pub symbol: String,
+    pub name: String,
     #[sea_orm(column_type = "TimestampWithTimeZone")]
     #[serde(with = "utils::date_format")]
     pub created_at: chrono::DateTime<chrono::FixedOffset>,

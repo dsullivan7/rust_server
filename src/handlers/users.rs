@@ -52,26 +52,26 @@ async fn get_user(path: web::Path<String>) -> impl Responder {
 }
 
 #[post("/users")]
-async fn create_user(data: web::Data<AppState>, body: web::Json<CreateParams>) -> Result<impl Responder, Error> {
+async fn create_user(data: web::Data<AppState>) -> Result<impl Responder, Error> {
     println!("create");
     let db = &data.db;
 
-    let mut first_name = NotSet;
-
-    if body.first_name.is_some() {
-        first_name = Set(body.first_name.as_ref().unwrap().to_owned());
-    }
-
-    let mut last_name = NotSet;
-
-    if body.last_name.is_some() {
-        last_name = Set(body.last_name.as_ref().unwrap().to_owned());
-    }
+    // let mut first_name = NotSet;
+    //
+    // if body.first_name.is_some() {
+    //     first_name = Set(body.first_name.as_ref().unwrap().to_owned());
+    // }
+    //
+    // let mut last_name = NotSet;
+    //
+    // if body.last_name.is_some() {
+    //     last_name = Set(body.last_name.as_ref().unwrap().to_owned());
+    // }
 
     let user: models::user::Model = models::user::ActiveModel {
         user_id: NotSet,
-        first_name: first_name,
-        last_name: last_name,
+        first_name: Set("first_name".to_owned()),
+        last_name: Set("last_name".to_owned()),
         created_at: NotSet,
         updated_at: NotSet,
     }

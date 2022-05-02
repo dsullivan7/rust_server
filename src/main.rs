@@ -7,13 +7,14 @@ mod authentication;
 mod handlers;
 mod middlewares;
 mod models;
+mod plaid;
 mod services;
 
 struct AppState {
     db: DatabaseConnection,
 }
 
-#[actix_web::main]
+#[tokio::main]
 async fn main() -> std::io::Result<()> {
     tracing_subscriber::fmt::init();
 

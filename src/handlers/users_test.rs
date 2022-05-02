@@ -67,7 +67,12 @@ async fn test_create_user() {
     let state = web::Data::new(AppState { db });
     let app = test::init_service(App::new().app_data(state).service(create_user)).await;
 
-    let req = test::TestRequest::post().uri("/users").to_request();
+    let body = serde_json::json!({
+        "first_name": "first_name",
+        "last_name": "last_name",
+    });
+
+    let req = test::TestRequest::post().set_json(&body).uri("/users").to_request();
     let resp = test::call_service(&app, req).await;
     let user_resp: models::user::Model = actix_web::test::read_body_json(resp).await;
 

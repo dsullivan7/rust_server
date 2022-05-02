@@ -82,3 +82,50 @@ async fn test_create_user() {
     assert_eq!(user_resp.created_at, user_db.created_at);
     assert_eq!(user_resp.updated_at, user_db.updated_at);
 }
+
+#[cfg(test)]
+#[actix_web::test]
+async fn test_modify_user() {
+    use super::*;
+
+    let user_id = Uuid::new_v4();
+
+    let user_db: models::user::Model = models::user::Model {
+        user_id: user_id.to_owned(),
+        first_name: "first_name".to_owned(),
+        last_name: "last_name".to_owned(),
+        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+    };
+
+    let user_db_modified: models::user::Model = models::user::Model {
+        user_id: user_id.to_owned(),
+        first_name: "first_name_different".to_owned(),
+        last_name: "last_name_different".to_owned(),
+        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+    };
+
+    let db = MockDatabase::new(DatabaseBackend::Postgres)
+        .append_query_results(vec![vec![user_db.clone()]])
+        .append_query_results(vec![vec![user_db_modified.clone()]])
+        .into_connection();
+    let state = web::Data::new(AppState { db });
+    let app = test::init_service(App::new().app_data(state).service(modify_user)).await;
+
+    let body = serde_json::json!({
+        "first_name": "first_name_different",
+        "last_name": "last_name_different",
+    });
+
+    let path = format!("/users/{}", user_id);
+    let req = test::TestRequest::put().set_json(&body).uri(&path).to_request();
+    let resp = test::call_service(&app, req).await;
+    let user_resp: models::user::Model = actix_web::test::read_body_json(resp).await;
+
+    assert_eq!(user_resp.user_id, user_db_modified.user_id);
+    assert_eq!(user_resp.first_name, user_db_modified.first_name);
+    assert_eq!(user_resp.last_name, user_db_modified.last_name);
+    assert_eq!(user_resp.created_at, user_db_modified.created_at);
+    assert_eq!(user_resp.updated_at, user_db_modified.updated_at);
+}

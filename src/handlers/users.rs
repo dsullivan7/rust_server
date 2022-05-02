@@ -5,7 +5,6 @@ mod users_test;
 use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
-
 use serde::{Deserialize};
 
 use crate::models;
@@ -82,9 +81,24 @@ async fn create_user(data: web::Data<AppState>, body: web::Json<CreateParams>) -
 }
 
 #[put("/users/{user_id}")]
-async fn modify_user(path: web::Path<String>) -> impl Responder {
-    let user_id = path.into_inner();
-    HttpResponse::Ok().body(format!("modify user {user_id}"))
+async fn modify_user(data: web::Data<AppState>, path: web::Path<String>, body: web::Json<CreateParams>) -> Result<impl Responder, Error> {
+    let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+
+    let db = &data.db;
+
+    let mut user: models::user::ActiveModel = User::find_by_id(user_id).one(db).await.unwrap().unwrap().into();
+
+    if body.first_name.is_some() {
+        user.first_name = Set(body.first_name.as_ref().unwrap().to_owned());
+    }
+
+    if body.last_name.is_some() {
+        user.last_name = Set(body.last_name.as_ref().unwrap().to_owned());
+    }
+
+    let user_updated: models::user::Model = user.update(db).await.unwrap();
+
+    Ok(web::Json(user_updated))
 }
 
 #[delete("/users/{user_id}")]

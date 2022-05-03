@@ -2,7 +2,7 @@
 #[cfg(test)]
 mod users_test;
 
-use actix_web::{delete, get, post, put, web, HttpResponse, Error, Responder};
+use actix_web::{delete, get, post, put, web, http, HttpResponse, Error, Responder};
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::{Deserialize};
@@ -82,7 +82,7 @@ async fn create_user(data: web::Data<AppState>, body: web::Json<CreateParams>) -
     .await
     .unwrap();
 
-    Ok(web::Json(user))
+    Ok((web::Json(user), http::StatusCode::CREATED))
 }
 
 #[put("/users/{user_id}")]

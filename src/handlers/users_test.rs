@@ -1,4 +1,4 @@
-use actix_web::{http, test, App};
+use actix_web::{test, App};
 use sea_orm::{MockExecResult, DatabaseBackend, MockDatabase};
 use uuid::Uuid;
 
@@ -26,6 +26,9 @@ async fn test_get_user() {
     let path = format!("/users/{}", user_id);
     let req = test::TestRequest::get().uri(&path).to_request();
     let resp = test::call_service(&app, req).await;
+
+    assert_eq!(resp.status(), http::StatusCode::OK);
+
     let user_resp: models::user::Model = actix_web::test::read_body_json(resp).await;
 
     assert_eq!(user_resp.user_id, user_db.user_id);
@@ -58,6 +61,9 @@ async fn test_list_user() {
 
     let req = test::TestRequest::get().uri("/users").to_request();
     let resp = test::call_service(&app, req).await;
+
+    assert_eq!(resp.status(), http::StatusCode::OK);
+
     let users_resp: Vec<models::user::Model> = actix_web::test::read_body_json(resp).await;
 
     assert_eq!(users_resp[0].user_id, user_db.user_id);
@@ -101,6 +107,9 @@ async fn test_create_user() {
 
     let req = test::TestRequest::post().set_json(&body).uri("/users").to_request();
     let resp = test::call_service(&app, req).await;
+
+    assert_eq!(resp.status(), http::StatusCode::CREATED);
+
     let user_resp: models::user::Model = actix_web::test::read_body_json(resp).await;
 
     assert_eq!(user_resp.user_id, user_db.user_id);
@@ -154,6 +163,9 @@ async fn test_modify_user() {
     let path = format!("/users/{}", user_id);
     let req = test::TestRequest::put().set_json(&body).uri(&path).to_request();
     let resp = test::call_service(&app, req).await;
+
+    assert_eq!(resp.status(), http::StatusCode::OK);
+
     let user_resp: models::user::Model = actix_web::test::read_body_json(resp).await;
 
     assert_eq!(user_resp.user_id, user_db_modified.user_id);

@@ -2,7 +2,7 @@
 #[cfg(test)]
 mod users_test;
 
-use actix_web::{delete, get, post, put, web, Error, HttpResponse, Responder};
+use actix_web::{delete, get, post, put, web, HttpResponse, Error, Responder};
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::{Deserialize};
@@ -107,7 +107,9 @@ async fn modify_user(data: web::Data<AppState>, path: web::Path<String>, body: w
 }
 
 #[delete("/users/{user_id}")]
-async fn delete_user(path: web::Path<String>) -> impl Responder {
-    let user_id = path.into_inner();
-    HttpResponse::Ok().body(format!("delete user {user_id}"))
+async fn delete_user(data: web::Data<AppState>, path: web::Path<String>) -> Result<impl Responder, Error> {
+    let db = &data.db;
+    let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    User::delete_by_id(user_id).exec(db).await.unwrap();
+    Ok(HttpResponse::NoContent())
 }

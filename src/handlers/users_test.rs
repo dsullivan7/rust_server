@@ -1,5 +1,5 @@
-use actix_web::{test, App};
-use sea_orm::{DatabaseBackend, MockDatabase};
+use actix_web::{http, test, App};
+use sea_orm::{MockExecResult, DatabaseBackend, MockDatabase};
 use uuid::Uuid;
 
 #[cfg(test)]
@@ -84,6 +84,12 @@ async fn test_create_user() {
 
     let db = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
+        .append_exec_results(vec![
+            MockExecResult {
+                last_insert_id: 1,
+                rows_affected: 1,
+            },
+        ])
         .into_connection();
     let state = web::Data::new(AppState { db });
     let app = test::init_service(App::new().app_data(state).service(create_user)).await;
@@ -130,6 +136,12 @@ async fn test_modify_user() {
     let db = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .append_query_results(vec![vec![user_db_modified.clone()]])
+        .append_exec_results(vec![
+            MockExecResult {
+                last_insert_id: 1,
+                rows_affected: 1,
+            },
+        ])
         .into_connection();
     let state = web::Data::new(AppState { db });
     let app = test::init_service(App::new().app_data(state).service(modify_user)).await;
@@ -149,4 +161,29 @@ async fn test_modify_user() {
     assert_eq!(user_resp.last_name, user_db_modified.last_name);
     assert_eq!(user_resp.created_at, user_db_modified.created_at);
     assert_eq!(user_resp.updated_at, user_db_modified.updated_at);
+}
+
+#[cfg(test)]
+#[actix_web::test]
+async fn test_delete_user() {
+    use super::*;
+
+    let user_id = Uuid::new_v4();
+
+    let db = MockDatabase::new(DatabaseBackend::Postgres)
+        .append_exec_results(vec![
+            MockExecResult {
+                last_insert_id: 1,
+                rows_affected: 1,
+            },
+        ])
+        .into_connection();
+    let state = web::Data::new(AppState { db });
+    let app = test::init_service(App::new().app_data(state).service(delete_user)).await;
+
+    let path = format!("/users/{}", user_id);
+    let req = test::TestRequest::delete().uri(&path).to_request();
+    let resp = test::call_service(&app, req).await;
+
+    assert_eq!(resp.status(), http::StatusCode::NO_CONTENT);
 }

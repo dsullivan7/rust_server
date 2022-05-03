@@ -45,9 +45,14 @@ async fn list_users(data: web::Data<AppState>, query: web::Query<QueryParams>) -
 }
 
 #[get("/users/{user_id}")]
-async fn get_user(path: web::Path<String>) -> impl Responder {
-    let user_id = path.into_inner();
-    HttpResponse::Ok().body(format!("get user {user_id}"))
+async fn get_user(data: web::Data<AppState>, path: web::Path<String>) -> Result<impl Responder, Error> {
+    let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+
+    let db = &data.db;
+
+    let user: models::user::Model = User::find_by_id(user_id).one(db).await.unwrap().unwrap();
+
+    Ok(web::Json(user))
 }
 
 #[post("/users")]

@@ -12,6 +12,7 @@ mod services;
 
 struct AppState {
     db: DatabaseConnection,
+    plaid_client: plaid::PlaidClient,
 }
 
 #[tokio::main]
@@ -27,9 +28,23 @@ async fn main() -> std::io::Result<()> {
     let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
 
     let db = sea_orm::Database::connect(&db_url).await.unwrap();
-    let state = web::Data::new(AppState { db });
 
     let auth = HttpAuthentication::bearer(middlewares::authentication::validator);
+
+    let plaid_client_id = std::env::var("PLAID_CLIENT_ID").expect("PLAID_CLIENT_ID must be set");
+    let plaid_secret = std::env::var("PLAID_SECRET").expect("PLAID_SECRET must be set");
+    let plaid_api_url = std::env::var("PLAID_API_URL").expect("PLAID_API_URL must be set");
+    let plaid_redirect_uri =
+        std::env::var("PLAID_REDIRECT_URI").expect("PLAID_REDIRECT_URI must be set");
+
+    let plaid_client = plaid::PlaidClient::new(
+        plaid_client_id,
+        plaid_secret,
+        plaid_api_url,
+        plaid_redirect_uri,
+    );
+
+    let state = web::Data::new(AppState { db, plaid_client });
 
     HttpServer::new(move || {
         App::new()
@@ -37,8 +52,11 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .wrap(auth.clone())
             .service(handlers::users::get_user)
-            .service(handlers::users::create_user)
             .service(handlers::users::list_users)
+            .service(handlers::users::create_user)
+            .service(handlers::users::modify_user)
+            .service(handlers::users::delete_user)
+            .service(handlers::plaid::create_token)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

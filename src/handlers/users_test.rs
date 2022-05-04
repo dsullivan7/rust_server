@@ -1,5 +1,5 @@
 use actix_web::{test, App};
-use sea_orm::{MockExecResult, DatabaseBackend, MockDatabase};
+use sea_orm::{MockDatabase, MockExecResult, DatabaseBackend};
 use uuid::Uuid;
 
 #[cfg(test)]
@@ -28,6 +28,17 @@ async fn test_get_user() {
     let resp = test::call_service(&app, req).await;
 
     assert_eq!(resp.status(), http::StatusCode::OK);
+
+    // assert_eq!(
+    //     db.into_transaction_log(),
+    //     vec![
+    //         Transaction::from_sql_and_values(
+    //             DatabaseBackend::Postgres,
+    //             r#"SELECT "user"."user_id", "user"."first_name", "user"."last_name", "user"."created_at", "user"."updated_at" FROM "users" LIMIT $1"#,
+    //             vec![1u64.into()]
+    //         ),
+    //     ],
+    // );
 
     let user_resp: models::user::Model = actix_web::test::read_body_json(resp).await;
 

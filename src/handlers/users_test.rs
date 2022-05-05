@@ -3,7 +3,7 @@ use sea_orm::{DatabaseBackend, MockDatabase, MockExecResult};
 use uuid::Uuid;
 
 #[cfg(test)]
-#[actix_web::test]
+#[tokio::test]
 async fn test_get_user() {
     use super::*;
 
@@ -53,7 +53,7 @@ async fn test_get_user() {
 }
 
 #[cfg(test)]
-#[actix_web::test]
+#[tokio::test]
 async fn test_list_user() {
     use super::*;
 
@@ -91,7 +91,7 @@ async fn test_list_user() {
 }
 
 #[cfg(test)]
-#[actix_web::test]
+#[tokio::test]
 async fn test_create_user() {
     use super::*;
 
@@ -141,7 +141,7 @@ async fn test_create_user() {
 }
 
 #[cfg(test)]
-#[actix_web::test]
+#[tokio::test]
 async fn test_modify_user() {
     use super::*;
 
@@ -201,7 +201,7 @@ async fn test_modify_user() {
 }
 
 #[cfg(test)]
-#[actix_web::test]
+#[tokio::test]
 async fn test_delete_user() {
     use super::*;
 

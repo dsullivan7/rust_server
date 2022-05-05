@@ -6,7 +6,7 @@ use mockall::predicate::*;
 use crate::plaid;
 
 #[cfg(test)]
-#[actix_web::test]
+#[tokio::test]
 async fn test_create_token() {
     use super::*;
 

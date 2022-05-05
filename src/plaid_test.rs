@@ -4,7 +4,7 @@ mod plaid_tests {
     use crate::plaid::PlaidClient;
 
     #[ignore]
-    #[actix_web::test]
+    #[tokio::test]
     async fn test_create_token() {
         let plaid_client_id =
             std::env::var("PLAID_CLIENT_ID").expect("PLAID_CLIENT_ID must be set");

@@ -1,8 +1,9 @@
 #[cfg(test)]
 mod plaid_tests {
-    use crate::plaid::PlaidClient;
     use crate::plaid::IPlaidClient;
+    use crate::plaid::PlaidClient;
 
+    #[ignore]
     #[actix_web::test]
     async fn test_create_token() {
         let plaid_client_id =
@@ -12,7 +13,12 @@ mod plaid_tests {
         let plaid_redirect_uri =
             std::env::var("PLAID_REDIRECT_URI").expect("PLAID_REDIRECT_URI must be set");
 
-        let plaid_client = PlaidClient::new(plaid_client_id, plaid_secret, plaid_api_url, plaid_redirect_uri);
+        let plaid_client = PlaidClient::new(
+            plaid_client_id,
+            plaid_secret,
+            plaid_api_url,
+            plaid_redirect_uri,
+        );
         let token = plaid_client.create_token("123".to_string()).await;
 
         assert_eq!("test", token);

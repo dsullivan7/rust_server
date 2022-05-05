@@ -3,9 +3,11 @@
 mod plaid_test;
 
 use async_trait::async_trait;
+use mockall::*;
 
+#[automock]
 #[async_trait]
-pub trait IPlaidClient {
+pub trait IPlaidClient: Send + Sync {
     async fn create_token(&self, user_id: String) -> String;
 }
 

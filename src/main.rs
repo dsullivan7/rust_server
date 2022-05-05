@@ -12,7 +12,7 @@ mod services;
 
 struct AppState {
     db: DatabaseConnection,
-    plaid_client: plaid::PlaidClient,
+    plaid_client: Option<Box<dyn plaid::IPlaidClient>>,
 }
 
 #[tokio::main]
@@ -44,7 +44,10 @@ async fn main() -> std::io::Result<()> {
         plaid_redirect_uri,
     );
 
-    let state = web::Data::new(AppState { db, plaid_client });
+    let state = web::Data::new(AppState {
+        db,
+        plaid_client: Some(Box::new(plaid_client)),
+    });
 
     HttpServer::new(move || {
         App::new()

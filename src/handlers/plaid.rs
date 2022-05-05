@@ -2,13 +2,9 @@
 #[cfg(test)]
 mod plaid_test;
 
-use actix_web::{delete, get, post, put, web, http, HttpResponse, Error, Responder};
-use sea_orm::entity::*;
-use sea_orm::QueryFilter;
-use serde::{Deserialize};
+use actix_web::{post, web, Error, Responder};
+use serde::{Deserialize, Serialize};
 
-use crate::models;
-use crate::models::user::Entity as User;
 use crate::AppState;
 
 #[derive(Deserialize)]
@@ -16,13 +12,23 @@ struct CreateParams {
     user_id: Option<String>,
 }
 
+#[derive(Serialize)]
+struct Response {
+    value: String,
+}
+
 #[post("/plaid/token")]
-async fn create_token(data: web::Data<AppState>, body: web::Json<CreateParams>) -> Result<impl Responder, Error> {
-    let plaid = &data.plaid;
+async fn create_token(
+    data: web::Data<AppState>,
+    body: web::Json<CreateParams>,
+) -> Result<impl Responder, Error> {
+    let plaid_client = &data.plaid_client.as_ref().unwrap();
 
-    let user_id = body.user_id.unwrap();
+    let user_id = body.user_id.as_ref().unwrap().to_owned();
 
-    let token = plaid.create_token(user_id);
+    let token = plaid_client.create_token(user_id).await;
 
-    Ok(web::Json(serde_json::json!({ value: token })))
+    Ok(web::Json(Response {
+        value: token.to_string(),
+    }))
 }

@@ -1,5 +1,5 @@
 use actix_web::{test, App};
-use sea_orm::{MockDatabase, MockExecResult, DatabaseBackend};
+use sea_orm::{DatabaseBackend, MockDatabase, MockExecResult};
 use uuid::Uuid;
 
 #[cfg(test)]
@@ -20,7 +20,10 @@ async fn test_get_user() {
     let db = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .into_connection();
-    let state = web::Data::new(AppState { db });
+    let state = web::Data::new(AppState {
+        db,
+        plaid_client: None,
+    });
     let app = test::init_service(App::new().app_data(state).service(get_user)).await;
 
     let path = format!("/users/{}", user_id);
@@ -67,7 +70,10 @@ async fn test_list_user() {
     let db = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .into_connection();
-    let state = web::Data::new(AppState { db });
+    let state = web::Data::new(AppState {
+        db,
+        plaid_client: None,
+    });
     let app = test::init_service(App::new().app_data(state).service(list_users)).await;
 
     let req = test::TestRequest::get().uri("/users").to_request();
@@ -101,14 +107,15 @@ async fn test_create_user() {
 
     let db = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
-        .append_exec_results(vec![
-            MockExecResult {
-                last_insert_id: 1,
-                rows_affected: 1,
-            },
-        ])
+        .append_exec_results(vec![MockExecResult {
+            last_insert_id: 1,
+            rows_affected: 1,
+        }])
         .into_connection();
-    let state = web::Data::new(AppState { db });
+    let state = web::Data::new(AppState {
+        db,
+        plaid_client: None,
+    });
     let app = test::init_service(App::new().app_data(state).service(create_user)).await;
 
     let body = serde_json::json!({
@@ -116,7 +123,10 @@ async fn test_create_user() {
         "last_name": "last_name",
     });
 
-    let req = test::TestRequest::post().set_json(&body).uri("/users").to_request();
+    let req = test::TestRequest::post()
+        .set_json(&body)
+        .uri("/users")
+        .to_request();
     let resp = test::call_service(&app, req).await;
 
     assert_eq!(resp.status(), http::StatusCode::CREATED);
@@ -156,14 +166,15 @@ async fn test_modify_user() {
     let db = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .append_query_results(vec![vec![user_db_modified.clone()]])
-        .append_exec_results(vec![
-            MockExecResult {
-                last_insert_id: 1,
-                rows_affected: 1,
-            },
-        ])
+        .append_exec_results(vec![MockExecResult {
+            last_insert_id: 1,
+            rows_affected: 1,
+        }])
         .into_connection();
-    let state = web::Data::new(AppState { db });
+    let state = web::Data::new(AppState {
+        db,
+        plaid_client: None,
+    });
     let app = test::init_service(App::new().app_data(state).service(modify_user)).await;
 
     let body = serde_json::json!({
@@ -172,7 +183,10 @@ async fn test_modify_user() {
     });
 
     let path = format!("/users/{}", user_id);
-    let req = test::TestRequest::put().set_json(&body).uri(&path).to_request();
+    let req = test::TestRequest::put()
+        .set_json(&body)
+        .uri(&path)
+        .to_request();
     let resp = test::call_service(&app, req).await;
 
     assert_eq!(resp.status(), http::StatusCode::OK);
@@ -194,14 +208,15 @@ async fn test_delete_user() {
     let user_id = Uuid::new_v4();
 
     let db = MockDatabase::new(DatabaseBackend::Postgres)
-        .append_exec_results(vec![
-            MockExecResult {
-                last_insert_id: 1,
-                rows_affected: 1,
-            },
-        ])
+        .append_exec_results(vec![MockExecResult {
+            last_insert_id: 1,
+            rows_affected: 1,
+        }])
         .into_connection();
-    let state = web::Data::new(AppState { db });
+    let state = web::Data::new(AppState {
+        db,
+        plaid_client: None,
+    });
     let app = test::init_service(App::new().app_data(state).service(delete_user)).await;
 
     let path = format!("/users/{}", user_id);

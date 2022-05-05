@@ -2,10 +2,10 @@
 #[cfg(test)]
 mod users_test;
 
-use actix_web::{delete, get, post, put, web, http, HttpResponse, Error, Responder};
+use actix_web::{delete, get, http, post, put, web, Error, HttpResponse, Responder};
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
-use serde::{Deserialize};
+use serde::Deserialize;
 
 use crate::models;
 use crate::models::user::Entity as User;
@@ -24,7 +24,10 @@ struct CreateParams {
 }
 
 #[get("/users")]
-async fn list_users(data: web::Data<AppState>, query: web::Query<QueryParams>) -> Result<impl Responder, Error> {
+async fn list_users(
+    data: web::Data<AppState>,
+    query: web::Query<QueryParams>,
+) -> Result<impl Responder, Error> {
     let db = &data.db;
 
     let mut sql_query = sea_orm::Condition::all();
@@ -45,7 +48,10 @@ async fn list_users(data: web::Data<AppState>, query: web::Query<QueryParams>) -
 }
 
 #[get("/users/{user_id}")]
-async fn get_user(data: web::Data<AppState>, path: web::Path<String>) -> Result<impl Responder, Error> {
+async fn get_user(
+    data: web::Data<AppState>,
+    path: web::Path<String>,
+) -> Result<impl Responder, Error> {
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
 
     let db = &data.db;
@@ -56,7 +62,10 @@ async fn get_user(data: web::Data<AppState>, path: web::Path<String>) -> Result<
 }
 
 #[post("/users")]
-async fn create_user(data: web::Data<AppState>, body: web::Json<CreateParams>) -> Result<impl Responder, Error> {
+async fn create_user(
+    data: web::Data<AppState>,
+    body: web::Json<CreateParams>,
+) -> Result<impl Responder, Error> {
     let db = &data.db;
 
     let mut first_name = NotSet;
@@ -73,8 +82,8 @@ async fn create_user(data: web::Data<AppState>, body: web::Json<CreateParams>) -
 
     let user: models::user::Model = models::user::ActiveModel {
         user_id: NotSet,
-        first_name: first_name,
-        last_name: last_name,
+        first_name,
+        last_name,
         created_at: NotSet,
         updated_at: NotSet,
     }
@@ -86,12 +95,21 @@ async fn create_user(data: web::Data<AppState>, body: web::Json<CreateParams>) -
 }
 
 #[put("/users/{user_id}")]
-async fn modify_user(data: web::Data<AppState>, path: web::Path<String>, body: web::Json<CreateParams>) -> Result<impl Responder, Error> {
+async fn modify_user(
+    data: web::Data<AppState>,
+    path: web::Path<String>,
+    body: web::Json<CreateParams>,
+) -> Result<impl Responder, Error> {
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
 
     let db = &data.db;
 
-    let mut user: models::user::ActiveModel = User::find_by_id(user_id).one(db).await.unwrap().unwrap().into();
+    let mut user: models::user::ActiveModel = User::find_by_id(user_id)
+        .one(db)
+        .await
+        .unwrap()
+        .unwrap()
+        .into();
 
     if body.first_name.is_some() {
         user.first_name = Set(body.first_name.as_ref().unwrap().to_owned());
@@ -107,7 +125,10 @@ async fn modify_user(data: web::Data<AppState>, path: web::Path<String>, body: w
 }
 
 #[delete("/users/{user_id}")]
-async fn delete_user(data: web::Data<AppState>, path: web::Path<String>) -> Result<impl Responder, Error> {
+async fn delete_user(
+    data: web::Data<AppState>,
+    path: web::Path<String>,
+) -> Result<impl Responder, Error> {
     let db = &data.db;
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
     User::delete_by_id(user_id).exec(db).await.unwrap();

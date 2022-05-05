@@ -13,7 +13,7 @@ struct CreateParams {
 }
 
 #[derive(Serialize)]
-struct Response {
+struct TokenResponse {
     value: String,
 }
 
@@ -28,7 +28,7 @@ async fn create_token(
 
     let token = plaid_client.create_token(user_id).await;
 
-    Ok(web::Json(Response {
+    Ok(web::Json(TokenResponse {
         value: token.to_string(),
     }))
 }

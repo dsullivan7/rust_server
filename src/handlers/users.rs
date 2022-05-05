@@ -52,9 +52,13 @@ async fn get_user(
     data: web::Data<AppState>,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
+    println!("here!");
+
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
 
     let conn = &data.conn;
+
+    println!("about to call");
 
     let user: models::user::Model = User::find_by_id(user_id).one(conn).await.unwrap().unwrap();
 

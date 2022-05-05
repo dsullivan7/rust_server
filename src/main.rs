@@ -9,8 +9,9 @@ mod middlewares;
 mod models;
 mod plaid;
 mod services;
+mod test_utils;
 
-struct AppState {
+pub struct AppState {
     conn: DatabaseConnection,
     plaid_client: Box<dyn plaid::IPlaidClient>,
 }

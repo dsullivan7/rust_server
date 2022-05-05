@@ -11,8 +11,8 @@ mod plaid;
 mod services;
 
 struct AppState {
-    db: DatabaseConnection,
-    plaid_client: Option<Box<dyn plaid::IPlaidClient>>,
+    conn: DatabaseConnection,
+    plaid_client: Box<dyn plaid::IPlaidClient>,
 }
 
 #[tokio::main]
@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
 
     let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
 
-    let db = sea_orm::Database::connect(&db_url).await.unwrap();
+    let conn = sea_orm::Database::connect(&db_url).await.unwrap();
 
     let auth = HttpAuthentication::bearer(middlewares::authentication::validator);
 
@@ -45,8 +45,8 @@ async fn main() -> std::io::Result<()> {
     );
 
     let state = web::Data::new(AppState {
-        db,
-        plaid_client: Some(Box::new(plaid_client)),
+        conn,
+        plaid_client: Box::new(plaid_client),
     });
 
     HttpServer::new(move || {

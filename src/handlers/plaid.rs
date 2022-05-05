@@ -22,7 +22,7 @@ async fn create_token(
     data: web::Data<AppState>,
     body: web::Json<CreateParams>,
 ) -> Result<impl Responder, Error> {
-    let plaid_client = &data.plaid_client.as_ref().unwrap();
+    let plaid_client = &data.plaid_client;
 
     let user_id = body.user_id.as_ref().unwrap().to_owned();
 

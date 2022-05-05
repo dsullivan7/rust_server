@@ -2,6 +2,8 @@ use actix_web::{test, App};
 use sea_orm::{DatabaseBackend, MockDatabase, MockExecResult};
 use uuid::Uuid;
 
+use crate::plaid;
+
 #[cfg(test)]
 #[tokio::test]
 async fn test_get_user() {
@@ -17,12 +19,12 @@ async fn test_get_user() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
-    let db = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .into_connection();
     let state = web::Data::new(AppState {
-        db,
-        plaid_client: None,
+        conn,
+        plaid_client: Box::new(plaid::MockIPlaidClient::new()),
     });
     let app = test::init_service(App::new().app_data(state).service(get_user)).await;
 
@@ -67,12 +69,12 @@ async fn test_list_user() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
-    let db = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .into_connection();
     let state = web::Data::new(AppState {
-        db,
-        plaid_client: None,
+        conn,
+        plaid_client: Box::new(plaid::MockIPlaidClient::new()),
     });
     let app = test::init_service(App::new().app_data(state).service(list_users)).await;
 
@@ -105,7 +107,7 @@ async fn test_create_user() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
-    let db = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .append_exec_results(vec![MockExecResult {
             last_insert_id: 1,
@@ -113,8 +115,8 @@ async fn test_create_user() {
         }])
         .into_connection();
     let state = web::Data::new(AppState {
-        db,
-        plaid_client: None,
+        conn,
+        plaid_client: Box::new(plaid::MockIPlaidClient::new()),
     });
     let app = test::init_service(App::new().app_data(state).service(create_user)).await;
 
@@ -163,7 +165,7 @@ async fn test_modify_user() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
-    let db = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .append_query_results(vec![vec![user_db_modified.clone()]])
         .append_exec_results(vec![MockExecResult {
@@ -172,8 +174,8 @@ async fn test_modify_user() {
         }])
         .into_connection();
     let state = web::Data::new(AppState {
-        db,
-        plaid_client: None,
+        conn,
+        plaid_client: Box::new(plaid::MockIPlaidClient::new()),
     });
     let app = test::init_service(App::new().app_data(state).service(modify_user)).await;
 
@@ -207,15 +209,15 @@ async fn test_delete_user() {
 
     let user_id = Uuid::new_v4();
 
-    let db = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_exec_results(vec![MockExecResult {
             last_insert_id: 1,
             rows_affected: 1,
         }])
         .into_connection();
     let state = web::Data::new(AppState {
-        db,
-        plaid_client: None,
+        conn,
+        plaid_client: Box::new(plaid::MockIPlaidClient::new()),
     });
     let app = test::init_service(App::new().app_data(state).service(delete_user)).await;
 

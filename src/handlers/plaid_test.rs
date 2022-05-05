@@ -10,7 +10,7 @@ use crate::plaid;
 async fn test_create_token() {
     use super::*;
 
-    let db = MockDatabase::new(DatabaseBackend::Postgres).into_connection();
+    let conn = MockDatabase::new(DatabaseBackend::Postgres).into_connection();
     let mut plaid_client = plaid::MockIPlaidClient::new();
     plaid_client
         .expect_create_token()
@@ -18,8 +18,8 @@ async fn test_create_token() {
         .times(1)
         .return_const("my_token".to_string());
     let state = web::Data::new(AppState {
-        db,
-        plaid_client: Some(Box::new(plaid_client)),
+        conn,
+        plaid_client: Box::new(plaid_client),
     });
 
     let body = serde_json::json!({

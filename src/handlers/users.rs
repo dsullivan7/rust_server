@@ -28,7 +28,7 @@ async fn list_users(
     data: web::Data<AppState>,
     query: web::Query<QueryParams>,
 ) -> Result<impl Responder, Error> {
-    let db = &data.db;
+    let conn = &data.conn;
 
     let mut sql_query = sea_orm::Condition::all();
 
@@ -42,7 +42,7 @@ async fn list_users(
         sql_query = sql_query.add(models::user::Column::LastName.eq(last_name));
     }
 
-    let users: Vec<models::user::Model> = User::find().filter(sql_query).all(db).await.unwrap();
+    let users: Vec<models::user::Model> = User::find().filter(sql_query).all(conn).await.unwrap();
 
     Ok(web::Json(users))
 }
@@ -54,9 +54,9 @@ async fn get_user(
 ) -> Result<impl Responder, Error> {
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
 
-    let db = &data.db;
+    let conn = &data.conn;
 
-    let user: models::user::Model = User::find_by_id(user_id).one(db).await.unwrap().unwrap();
+    let user: models::user::Model = User::find_by_id(user_id).one(conn).await.unwrap().unwrap();
 
     Ok(web::Json(user))
 }
@@ -66,7 +66,7 @@ async fn create_user(
     data: web::Data<AppState>,
     body: web::Json<CreateParams>,
 ) -> Result<impl Responder, Error> {
-    let db = &data.db;
+    let conn = &data.conn;
 
     let mut first_name = NotSet;
 
@@ -87,7 +87,7 @@ async fn create_user(
         created_at: NotSet,
         updated_at: NotSet,
     }
-    .insert(db)
+    .insert(conn)
     .await
     .unwrap();
 
@@ -102,10 +102,10 @@ async fn modify_user(
 ) -> Result<impl Responder, Error> {
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
 
-    let db = &data.db;
+    let conn = &data.conn;
 
     let mut user: models::user::ActiveModel = User::find_by_id(user_id)
-        .one(db)
+        .one(conn)
         .await
         .unwrap()
         .unwrap()
@@ -119,7 +119,7 @@ async fn modify_user(
         user.last_name = Set(body.last_name.as_ref().unwrap().to_owned());
     }
 
-    let user_updated: models::user::Model = user.update(db).await.unwrap();
+    let user_updated: models::user::Model = user.update(conn).await.unwrap();
 
     Ok(web::Json(user_updated))
 }
@@ -129,8 +129,8 @@ async fn delete_user(
     data: web::Data<AppState>,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
-    let db = &data.db;
+    let conn = &data.conn;
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
-    User::delete_by_id(user_id).exec(db).await.unwrap();
+    User::delete_by_id(user_id).exec(conn).await.unwrap();
     Ok(HttpResponse::NoContent())
 }

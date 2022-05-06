@@ -1726,6 +1726,7 @@ dependencies = [
  "chrono",
  "derive_more",
  "dotenv",
+ "futures-util",
  "jsonwebtoken",
  "mockall",
  "reqwest",

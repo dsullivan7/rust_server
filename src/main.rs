@@ -1,11 +1,9 @@
 use actix_web::{middleware, web, App, HttpServer};
-use actix_web_httpauth::middleware::HttpAuthentication;
 use sea_orm::DatabaseConnection;
 use std::env;
 
 mod authentication;
 mod handlers;
-mod middlewares;
 mod models;
 mod plaid;
 mod services;
@@ -14,6 +12,10 @@ mod test_utils;
 pub struct AppState {
     conn: DatabaseConnection,
     plaid_client: Box<dyn plaid::IPlaidClient>,
+}
+
+pub struct BlahState {
+    stank: String,
 }
 
 #[tokio::main]
@@ -29,8 +31,6 @@ async fn main() -> std::io::Result<()> {
     let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
 
     let conn = sea_orm::Database::connect(&db_url).await.unwrap();
-
-    let auth = HttpAuthentication::bearer(middlewares::authentication::validator);
 
     let plaid_client_id = std::env::var("PLAID_CLIENT_ID").expect("PLAID_CLIENT_ID must be set");
     let plaid_secret = std::env::var("PLAID_SECRET").expect("PLAID_SECRET must be set");
@@ -50,11 +50,15 @@ async fn main() -> std::io::Result<()> {
         plaid_client: Box::new(plaid_client),
     });
 
+    let blah_state = web::Data::new(BlahState {
+        stank: "wingus".to_string(),
+    });
+
     HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
+            .app_data(blah_state.clone())
             .wrap(middleware::Logger::default())
-            .wrap(auth.clone())
             .service(handlers::users::get_user)
             .service(handlers::users::list_users)
             .service(handlers::users::create_user)

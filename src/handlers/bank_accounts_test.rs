@@ -1,6 +1,5 @@
 use actix_web::{test, App};
 use sea_orm::{DatabaseBackend, MockDatabase, MockExecResult};
-use uuid::Uuid;
 
 use crate::test_utils;
 

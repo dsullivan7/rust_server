@@ -1,6 +1,5 @@
 use actix_web::{test, App};
 use sea_orm::{DatabaseBackend, MockDatabase, MockExecResult};
-use uuid::Uuid;
 
 use crate::test_utils;
 
@@ -269,8 +268,14 @@ async fn test_modify_bank_transfer() {
     );
     assert_eq!(bank_transfer_resp.amount, bank_transfer_db_modified.amount);
     assert_eq!(bank_transfer_resp.status, bank_transfer_db_modified.status);
-    assert_eq!(bank_transfer_resp.created_at, bank_transfer_db_modified.created_at);
-    assert_eq!(bank_transfer_resp.updated_at, bank_transfer_db_modified.updated_at);
+    assert_eq!(
+        bank_transfer_resp.created_at,
+        bank_transfer_db_modified.created_at
+    );
+    assert_eq!(
+        bank_transfer_resp.updated_at,
+        bank_transfer_db_modified.updated_at
+    );
 }
 
 #[cfg(test)]

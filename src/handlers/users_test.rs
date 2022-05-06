@@ -19,11 +19,14 @@ async fn test_get_user() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
-    let mut test_state = test_utils::TestState::new();
-
-    test_state.conn = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .into_connection();
+
+    let test_state = test_utils::TestState {
+        conn,
+        ..Default::default()
+    };
 
     let state = web::Data::new(test_state.into_app_state());
     let app = test::init_service(App::new().app_data(state).service(get_user)).await;
@@ -69,11 +72,14 @@ async fn test_list_user() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
-    let mut test_state = test_utils::TestState::new();
-
-    test_state.conn = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .into_connection();
+
+    let test_state = test_utils::TestState {
+        conn,
+        ..Default::default()
+    };
 
     let state = web::Data::new(test_state.into_app_state());
 
@@ -108,15 +114,18 @@ async fn test_create_user() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
-    let mut test_state = test_utils::TestState::new();
-
-    test_state.conn = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .append_exec_results(vec![MockExecResult {
             last_insert_id: 1,
             rows_affected: 1,
         }])
         .into_connection();
+
+    let test_state = test_utils::TestState {
+        conn,
+        ..Default::default()
+    };
 
     let state = web::Data::new(test_state.into_app_state());
 
@@ -167,9 +176,7 @@ async fn test_modify_user() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
-    let mut test_state = test_utils::TestState::new();
-
-    test_state.conn = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_db.clone()]])
         .append_query_results(vec![vec![user_db_modified.clone()]])
         .append_exec_results(vec![MockExecResult {
@@ -177,6 +184,11 @@ async fn test_modify_user() {
             rows_affected: 1,
         }])
         .into_connection();
+
+    let test_state = test_utils::TestState {
+        conn,
+        ..Default::default()
+    };
 
     let state = web::Data::new(test_state.into_app_state());
 
@@ -212,14 +224,17 @@ async fn test_delete_user() {
 
     let user_id = Uuid::new_v4();
 
-    let mut test_state = test_utils::TestState::new();
-
-    test_state.conn = MockDatabase::new(DatabaseBackend::Postgres)
+    let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_exec_results(vec![MockExecResult {
             last_insert_id: 1,
             rows_affected: 1,
         }])
         .into_connection();
+
+    let test_state = test_utils::TestState {
+        conn,
+        ..Default::default()
+    };
 
     let state = web::Data::new(test_state.into_app_state());
 

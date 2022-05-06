@@ -2,6 +2,7 @@ use actix_web::{http, test, App};
 
 use mockall::predicate::*;
 
+use crate::plaid;
 use crate::test_utils;
 
 #[cfg(test)]
@@ -9,14 +10,18 @@ use crate::test_utils;
 async fn test_create_token() {
     use super::*;
 
-    let mut test_state = test_utils::TestState::new();
+    let mut plaid_client = Box::new(plaid::MockIPlaidClient::new());
 
-    test_state
-        .plaid_client
+    plaid_client
         .expect_create_token()
         .with(eq(String::from("my_user_id")))
         .times(1)
         .return_const("my_token".to_string());
+
+    let test_state = test_utils::TestState {
+        plaid_client,
+        ..Default::default()
+    };
 
     let state = web::Data::new(test_state.into_app_state());
 

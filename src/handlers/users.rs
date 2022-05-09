@@ -27,9 +27,10 @@ struct CreateParams {
 #[get("/users")]
 async fn list_users(
     data: web::Data<AppState>,
-    claims: Claims,
+    _claims: Claims,
     query: web::Query<QueryParams>,
 ) -> Result<impl Responder, Error> {
+    let conn = &data.conn;
 
     let mut sql_query = sea_orm::Condition::all();
 

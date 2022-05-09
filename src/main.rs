@@ -13,7 +13,7 @@ mod test_utils;
 pub struct AppState {
     conn: DatabaseConnection,
     plaid_client: Box<dyn plaid::IPlaidClient>,
-    authentication: authentication::Authentication,
+    authentication: Box<dyn authentication::IAuthentication>,
 }
 
 #[tokio::main]
@@ -54,17 +54,12 @@ async fn main() -> std::io::Result<()> {
     let state = web::Data::new(AppState {
         conn,
         plaid_client: Box::new(plaid_client),
-        authentication: auth,
+        authentication: Box::new(auth),
     });
-
-    // let auth_state = web::Data::new(AuthState {
-    //     authentication: auth,
-    // });
 
     HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
-            // .app_data(auth_state.clone())
             .wrap(middleware::Logger::default())
             .service(handlers::users::get_user)
             .service(handlers::users::list_users)

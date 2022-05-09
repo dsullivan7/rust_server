@@ -6,7 +6,7 @@ use sea_orm::{DatabaseBackend, MockDatabase};
 pub struct TestState {
     pub conn: sea_orm::DatabaseConnection,
     pub plaid_client: Box<dyn plaid::IPlaidClient>,
-    pub authentication: authentication::Authentication,
+    pub authentication: Box<dyn authentication::IAuthentication>,
 }
 
 impl Default for TestState {
@@ -14,10 +14,7 @@ impl Default for TestState {
         TestState {
             conn: MockDatabase::new(DatabaseBackend::Postgres).into_connection(),
             plaid_client: Box::new(plaid::MockIPlaidClient::new()),
-            authentication: authentication::Authentication {
-                audience: "audience".to_string(),
-                domain: "domain".to_string(),
-            },
+            authentication: Box::new(authentication::MockIAuthentication::new()),
         }
     }
 }

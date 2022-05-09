@@ -7,16 +7,8 @@ use serde::{Deserialize, Serialize};
 
 use derive_more::Display;
 
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Claims {
-    pub sub: String,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Authentication {
-    pub audience: String,
-    pub domain: String,
-}
+use async_trait::async_trait;
+use mockall::*;
 
 #[derive(Debug, Display)]
 pub enum AuthError {
@@ -30,8 +22,26 @@ pub enum AuthError {
     RequestFailed(reqwest::Error),
 }
 
-impl Authentication {
-    pub async fn validate_token(&self, token: String) -> Result<Claims, AuthError> {
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: String,
+}
+
+#[automock]
+#[async_trait]
+pub trait IAuthentication: Send + Sync {
+    async fn validate_token(&self, token: String) -> Result<Claims, AuthError>;
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Authentication {
+    pub audience: String,
+    pub domain: String,
+}
+
+#[async_trait]
+impl IAuthentication for Authentication {
+    async fn validate_token(&self, token: String) -> Result<Claims, AuthError> {
         let header = decode_header(token.as_str()).map_err(AuthError::Decode)?;
         let kid = header
             .kid

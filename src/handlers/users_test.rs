@@ -2,6 +2,9 @@ use actix_web::{test, App};
 use sea_orm::{DatabaseBackend, MockDatabase, MockExecResult};
 use uuid::Uuid;
 
+use mockall::predicate::*;
+
+use crate::authentication;
 use crate::test_utils;
 
 #[cfg(test)]
@@ -76,8 +79,20 @@ async fn test_list_user() {
         .append_query_results(vec![vec![user_db.clone()]])
         .into_connection();
 
+    let mut auth = Box::new(authentication::MockIAuthentication::new());
+
+    auth.expect_validate_token()
+        .with(eq(String::from("test_token")))
+        .times(1)
+        .returning(|_| {
+            Ok(Claims {
+                sub: "mysub".to_string(),
+            })
+        });
+
     let test_state = test_utils::TestState {
         conn,
+        authentication: auth,
         ..Default::default()
     };
 
@@ -85,7 +100,10 @@ async fn test_list_user() {
 
     let app = test::init_service(App::new().app_data(state).service(list_users)).await;
 
-    let req = test::TestRequest::get().uri("/users").to_request();
+    let req = test::TestRequest::get()
+        .uri("/users")
+        .insert_header(("Authorization", "Bearer test_token"))
+        .to_request();
     let resp = test::call_service(&app, req).await;
 
     assert_eq!(resp.status(), http::StatusCode::OK);

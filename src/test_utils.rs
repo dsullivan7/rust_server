@@ -3,6 +3,11 @@ use crate::authentication;
 use crate::plaid;
 use sea_orm::{DatabaseBackend, MockDatabase};
 
+use mockall::predicate::*;
+
+pub const DEFAULT_AUTH0_ID: &str = "default_auth0_id";
+pub const DEFAULT_AUTH0_TOKEN: &str = "default_auth0_token";
+
 pub struct TestState {
     pub conn: sea_orm::DatabaseConnection,
     pub plaid_client: Box<dyn plaid::IPlaidClient>,
@@ -26,5 +31,22 @@ impl TestState {
             plaid_client: self.plaid_client,
             authentication: self.authentication,
         }
+    }
+
+    pub fn with_default_auth(mut self) -> Self {
+        let mut auth = Box::new(authentication::MockIAuthentication::new());
+
+        auth.expect_validate_token()
+            .with(eq(String::from(DEFAULT_AUTH0_TOKEN)))
+            .times(1)
+            .returning(|_| {
+                Ok(authentication::Claims {
+                    sub: DEFAULT_AUTH0_ID.to_string(),
+                })
+            });
+
+        self.authentication = auth;
+
+        self
     }
 }

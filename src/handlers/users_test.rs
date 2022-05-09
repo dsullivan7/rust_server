@@ -79,22 +79,11 @@ async fn test_list_user() {
         .append_query_results(vec![vec![user_db.clone()]])
         .into_connection();
 
-    let mut auth = Box::new(authentication::MockIAuthentication::new());
-
-    auth.expect_validate_token()
-        .with(eq(String::from("test_token")))
-        .times(1)
-        .returning(|_| {
-            Ok(Claims {
-                sub: "mysub".to_string(),
-            })
-        });
-
     let test_state = test_utils::TestState {
         conn,
-        authentication: auth,
         ..Default::default()
-    };
+    }
+    .with_default_auth();
 
     let state = web::Data::new(test_state.into_app_state());
 
@@ -102,7 +91,7 @@ async fn test_list_user() {
 
     let req = test::TestRequest::get()
         .uri("/users")
-        .insert_header(("Authorization", "Bearer test_token"))
+        .insert_header(("Authorization", "Bearer default_auth0_token"))
         .to_request();
     let resp = test::call_service(&app, req).await;
 

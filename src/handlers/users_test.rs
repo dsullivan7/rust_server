@@ -29,13 +29,17 @@ async fn test_get_user() {
     let test_state = test_utils::TestState {
         conn,
         ..Default::default()
-    };
+    }
+    .with_default_auth();
 
     let state = web::Data::new(test_state.into_app_state());
     let app = test::init_service(App::new().app_data(state).service(get_user)).await;
 
     let path = format!("/users/{}", user_id);
-    let req = test::TestRequest::get().uri(&path).to_request();
+    let req = test::TestRequest::get()
+        .uri(&path)
+        .insert_header(test_utils::TestState::get_default_auth_header())
+        .to_request();
     let resp = test::call_service(&app, req).await;
 
     assert_eq!(resp.status(), http::StatusCode::OK);
@@ -132,7 +136,8 @@ async fn test_create_user() {
     let test_state = test_utils::TestState {
         conn,
         ..Default::default()
-    };
+    }
+    .with_default_auth();
 
     let state = web::Data::new(test_state.into_app_state());
 
@@ -146,6 +151,7 @@ async fn test_create_user() {
     let req = test::TestRequest::post()
         .set_json(&body)
         .uri("/users")
+        .insert_header(test_utils::TestState::get_default_auth_header())
         .to_request();
     let resp = test::call_service(&app, req).await;
 
@@ -195,7 +201,8 @@ async fn test_modify_user() {
     let test_state = test_utils::TestState {
         conn,
         ..Default::default()
-    };
+    }
+    .with_default_auth();
 
     let state = web::Data::new(test_state.into_app_state());
 
@@ -210,6 +217,7 @@ async fn test_modify_user() {
     let req = test::TestRequest::put()
         .set_json(&body)
         .uri(&path)
+        .insert_header(test_utils::TestState::get_default_auth_header())
         .to_request();
     let resp = test::call_service(&app, req).await;
 
@@ -241,14 +249,17 @@ async fn test_delete_user() {
     let test_state = test_utils::TestState {
         conn,
         ..Default::default()
-    };
+    }.with_default_auth();
 
     let state = web::Data::new(test_state.into_app_state());
 
     let app = test::init_service(App::new().app_data(state).service(delete_user)).await;
 
     let path = format!("/users/{}", user_id);
-    let req = test::TestRequest::delete().uri(&path).to_request();
+    let req = test::TestRequest::delete()
+        .uri(&path)
+        .insert_header(test_utils::TestState::get_default_auth_header())
+        .to_request();
     let resp = test::call_service(&app, req).await;
 
     assert_eq!(resp.status(), http::StatusCode::NO_CONTENT);

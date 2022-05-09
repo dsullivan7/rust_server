@@ -52,6 +52,7 @@ async fn list_users(
 #[get("/users/{user_id}")]
 async fn get_user(
     data: web::Data<AppState>,
+    _claims: Claims,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
@@ -66,6 +67,7 @@ async fn get_user(
 #[post("/users")]
 async fn create_user(
     data: web::Data<AppState>,
+    _claims: Claims,
     body: web::Json<CreateParams>,
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
@@ -99,6 +101,7 @@ async fn create_user(
 #[put("/users/{user_id}")]
 async fn modify_user(
     data: web::Data<AppState>,
+    _claims: Claims,
     path: web::Path<String>,
     body: web::Json<CreateParams>,
 ) -> Result<impl Responder, Error> {
@@ -129,6 +132,7 @@ async fn modify_user(
 #[delete("/users/{user_id}")]
 async fn delete_user(
     data: web::Data<AppState>,
+    _claims: Claims,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;

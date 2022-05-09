@@ -7,6 +7,7 @@ use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
 
+use crate::authentication::Claims;
 use crate::models;
 use crate::models::user::Entity as User;
 use crate::AppState;
@@ -26,9 +27,9 @@ struct CreateParams {
 #[get("/users")]
 async fn list_users(
     data: web::Data<AppState>,
+    claims: Claims,
     query: web::Query<QueryParams>,
 ) -> Result<impl Responder, Error> {
-    let conn = &data.conn;
 
     let mut sql_query = sea_orm::Condition::all();
 

@@ -4,6 +4,7 @@ use actix_web_httpauth::{
 };
 use derive_more::Display;
 use serde::Serialize;
+use serde_json::json;
 use std::{future::Future, pin::Pin};
 
 use crate::authentication::{AuthError, Claims};
@@ -20,36 +21,9 @@ pub struct ErrorMessage {
 
 impl ResponseError for AuthError {
     fn error_response(&self) -> HttpResponse {
-        match self {
-            AuthError::Decode(_) => HttpResponse::Unauthorized().json(ErrorMessage {
-                error: Some("invalid_token".to_string()),
-                error_description: Some(
-                    "Authorization header value must follow this format: Bearer access-token"
-                        .to_string(),
-                ),
-                message: "Bad credentials".to_string(),
-            }),
-            AuthError::NotFound(msg) => HttpResponse::Unauthorized().json(ErrorMessage {
-                error: Some("invalid_token".to_string()),
-                error_description: Some(msg.to_string()),
-                message: "Bad credentials".to_string(),
-            }),
-            AuthError::UnsupportedAlgortithm(alg) => {
-                HttpResponse::Unauthorized().json(ErrorMessage {
-                    error: Some("invalid_token".to_string()),
-                    error_description: Some(format!(
-                        "Unsupported encryption algortithm expected RSA got {:?}",
-                        alg
-                    )),
-                    message: "Bad credentials".to_string(),
-                })
-            }
-            AuthError::RequestFailed(_) => HttpResponse::Unauthorized().json(ErrorMessage {
-                error: Some("request_failed".to_string()),
-                error_description: Some("Request failed".to_string()),
-                message: "Request failed".to_string(),
-            }),
-        }
+        HttpResponse::Unauthorized().json(json!({
+            "message": "Authorization error".to_string(),
+        }))
     }
 
     fn status_code(&self) -> StatusCode {

@@ -5,8 +5,8 @@ use sea_orm::{DatabaseBackend, MockDatabase};
 
 use mockall::predicate::*;
 
-pub const DEFAULT_AUTH0_ID: &str = "default_auth0_id";
-pub const DEFAULT_AUTH0_TOKEN: &str = "default_auth0_token";
+const DEFAULT_AUTH0_ID: &str = "default_auth0_id";
+const DEFAULT_AUTH0_TOKEN: &str = "default_auth0_token";
 
 pub struct TestState {
     pub conn: sea_orm::DatabaseConnection,
@@ -25,6 +25,10 @@ impl Default for TestState {
 }
 
 impl TestState {
+    pub fn get_default_auth_header() -> (String, String) {
+        ("Authorization".to_string(), format!("Bearer {}", DEFAULT_AUTH0_TOKEN))
+    }
+
     pub fn into_app_state(self) -> AppState {
         AppState {
             conn: self.conn,

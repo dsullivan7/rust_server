@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use mockall::predicate::*;
 
-use crate::authentication;
+use crate::authentication::Authentication;
 use crate::test_utils;
 
 #[cfg(test)]
@@ -91,7 +91,7 @@ async fn test_list_user() {
 
     let req = test::TestRequest::get()
         .uri("/users")
-        .insert_header(("Authorization", "Bearer default_auth0_token"))
+        .insert_header(test_utils::TestState::get_default_auth_header())
         .to_request();
     let resp = test::call_service(&app, req).await;
 

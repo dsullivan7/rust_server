@@ -3,11 +3,11 @@ use actix_web_httpauth::{
     extractors::bearer::BearerAuth, headers::www_authenticate::bearer::Bearer,
 };
 use derive_more::Display;
-use serde::{Serialize};
+use serde::Serialize;
 use std::{future::Future, pin::Pin};
 
 use crate::authentication::{AuthError, Claims};
-use crate::AuthState;
+use crate::AppState;
 
 #[derive(Serialize)]
 pub struct ErrorMessage {
@@ -87,7 +87,7 @@ impl FromRequest for Claims {
         req: &actix_web::HttpRequest,
         _payload: &mut actix_web::dev::Payload,
     ) -> Self::Future {
-        let app_state = req.app_data::<web::Data<AuthState>>().unwrap().clone();
+        let app_state = req.app_data::<web::Data<AppState>>().unwrap().clone();
         let extractor = BearerAuth::extract(req);
         Box::pin(async move {
             let credentials = extractor.await.map_err(ExtractorError::Authentication)?;

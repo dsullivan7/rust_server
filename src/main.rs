@@ -16,11 +16,6 @@ pub struct AppState {
     authentication: authentication::Authentication,
 }
 
-#[derive(Clone)]
-pub struct AuthState {
-    authentication: authentication::Authentication,
-}
-
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     tracing_subscriber::fmt::init();

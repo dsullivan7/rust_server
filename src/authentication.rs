@@ -8,13 +8,14 @@ use serde::{Deserialize, Serialize};
 use derive_more::Display;
 
 #[derive(Clone, Serialize, Deserialize)]
-struct Claims {
-    sub: String,
+pub struct Claims {
+    pub sub: String,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Authentication {
-    audience: String,
-    domain: String,
+    pub audience: String,
+    pub domain: String,
 }
 
 #[derive(Debug, Display)]

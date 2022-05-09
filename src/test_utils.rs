@@ -1,4 +1,5 @@
 use super::AppState;
+use crate::authentication;
 use crate::plaid;
 use sea_orm::{DatabaseBackend, MockDatabase};
 

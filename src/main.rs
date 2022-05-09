@@ -3,6 +3,7 @@ use sea_orm::DatabaseConnection;
 use std::env;
 
 mod authentication;
+mod extractors;
 mod handlers;
 mod models;
 mod plaid;
@@ -14,8 +15,9 @@ pub struct AppState {
     plaid_client: Box<dyn plaid::IPlaidClient>,
 }
 
-pub struct BlahState {
-    stank: String,
+#[derive(Clone)]
+pub struct AuthState {
+    authentication: authentication::Authentication,
 }
 
 #[tokio::main]
@@ -45,19 +47,27 @@ async fn main() -> std::io::Result<()> {
         plaid_redirect_uri,
     );
 
+    let auth0_domain = std::env::var("AUTH0_DOMAIN").expect("AUTH0_DOMAIN must be set");
+    let auth0_audience = std::env::var("AUTH0_AUDIENCE").expect("AUTH0_AUDIENCE must be set");
+
+    let auth = authentication::Authentication {
+        audience: auth0_audience,
+        domain: auth0_domain,
+    };
+
     let state = web::Data::new(AppState {
         conn,
         plaid_client: Box::new(plaid_client),
     });
 
-    let blah_state = web::Data::new(BlahState {
-        stank: "wingus".to_string(),
+    let auth_state = web::Data::new(AuthState {
+        authentication: auth,
     });
 
     HttpServer::new(move || {
         App::new()
             .app_data(state.clone())
-            .app_data(blah_state.clone())
+            .app_data(auth_state.clone())
             .wrap(middleware::Logger::default())
             .service(handlers::users::get_user)
             .service(handlers::users::list_users)

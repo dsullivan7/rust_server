@@ -2,9 +2,6 @@ use actix_web::{test, App};
 use sea_orm::{DatabaseBackend, MockDatabase, MockExecResult};
 use uuid::Uuid;
 
-use mockall::predicate::*;
-
-use crate::authentication::Authentication;
 use crate::test_utils;
 
 #[cfg(test)]
@@ -18,6 +15,7 @@ async fn test_get_user() {
         user_id: user_id.to_owned(),
         first_name: "first_name".to_owned(),
         last_name: "last_name".to_owned(),
+        auth0_id: "auth0_id".to_owned(),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -60,6 +58,7 @@ async fn test_get_user() {
     assert_eq!(user_resp.user_id, user_db.user_id);
     assert_eq!(user_resp.first_name, user_db.first_name);
     assert_eq!(user_resp.last_name, user_db.last_name);
+    assert_eq!(user_resp.auth0_id, user_db.auth0_id);
     assert_eq!(user_resp.created_at, user_db.created_at);
     assert_eq!(user_resp.updated_at, user_db.updated_at);
 }
@@ -75,6 +74,7 @@ async fn test_list_user() {
         user_id: user_id_1.to_owned(),
         first_name: "first_name".to_owned(),
         last_name: "last_name".to_owned(),
+        auth0_id: "auth0_id".to_owned(),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -106,6 +106,7 @@ async fn test_list_user() {
     assert_eq!(users_resp[0].user_id, user_db.user_id);
     assert_eq!(users_resp[0].first_name, user_db.first_name);
     assert_eq!(users_resp[0].last_name, user_db.last_name);
+    assert_eq!(users_resp[0].auth0_id, user_db.auth0_id);
     assert_eq!(users_resp[0].created_at, user_db.created_at);
     assert_eq!(users_resp[0].updated_at, user_db.updated_at);
 }
@@ -121,6 +122,7 @@ async fn test_create_user() {
         user_id: user_id_1.to_owned(),
         first_name: "first_name".to_owned(),
         last_name: "last_name".to_owned(),
+        auth0_id: "auth0_id".to_owned(),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -162,6 +164,7 @@ async fn test_create_user() {
     assert_eq!(user_resp.user_id, user_db.user_id);
     assert_eq!(user_resp.first_name, user_db.first_name);
     assert_eq!(user_resp.last_name, user_db.last_name);
+    assert_eq!(user_resp.auth0_id, user_db.auth0_id);
     assert_eq!(user_resp.created_at, user_db.created_at);
     assert_eq!(user_resp.updated_at, user_db.updated_at);
 }
@@ -177,6 +180,7 @@ async fn test_modify_user() {
         user_id: user_id.to_owned(),
         first_name: "first_name".to_owned(),
         last_name: "last_name".to_owned(),
+        auth0_id: "auth0_id".to_owned(),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -185,6 +189,7 @@ async fn test_modify_user() {
         user_id: user_id.to_owned(),
         first_name: "first_name_different".to_owned(),
         last_name: "last_name_different".to_owned(),
+        auth0_id: "auth0_id".to_owned(),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -228,6 +233,7 @@ async fn test_modify_user() {
     assert_eq!(user_resp.user_id, user_db_modified.user_id);
     assert_eq!(user_resp.first_name, user_db_modified.first_name);
     assert_eq!(user_resp.last_name, user_db_modified.last_name);
+    assert_eq!(user_resp.auth0_id, user_db_modified.auth0_id);
     assert_eq!(user_resp.created_at, user_db_modified.created_at);
     assert_eq!(user_resp.updated_at, user_db_modified.updated_at);
 }
@@ -249,7 +255,8 @@ async fn test_delete_user() {
     let test_state = test_utils::TestState {
         conn,
         ..Default::default()
-    }.with_default_auth();
+    }
+    .with_default_auth();
 
     let state = web::Data::new(test_state.into_app_state());
 

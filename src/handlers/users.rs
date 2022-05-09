@@ -20,6 +20,7 @@ struct QueryParams {
 
 #[derive(Deserialize)]
 struct CreateParams {
+    auth0_id: Option<String>,
     first_name: Option<String>,
     last_name: Option<String>,
 }
@@ -52,14 +53,27 @@ async fn list_users(
 #[get("/users/{user_id}")]
 async fn get_user(
     data: web::Data<AppState>,
-    _claims: Claims,
+    claims: Claims,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
-    let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let user_id = &path.into_inner();
 
     let conn = &data.conn;
-
-    let user: models::user::Model = User::find_by_id(user_id).one(conn).await.unwrap().unwrap();
+    let user: models::user::Model = if user_id == "me" {
+        User::find()
+            .filter(models::user::Column::Auth0Id.eq(claims.sub))
+            .one(conn)
+            .await
+            .unwrap()
+            .unwrap()
+    } else {
+        let user_id_uuid = uuid::Uuid::parse_str(user_id).unwrap();
+        User::find_by_id(user_id_uuid)
+            .one(conn)
+            .await
+            .unwrap()
+            .unwrap()
+    };
 
     Ok(web::Json(user))
 }
@@ -84,8 +98,15 @@ async fn create_user(
         last_name = Set(body.last_name.as_ref().unwrap().to_owned());
     }
 
+    let mut auth0_id = NotSet;
+
+    if body.auth0_id.is_some() {
+        auth0_id = Set(body.last_name.as_ref().unwrap().to_owned());
+    }
+
     let user: models::user::Model = models::user::ActiveModel {
         user_id: NotSet,
+        auth0_id,
         first_name,
         last_name,
         created_at: NotSet,

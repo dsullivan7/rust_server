@@ -7,6 +7,7 @@ use uuid::Uuid;
 pub struct Model {
     #[sea_orm(primary_key)]
     pub user_id: Uuid,
+    pub auth0_id: String,
     pub first_name: String,
     pub last_name: String,
     #[sea_orm(column_type = "TimestampWithTimeZone")]

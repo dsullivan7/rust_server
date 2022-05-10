@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Deserialize, Serialize)]
-#[sea_orm(table_name = "bank_accounts")]
+#[sea_orm(table_name = "bank_transfers")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub bank_transfer_id: Uuid,

@@ -9,28 +9,26 @@ pub enum ServerError {
 }
 
 impl ServerError {
-    pub fn name(&self) -> String {
+    pub fn code(&self) -> String {
         match self {
-            Self::NonExistent => "NonExistent".to_string(),
-            Self::Unknown => "Unknown".to_string(),
+            Self::NonExistent => "non_existent".to_string(),
+            Self::Unknown => "internal".to_string(),
         }
     }
 }
 
 #[derive(Serialize)]
 struct ErrorResponse {
-    code: u16,
-    error: String,
+    code: String,
     message: String,
 }
 
 impl error::ResponseError for ServerError {
     fn error_response(&self) -> HttpResponse {
         let status_code = self.status_code();
-        HttpResponse::build(self.status_code()).json(ErrorResponse {
-            code: status_code.as_u16(),
+        HttpResponse::build(status_code).json(ErrorResponse {
+            code: self.code(),
             message: self.to_string(),
-            error: self.name(),
         })
     }
 

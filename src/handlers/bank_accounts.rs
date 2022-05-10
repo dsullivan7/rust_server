@@ -33,7 +33,7 @@ async fn list_bank_accounts(
     let mut sql_query = sea_orm::Condition::all();
 
     if query.user_id.is_some() {
-        let user_id = query.user_id.as_ref().unwrap().clone();
+        let user_id = uuid::Uuid::parse_str(&query.user_id.as_ref().unwrap()).unwrap();
         sql_query = sql_query.add(models::bank_account::Column::UserId.eq(user_id));
     }
 

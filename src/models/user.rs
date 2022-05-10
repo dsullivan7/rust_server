@@ -7,9 +7,9 @@ use uuid::Uuid;
 pub struct Model {
     #[sea_orm(primary_key)]
     pub user_id: Uuid,
-    pub auth0_id: String,
-    pub first_name: String,
-    pub last_name: String,
+    pub auth0_id: Option<String>,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
     #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
     #[sea_orm(column_type = "TimestampWithTimeZone")]

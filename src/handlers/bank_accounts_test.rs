@@ -14,9 +14,9 @@ async fn test_get_bank_account() {
     let bank_account_db: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
         user_id: user_id.to_owned(),
-        plaid_account_id: "plaid_account_id".to_owned(),
-        plaid_access_token: "plaid_access_token".to_owned(),
-        dwolla_funding_source_id: "dwolla_funding_source_id".to_owned(),
+        plaid_account_id: Some("plaid_account_id".to_owned()),
+        plaid_access_token: Some("plaid_access_token".to_owned()),
+        dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -74,9 +74,9 @@ async fn test_list_bank_account() {
     let bank_account_db: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
         user_id: user_id.to_owned(),
-        plaid_account_id: "plaid_account_id".to_owned(),
-        plaid_access_token: "plaid_access_token".to_owned(),
-        dwolla_funding_source_id: "dwolla_funding_source_id".to_owned(),
+        plaid_account_id: Some("plaid_account_id".to_owned()),
+        plaid_access_token: Some("plaid_access_token".to_owned()),
+        dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -134,9 +134,9 @@ async fn test_create_bank_account() {
     let bank_account_db: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
         user_id: user_id.to_owned(),
-        plaid_account_id: "plaid_account_id".to_owned(),
-        plaid_access_token: "plaid_access_token".to_owned(),
-        dwolla_funding_source_id: "dwolla_funding_source_id".to_owned(),
+        plaid_account_id: Some("plaid_account_id".to_owned()),
+        plaid_access_token: Some("plaid_access_token".to_owned()),
+        dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -206,9 +206,9 @@ async fn test_modify_bank_account() {
     let bank_account_db: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
         user_id: user_id.to_owned(),
-        plaid_account_id: "plaid_account_id".to_owned(),
-        plaid_access_token: "plaid_access_token".to_owned(),
-        dwolla_funding_source_id: "dwolla_funding_source_id".to_owned(),
+        plaid_account_id: Some("plaid_account_id".to_owned()),
+        plaid_access_token: Some("plaid_access_token".to_owned()),
+        dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -219,9 +219,9 @@ async fn test_modify_bank_account() {
     let bank_account_db_modified: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
         user_id: user_id.to_owned(),
-        plaid_account_id: "plaid_account_id".to_owned(),
-        plaid_access_token: "plaid_access_token".to_owned(),
-        dwolla_funding_source_id: "dwolla_funding_source_id".to_owned(),
+        plaid_account_id: Some("plaid_account_id".to_owned()),
+        plaid_access_token: Some("plaid_access_token".to_owned()),
+        dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };

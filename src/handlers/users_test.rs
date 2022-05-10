@@ -13,9 +13,9 @@ async fn test_get_user() {
 
     let user_db: models::user::Model = models::user::Model {
         user_id: user_id.to_owned(),
-        first_name: "first_name".to_owned(),
-        last_name: "last_name".to_owned(),
-        auth0_id: "auth0_id".to_owned(),
+        first_name: Some("first_name".to_owned()),
+        last_name: Some("last_name".to_owned()),
+        auth0_id: Some("auth0_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -72,9 +72,9 @@ async fn test_list_user() {
 
     let user_db: models::user::Model = models::user::Model {
         user_id: user_id_1.to_owned(),
-        first_name: "first_name".to_owned(),
-        last_name: "last_name".to_owned(),
-        auth0_id: "auth0_id".to_owned(),
+        first_name: Some("first_name".to_owned()),
+        last_name: Some("last_name".to_owned()),
+        auth0_id: Some("auth0_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -120,9 +120,9 @@ async fn test_create_user() {
 
     let user_db: models::user::Model = models::user::Model {
         user_id: user_id_1.to_owned(),
-        first_name: "first_name".to_owned(),
-        last_name: "last_name".to_owned(),
-        auth0_id: "auth0_id".to_owned(),
+        first_name: Some("first_name".to_owned()),
+        last_name: Some("last_name".to_owned()),
+        auth0_id: Some("auth0_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
@@ -178,18 +178,18 @@ async fn test_modify_user() {
 
     let user_db: models::user::Model = models::user::Model {
         user_id: user_id.to_owned(),
-        first_name: "first_name".to_owned(),
-        last_name: "last_name".to_owned(),
-        auth0_id: "auth0_id".to_owned(),
+        first_name: Some("first_name".to_owned()),
+        last_name: Some("last_name".to_owned()),
+        auth0_id: Some("auth0_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
     let user_db_modified: models::user::Model = models::user::Model {
         user_id: user_id.to_owned(),
-        first_name: "first_name_different".to_owned(),
-        last_name: "last_name_different".to_owned(),
-        auth0_id: "auth0_id".to_owned(),
+        first_name: Some("first_name_different".to_owned()),
+        last_name: Some("last_name_different".to_owned()),
+        auth0_id: Some("auth0_id".to_owned()),
         created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };

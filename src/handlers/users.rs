@@ -66,14 +66,23 @@ async fn get_user(
             .filter(models::user::Column::Auth0Id.eq(claims.sub))
             .one(conn)
             .await
-            .unwrap()
+            .map_err(|e| {
+                tracing::error!("Failed to execute query: {:?}", e);
+                errors::ServerError::Unknown
+            })?
     } else {
         let user_id_uuid = uuid::Uuid::parse_str(user_id).unwrap();
-        User::find_by_id(user_id_uuid).one(conn).await.unwrap()
+        User::find_by_id(user_id_uuid)
+            .one(conn)
+            .await
+            .map_err(|e| {
+                tracing::error!("Failed to execute query: {:?}", e);
+                errors::ServerError::Unknown
+            })?
     };
 
     if user.is_none() {
-        return Err(errors::ServerError::NonExistentError);
+        return Err(errors::ServerError::NonExistent);
     }
 
     Ok(web::Json(user.unwrap()))
@@ -90,19 +99,19 @@ async fn create_user(
     let mut first_name = NotSet;
 
     if body.first_name.is_some() {
-        first_name = Set(body.first_name.as_ref().unwrap().to_owned());
+        first_name = Set(body.first_name.to_owned());
     }
 
     let mut last_name = NotSet;
 
     if body.last_name.is_some() {
-        last_name = Set(body.last_name.as_ref().unwrap().to_owned());
+        last_name = Set(body.last_name.to_owned());
     }
 
     let mut auth0_id = NotSet;
 
     if body.auth0_id.is_some() {
-        auth0_id = Set(body.last_name.as_ref().unwrap().to_owned());
+        auth0_id = Set(body.auth0_id.to_owned());
     }
 
     let user: models::user::Model = models::user::ActiveModel {
@@ -139,11 +148,11 @@ async fn modify_user(
         .into();
 
     if body.first_name.is_some() {
-        user.first_name = Set(body.first_name.as_ref().unwrap().to_owned());
+        user.first_name = Set(body.first_name.to_owned());
     }
 
     if body.last_name.is_some() {
-        user.last_name = Set(body.last_name.as_ref().unwrap().to_owned());
+        user.last_name = Set(body.last_name.to_owned());
     }
 
     let user_updated: models::user::Model = user.update(conn).await.unwrap();

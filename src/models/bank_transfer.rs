@@ -9,7 +9,7 @@ pub struct Model {
     pub bank_transfer_id: Uuid,
     pub bank_account_id: Uuid,
     pub amount: i32,
-    pub dwolla_transfer_id: String,
+    pub dwolla_transfer_id: Option<String>,
     pub status: String,
     #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub created_at: chrono::DateTime<chrono::FixedOffset>,

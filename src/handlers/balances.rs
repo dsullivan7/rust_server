@@ -1,4 +1,4 @@
-use actix_web::{post, web, Error, Responder};
+use actix_web::{get, web, Error, Responder};
 use serde::{Deserialize, Serialize};
 
 use crate::authentication::Claims;
@@ -7,12 +7,12 @@ use crate::AppState;
 #[derive(Serialize)]
 struct Response {
     principal: i32,
-    balance: i32,
     interest: i32,
+    total: i32,
 }
 
-#[post("/users/{user_id}/balances")]
-async fn create_token(
+#[get("/users/{user_id}/balances")]
+async fn get_balances(
     data: web::Data<AppState>,
     _claims: Claims,
     path: web::Path<String>,
@@ -22,6 +22,6 @@ async fn create_token(
     Ok(web::Json(Response {
         principal: 1000,
         interest: 100,
-        balance: 1100,
+        total: 1100,
     }))
 }

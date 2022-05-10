@@ -60,33 +60,13 @@ async fn main() -> std::io::Result<()> {
     });
 
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allowed_origin("http://localhost:3000")
-            .allowed_methods(vec!["GET", "POST"])
-            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-            .allowed_header(http::header::CONTENT_TYPE)
-            .max_age(3600);
+        let cors = Cors::permissive();
 
         App::new()
             .app_data(state.clone())
             .wrap(middleware::Logger::default())
             .wrap(cors)
-            .service(handlers::users::get_user)
-            .service(handlers::users::list_users)
-            .service(handlers::users::create_user)
-            .service(handlers::users::modify_user)
-            .service(handlers::users::delete_user)
-            .service(handlers::bank_accounts::get_bank_account)
-            .service(handlers::bank_accounts::list_bank_accounts)
-            .service(handlers::bank_accounts::create_bank_account)
-            .service(handlers::bank_accounts::modify_bank_account)
-            .service(handlers::bank_accounts::delete_bank_account)
-            .service(handlers::bank_transfers::get_bank_transfer)
-            .service(handlers::bank_transfers::list_bank_transfers)
-            .service(handlers::bank_transfers::create_bank_transfer)
-            .service(handlers::bank_transfers::modify_bank_transfer)
-            .service(handlers::bank_transfers::delete_bank_transfer)
-            .service(handlers::plaid::create_token)
+            .service(handlers::routes())
     })
     .bind(("127.0.0.1", 7000))?
     .run()

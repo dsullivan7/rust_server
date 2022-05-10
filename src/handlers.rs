@@ -1,5 +1,8 @@
-pub mod bank_accounts;
-pub mod bank_transfers;
-pub mod plaid;
-pub mod users;
-pub mod balances;
+mod balances;
+mod bank_accounts;
+mod bank_transfers;
+mod plaid;
+mod routes;
+mod users;
+
+pub use self::routes::routes;

@@ -79,6 +79,6 @@ impl IPlaidClient for PlaidClient {
             )
             .await;
 
-        res["link_token"].to_string()
+        res["link_token"].as_str().unwrap().to_owned()
     }
 }

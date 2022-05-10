@@ -1,8 +1,10 @@
-use actix_web::{middleware, web, App, HttpServer};
+use actix_cors::Cors;
+use actix_web::{http, middleware, web, App, HttpServer};
 use sea_orm::DatabaseConnection;
 use std::env;
 
 mod authentication;
+mod errors;
 mod extractors;
 mod handlers;
 mod models;
@@ -58,9 +60,17 @@ async fn main() -> std::io::Result<()> {
     });
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000")
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            .allowed_header(http::header::CONTENT_TYPE)
+            .max_age(3600);
+
         App::new()
             .app_data(state.clone())
             .wrap(middleware::Logger::default())
+            .wrap(cors)
             .service(handlers::users::get_user)
             .service(handlers::users::list_users)
             .service(handlers::users::create_user)
@@ -78,7 +88,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::bank_transfers::delete_bank_transfer)
             .service(handlers::plaid::create_token)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", 7000))?
     .run()
     .await
 }

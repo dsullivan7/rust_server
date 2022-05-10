@@ -6,8 +6,10 @@ use actix_web::{delete, get, http, post, put, web, Error, HttpResponse, Responde
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
+use serde_json::json;
 
 use crate::authentication::Claims;
+use crate::errors;
 use crate::models;
 use crate::models::user::Entity as User;
 use crate::AppState;
@@ -55,27 +57,26 @@ async fn get_user(
     data: web::Data<AppState>,
     claims: Claims,
     path: web::Path<String>,
-) -> Result<impl Responder, Error> {
+) -> Result<impl Responder, errors::ServerError> {
     let user_id = &path.into_inner();
 
     let conn = &data.conn;
-    let user: models::user::Model = if user_id == "me" {
+    let user: Option<models::user::Model> = if user_id == "me" {
         User::find()
             .filter(models::user::Column::Auth0Id.eq(claims.sub))
             .one(conn)
             .await
             .unwrap()
-            .unwrap()
     } else {
         let user_id_uuid = uuid::Uuid::parse_str(user_id).unwrap();
-        User::find_by_id(user_id_uuid)
-            .one(conn)
-            .await
-            .unwrap()
-            .unwrap()
+        User::find_by_id(user_id_uuid).one(conn).await.unwrap()
     };
 
-    Ok(web::Json(user))
+    if user.is_none() {
+        return Err(errors::ServerError::NonExistentError);
+    }
+
+    Ok(web::Json(user.unwrap()))
 }
 
 #[post("/users")]

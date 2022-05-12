@@ -8,8 +8,12 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum PlaidError {
-    #[error("something went wrong")]
-    InternalError,
+    #[error("http request error")]
+    HTTPRequest,
+    #[error("json decode error")]
+    JSONDecode,
+    #[error("field not found error")]
+    FieldNotFound,
 }
 
 #[automock]
@@ -59,10 +63,10 @@ impl PlaidClient {
 
         req.send()
             .await
-            .map_err(|_| PlaidError::InternalError)?
+            .map_err(|_| PlaidError::HTTPRequest)?
             .json()
             .await
-            .map_err(|_| PlaidError::InternalError)
+            .map_err(|_| PlaidError::JSONDecode)
     }
 }
 
@@ -89,12 +93,11 @@ impl IPlaidClient for PlaidClient {
                     },
                 })),
             )
-            .await
-            .map_err(|_| PlaidError::InternalError)?;
+            .await?;
 
         Ok(res["link_token"]
             .as_str()
-            .ok_or(PlaidError::InternalError)?
+            .ok_or(PlaidError::FieldNotFound)?
             .to_owned())
     }
 }

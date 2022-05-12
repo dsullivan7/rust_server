@@ -2,10 +2,11 @@
 mod plaid_tests {
     use crate::plaid::IPlaidClient;
     use crate::plaid::PlaidClient;
+    use crate::plaid::PlaidError;
 
     #[ignore]
     #[tokio::test]
-    async fn test_create_token() {
+    async fn test_create_token() -> Result<(), PlaidError> {
         let plaid_client_id =
             std::env::var("PLAID_CLIENT_ID").expect("PLAID_CLIENT_ID must be set");
         let plaid_secret = std::env::var("PLAID_SECRET").expect("PLAID_SECRET must be set");
@@ -19,8 +20,9 @@ mod plaid_tests {
             plaid_api_url,
             plaid_redirect_uri,
         );
-        let token = plaid_client.create_token("123".to_string()).await;
+        let token = plaid_client.create_token("123".to_string()).await?;
 
         assert_eq!("test", token);
+        Ok(())
     }
 }

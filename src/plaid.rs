@@ -2,6 +2,7 @@
 #[cfg(test)]
 mod plaid_test;
 
+use anyhow::anyhow;
 use async_trait::async_trait;
 use mockall::*;
 use thiserror::Error;
@@ -9,9 +10,9 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum PlaidError {
     #[error("http request error")]
-    HTTPRequest,
+    HTTPRequest(anyhow::Error),
     #[error("json decode error")]
-    JSONDecode,
+    JSONDecode(anyhow::Error),
     #[error("field not found error")]
     FieldNotFound,
 }
@@ -63,10 +64,10 @@ impl PlaidClient {
 
         req.send()
             .await
-            .map_err(|_| PlaidError::HTTPRequest)?
+            .map_err(|err| PlaidError::HTTPRequest(anyhow!(err)))?
             .json()
             .await
-            .map_err(|_| PlaidError::JSONDecode)
+            .map_err(|err| PlaidError::JSONDecode(anyhow!(err)))
     }
 }
 

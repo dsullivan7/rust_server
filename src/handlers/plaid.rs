@@ -4,6 +4,7 @@ mod plaid_test;
 
 use actix_web::{post, web, Error, Responder};
 use serde::{Deserialize, Serialize};
+use anyhow::anyhow;
 
 use crate::errors;
 use crate::AppState;
@@ -31,7 +32,10 @@ async fn create_token(
         .ok_or(errors::ServerError::RequiredBodyParameter)?
         .to_owned();
 
-    let token = plaid_client.create_token(user_id).await;
+    let token = plaid_client
+        .create_token(user_id)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok(web::Json(Response {
         value: token.to_owned(),

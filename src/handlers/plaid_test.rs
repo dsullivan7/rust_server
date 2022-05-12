@@ -16,7 +16,7 @@ async fn test_create_token() {
         .expect_create_token()
         .with(eq(String::from("my_user_id")))
         .times(1)
-        .return_const("my_token".to_string());
+        .returning(|_| Ok("my_token".to_owned()));
 
     let test_state = test_utils::TestState {
         plaid_client,

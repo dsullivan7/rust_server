@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{http, middleware, web, App, HttpServer};
+use actix_web::{middleware, web, App, HttpServer};
 use sea_orm::DatabaseConnection;
 use std::env;
 
@@ -20,7 +20,7 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    tracing_subscriber::fmt::init();
+    env_logger::init();
 
     let db_name = env::var("DB_NAME").expect("DB_NAME must be set");
     let db_port = env::var("DB_PORT").expect("DB_PORT must be set");

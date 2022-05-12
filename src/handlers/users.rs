@@ -3,10 +3,13 @@
 mod users_test;
 
 use actix_web::{delete, get, http, post, put, web, Error, HttpResponse, Responder};
+use anyhow::{anyhow, Context, Result};
+use log;
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
-use serde_json::json;
+use std::fmt;
+use tracing;
 
 use crate::authentication::Claims;
 use crate::errors;
@@ -32,22 +35,24 @@ async fn list_users(
     data: web::Data<AppState>,
     _claims: Claims,
     query: web::Query<QueryParams>,
-) -> Result<impl Responder, Error> {
+) -> Result<impl Responder, errors::ServerError> {
     let conn = &data.conn;
 
     let mut sql_query = sea_orm::Condition::all();
 
-    if query.first_name.is_some() {
-        let first_name = query.first_name.as_ref().unwrap().clone();
-        sql_query = sql_query.add(models::user::Column::FirstName.eq(first_name));
+    if let Some(first_name) = &query.first_name {
+        sql_query = sql_query.add(models::user::Column::FirstName.eq(first_name.to_owned()));
     }
 
-    if query.last_name.is_some() {
-        let last_name = query.last_name.as_ref().unwrap().clone();
-        sql_query = sql_query.add(models::user::Column::LastName.eq(last_name));
-    }
+    if let Some(last_name) = &query.last_name {
+        sql_query = sql_query.add(models::user::Column::LastName.eq(last_name.to_owned()));
+    };
 
-    let users: Vec<models::user::Model> = User::find().filter(sql_query).all(conn).await.unwrap();
+    let users: Vec<models::user::Model> = User::find()
+        .filter(sql_query)
+        .all(conn)
+        .await
+        .map_err(|_| errors::ServerError::Unknown)?;
 
     Ok(web::Json(users))
 }

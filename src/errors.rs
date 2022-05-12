@@ -4,20 +4,27 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ServerError {
-    #[error("non existent record")]
-    NonExistent,
-    #[error("unknown")]
-    Unknown,
-    #[error(transparent)]
-    Internal(#[from] anyhow::Error),
+    #[error("not found")]
+    NotFound,
+    // #[error("user error")]
+    // User(anyhow::Error, String),
+    #[error("internal error")]
+    Internal(anyhow::Error),
 }
 
 impl ServerError {
     pub fn code(&self) -> String {
         match self {
-            Self::NonExistent => "non_existent".to_string(),
-            Self::Unknown => "unknown".to_string(),
-            Self::Internal(_) => "internal".to_string(),
+            Self::NotFound => "not_found".to_owned(),
+            // Self::User(_, _) => "user".to_owned(),
+            Self::Internal(_) => "internal".to_owned(),
+        }
+    }
+    pub fn message(&self) -> String {
+        match self {
+            Self::NotFound => "record not found".to_owned(),
+            // Self::User(_, user_message) => user_message.to_owned(),
+            Self::Internal(_) => "internal".to_owned(),
         }
     }
 }
@@ -33,14 +40,14 @@ impl ResponseError for ServerError {
         let status_code = self.status_code();
         HttpResponse::build(status_code).json(ErrorResponse {
             code: self.code(),
-            message: self.to_string(),
+            message: self.message(),
         })
     }
 
     fn status_code(&self) -> StatusCode {
         match self {
-            Self::NonExistent => StatusCode::NOT_FOUND,
-            Self::Unknown => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::NotFound => StatusCode::NOT_FOUND,
+            // Self::User(_, _) => StatusCode::BAD_REQUEST,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

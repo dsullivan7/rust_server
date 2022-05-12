@@ -3,13 +3,10 @@
 mod users_test;
 
 use actix_web::{delete, get, http, post, put, web, Error, HttpResponse, Responder};
-use anyhow::{anyhow, Context, Result};
-use log;
+use anyhow::{anyhow, Result};
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
-use std::fmt;
-use tracing;
 
 use crate::authentication::Claims;
 use crate::errors;
@@ -52,7 +49,7 @@ async fn list_users(
         .filter(sql_query)
         .all(conn)
         .await
-        .map_err(|_| errors::ServerError::Unknown)?;
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok(web::Json(users))
 }
@@ -66,31 +63,21 @@ async fn get_user(
     let user_id = &path.into_inner();
 
     let conn = &data.conn;
-    let user: Option<models::user::Model> = if user_id == "me" {
-        User::find()
-            .filter(models::user::Column::Auth0Id.eq(claims.sub))
-            .one(conn)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to execute query: {:?}", e);
-                errors::ServerError::Unknown
-            })?
-    } else {
+
+    let user: models::user::Model = (|| {
+        if user_id == "me" {
+            return User::find()
+                .filter(models::user::Column::Auth0Id.eq(claims.sub))
+                .one(conn);
+        }
         let user_id_uuid = uuid::Uuid::parse_str(user_id).unwrap();
-        User::find_by_id(user_id_uuid)
-            .one(conn)
-            .await
-            .map_err(|e| {
-                tracing::error!("Failed to execute query: {:?}", e);
-                errors::ServerError::Unknown
-            })?
-    };
+        return User::find_by_id(user_id_uuid).one(conn);
+    })()
+    .await
+    .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
+    .ok_or(errors::ServerError::NotFound)?;
 
-    if user.is_none() {
-        return Err(errors::ServerError::NonExistent);
-    }
-
-    Ok(web::Json(user.unwrap()))
+    Ok(web::Json(user))
 }
 
 #[post("/users")]
@@ -129,7 +116,7 @@ async fn create_user(
     }
     .insert(conn)
     .await
-    .unwrap();
+    .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok((web::Json(user), http::StatusCode::CREATED))
 }
@@ -148,8 +135,8 @@ async fn modify_user(
     let mut user: models::user::ActiveModel = User::find_by_id(user_id)
         .one(conn)
         .await
-        .unwrap()
-        .unwrap()
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
+        .ok_or(errors::ServerError::NotFound)?
         .into();
 
     if body.first_name.is_some() {
@@ -160,7 +147,10 @@ async fn modify_user(
         user.last_name = Set(body.last_name.to_owned());
     }
 
-    let user_updated: models::user::Model = user.update(conn).await.unwrap();
+    let user_updated: models::user::Model = user
+        .update(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok(web::Json(user_updated))
 }
@@ -172,7 +162,13 @@ async fn delete_user(
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
+
     let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
-    User::delete_by_id(user_id).exec(conn).await.unwrap();
+
+    User::delete_by_id(user_id)
+        .exec(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
     Ok(HttpResponse::NoContent())
 }

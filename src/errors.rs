@@ -10,6 +10,8 @@ pub enum ServerError {
     // User(anyhow::Error, String),
     #[error("invalid uuid error")]
     InvalidUUID(anyhow::Error),
+    #[error("required body parameter")]
+    RequiredBodyParameter,
     #[error("internal error")]
     Internal(anyhow::Error),
 }
@@ -21,6 +23,7 @@ impl ServerError {
             // Self::User(_, _) => "user".to_owned(),
             Self::Internal(_) => "internal".to_owned(),
             Self::InvalidUUID(_) => "invalid_uuid".to_owned(),
+            Self::RequiredBodyParameter => "required_body_param".to_owned(),
         }
     }
     pub fn message(&self) -> String {
@@ -29,6 +32,7 @@ impl ServerError {
             // Self::User(_, user_message) => user_message.to_owned(),
             Self::Internal(_) => "internal".to_owned(),
             Self::InvalidUUID(_) => "invalid uuid".to_owned(),
+            Self::RequiredBodyParameter => "required body parameter".to_owned(),
         }
     }
 }
@@ -54,6 +58,7 @@ impl ResponseError for ServerError {
             // Self::User(_, _) => StatusCode::BAD_REQUEST,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::InvalidUUID(_) => StatusCode::BAD_REQUEST,
+            Self::RequiredBodyParameter => StatusCode::BAD_REQUEST,
         }
     }
 }

@@ -5,6 +5,7 @@ mod plaid_test;
 use actix_web::{post, web, Error, Responder};
 use serde::{Deserialize, Serialize};
 
+use crate::errors;
 use crate::AppState;
 
 #[derive(Deserialize)]
@@ -24,7 +25,11 @@ async fn create_token(
 ) -> Result<impl Responder, Error> {
     let plaid_client = &data.plaid_client;
 
-    let user_id = body.user_id.as_ref().unwrap().to_owned();
+    let user_id = body
+        .user_id
+        .as_ref()
+        .ok_or(errors::ServerError::RequiredBodyParameter)?
+        .to_owned();
 
     let token = plaid_client.create_token(user_id).await;
 

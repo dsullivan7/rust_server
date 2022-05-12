@@ -4,11 +4,18 @@ mod plaid_test;
 
 use async_trait::async_trait;
 use mockall::*;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum PlaidError {
+    #[error("something went wrong")]
+    InternalError,
+}
 
 #[automock]
 #[async_trait]
 pub trait IPlaidClient: Send + Sync {
-    async fn create_token(&self, user_id: String) -> String;
+    async fn create_token(&self, user_id: String) -> Result<String, PlaidError>;
 }
 
 pub struct PlaidClient {
@@ -38,7 +45,7 @@ impl PlaidClient {
         method: reqwest::Method,
         path: String,
         body: Option<serde_json::Value>,
-    ) -> serde_json::Value {
+    ) -> Result<serde_json::Value, PlaidError> {
         let client = reqwest::Client::new();
         let url = format!("{}{}", self.api_url, path);
         let mut req = client
@@ -50,13 +57,18 @@ impl PlaidClient {
             req = req.json(&body.unwrap());
         }
 
-        req.send().await.unwrap().json().await.unwrap()
+        req.send()
+            .await
+            .map_err(|_| PlaidError::InternalError)?
+            .json()
+            .await
+            .map_err(|_| PlaidError::InternalError)
     }
 }
 
 #[async_trait]
 impl IPlaidClient for PlaidClient {
-    async fn create_token(&self, user_id: String) -> String {
+    async fn create_token(&self, user_id: String) -> Result<String, PlaidError> {
         let res = self
             .request(
                 reqwest::Method::POST,
@@ -77,8 +89,12 @@ impl IPlaidClient for PlaidClient {
                     },
                 })),
             )
-            .await;
+            .await
+            .map_err(|_| PlaidError::InternalError)?;
 
-        res["link_token"].as_str().unwrap().to_owned()
+        Ok(res["link_token"]
+            .as_str()
+            .ok_or(PlaidError::InternalError)?
+            .to_owned())
     }
 }

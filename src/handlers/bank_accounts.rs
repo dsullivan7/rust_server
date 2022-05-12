@@ -3,12 +3,13 @@
 mod bank_accounts_test;
 
 use actix_web::{delete, get, http, post, put, web, Error, HttpResponse, Responder};
+use anyhow::anyhow;
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
-
 use uuid::Uuid;
 
+use crate::errors;
 use crate::models;
 use crate::models::bank_account::Entity as BankAccount;
 use crate::AppState;
@@ -32,16 +33,15 @@ async fn list_bank_accounts(
 
     let mut sql_query = sea_orm::Condition::all();
 
-    if query.user_id.is_some() {
-        let user_id = uuid::Uuid::parse_str(&query.user_id.as_ref().unwrap()).unwrap();
-        sql_query = sql_query.add(models::bank_account::Column::UserId.eq(user_id));
+    if let Some(user_id) = &query.user_id {
+        sql_query = sql_query.add(models::bank_account::Column::UserId.eq(user_id.to_owned()));
     }
 
     let bank_accounts: Vec<models::bank_account::Model> = BankAccount::find()
         .filter(sql_query)
         .all(conn)
         .await
-        .unwrap();
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok(web::Json(bank_accounts))
 }
@@ -51,15 +51,16 @@ async fn get_bank_account(
     data: web::Data<AppState>,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
-    let bank_account_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let bank_account_id = uuid::Uuid::parse_str(&path.into_inner())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
 
     let conn = &data.conn;
 
     let bank_account: models::bank_account::Model = BankAccount::find_by_id(bank_account_id)
         .one(conn)
         .await
-        .unwrap()
-        .unwrap();
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
+        .ok_or(errors::ServerError::NotFound)?;
 
     Ok(web::Json(bank_account))
 }
@@ -84,7 +85,7 @@ async fn create_bank_account(
     }
     .insert(conn)
     .await
-    .unwrap();
+    .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok((web::Json(bank_account), http::StatusCode::CREATED))
 }
@@ -94,19 +95,22 @@ async fn modify_bank_account(
     data: web::Data<AppState>,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
-    let bank_account_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let bank_account_id = uuid::Uuid::parse_str(&path.into_inner())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
 
     let conn = &data.conn;
 
     let bank_account: models::bank_account::ActiveModel = BankAccount::find_by_id(bank_account_id)
         .one(conn)
         .await
-        .unwrap()
-        .unwrap()
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
+        .ok_or(errors::ServerError::NotFound)?
         .into();
 
-    let bank_account_updated: models::bank_account::Model =
-        bank_account.update(conn).await.unwrap();
+    let bank_account_updated: models::bank_account::Model = bank_account
+        .update(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok(web::Json(bank_account_updated))
 }
@@ -117,10 +121,11 @@ async fn delete_bank_account(
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
-    let bank_account_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let bank_account_id = uuid::Uuid::parse_str(&path.into_inner())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
     BankAccount::delete_by_id(bank_account_id)
         .exec(conn)
         .await
-        .unwrap();
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
     Ok(HttpResponse::NoContent())
 }

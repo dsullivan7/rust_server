@@ -26,7 +26,10 @@ impl Default for TestState {
 
 impl TestState {
     pub fn get_default_auth_header() -> (String, String) {
-        ("Authorization".to_string(), format!("Bearer {}", DEFAULT_AUTH0_TOKEN))
+        (
+            "Authorization".to_string(),
+            format!("Bearer {}", DEFAULT_AUTH0_TOKEN),
+        )
     }
 
     pub fn into_app_state(self) -> AppState {

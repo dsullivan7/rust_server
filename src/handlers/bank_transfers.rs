@@ -34,9 +34,9 @@ async fn list_bank_transfers(
 
     let mut sql_query = sea_orm::Condition::all();
 
-    if query.bank_account_id.is_some() {
-        let bank_account_id = query.bank_account_id.as_ref().unwrap().clone();
-        sql_query = sql_query.add(models::bank_transfer::Column::BankAccountId.eq(bank_account_id));
+    if let Some(bank_account_id) = &query.bank_account_id {
+        sql_query = sql_query
+            .add(models::bank_transfer::Column::BankAccountId.eq(bank_account_id.to_owned()));
     }
 
     let bank_transfers: Vec<models::bank_transfer::Model> = BankTransfer::find()
@@ -53,7 +53,8 @@ async fn get_bank_transfer(
     data: web::Data<AppState>,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
-    let bank_transfer_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let bank_transfer_id = uuid::Uuid::parse_str(&path.into_inner())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
 
     let conn = &data.conn;
 
@@ -61,7 +62,7 @@ async fn get_bank_transfer(
         .one(conn)
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
-        .unwrap();
+        .ok_or(errors::ServerError::NotFound)?;
 
     Ok(web::Json(bank_transfer))
 }
@@ -97,7 +98,8 @@ async fn modify_bank_transfer(
     data: web::Data<AppState>,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
-    let bank_transfer_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let bank_transfer_id = uuid::Uuid::parse_str(&path.into_inner())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
 
     let conn = &data.conn;
 
@@ -105,12 +107,14 @@ async fn modify_bank_transfer(
         BankTransfer::find_by_id(bank_transfer_id)
             .one(conn)
             .await
-            .unwrap()
-            .unwrap()
+            .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
+            .ok_or(errors::ServerError::NotFound)?
             .into();
 
-    let bank_transfer_updated: models::bank_transfer::Model =
-        bank_transfer.update(conn).await.unwrap();
+    let bank_transfer_updated: models::bank_transfer::Model = bank_transfer
+        .update(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok(web::Json(bank_transfer_updated))
 }
@@ -121,10 +125,11 @@ async fn delete_bank_transfer(
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
-    let bank_transfer_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let bank_transfer_id = uuid::Uuid::parse_str(&path.into_inner())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
     BankTransfer::delete_by_id(bank_transfer_id)
         .exec(conn)
         .await
-        .unwrap();
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
     Ok(HttpResponse::NoContent())
 }

@@ -32,7 +32,7 @@ async fn list_users(
     data: web::Data<AppState>,
     _claims: Claims,
     query: web::Query<QueryParams>,
-) -> Result<impl Responder, errors::ServerError> {
+) -> Result<impl Responder, Error> {
     let conn = &data.conn;
 
     let mut sql_query = sea_orm::Condition::all();
@@ -59,20 +59,21 @@ async fn get_user(
     data: web::Data<AppState>,
     claims: Claims,
     path: web::Path<String>,
-) -> Result<impl Responder, errors::ServerError> {
+) -> Result<impl Responder, Error> {
     let user_id = &path.into_inner();
 
     let conn = &data.conn;
 
-    let user: models::user::Model = (|| {
+    let user: models::user::Model = (|| -> Result<_, Error> {
         if user_id == "me" {
-            return User::find()
+            return Ok(User::find()
                 .filter(models::user::Column::Auth0Id.eq(claims.sub))
-                .one(conn);
+                .one(conn));
         }
-        let user_id_uuid = uuid::Uuid::parse_str(user_id).unwrap();
-        return User::find_by_id(user_id_uuid).one(conn);
-    })()
+        let user_id_uuid = uuid::Uuid::parse_str(user_id)
+            .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
+        Ok(User::find_by_id(user_id_uuid).one(conn))
+    })()?
     .await
     .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
     .ok_or(errors::ServerError::NotFound)?;
@@ -128,7 +129,8 @@ async fn modify_user(
     path: web::Path<String>,
     body: web::Json<CreateParams>,
 ) -> Result<impl Responder, Error> {
-    let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let user_id = uuid::Uuid::parse_str(&path.into_inner())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
 
     let conn = &data.conn;
 
@@ -163,7 +165,8 @@ async fn delete_user(
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
 
-    let user_id = uuid::Uuid::parse_str(&path.into_inner()).unwrap();
+    let user_id = uuid::Uuid::parse_str(&path.into_inner())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
 
     User::delete_by_id(user_id)
         .exec(conn)

@@ -8,6 +8,8 @@ pub enum ServerError {
     NotFound,
     // #[error("user error")]
     // User(anyhow::Error, String),
+    #[error("invalid uuid error")]
+    InvalidUUID(anyhow::Error),
     #[error("internal error")]
     Internal(anyhow::Error),
 }
@@ -18,6 +20,7 @@ impl ServerError {
             Self::NotFound => "not_found".to_owned(),
             // Self::User(_, _) => "user".to_owned(),
             Self::Internal(_) => "internal".to_owned(),
+            Self::InvalidUUID(_) => "invalid_uuid".to_owned(),
         }
     }
     pub fn message(&self) -> String {
@@ -25,6 +28,7 @@ impl ServerError {
             Self::NotFound => "record not found".to_owned(),
             // Self::User(_, user_message) => user_message.to_owned(),
             Self::Internal(_) => "internal".to_owned(),
+            Self::InvalidUUID(_) => "invalid uuid".to_owned(),
         }
     }
 }
@@ -49,6 +53,7 @@ impl ResponseError for ServerError {
             Self::NotFound => StatusCode::NOT_FOUND,
             // Self::User(_, _) => StatusCode::BAD_REQUEST,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::InvalidUUID(_) => StatusCode::BAD_REQUEST,
         }
     }
 }

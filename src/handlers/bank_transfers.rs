@@ -3,12 +3,13 @@
 mod bank_transfers_test;
 
 use actix_web::{delete, get, http, post, put, web, Error, HttpResponse, Responder};
+use anyhow::anyhow;
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
-
 use uuid::Uuid;
 
+use crate::errors;
 use crate::models;
 use crate::models::bank_transfer::Entity as BankTransfer;
 use crate::AppState;
@@ -42,7 +43,7 @@ async fn list_bank_transfers(
         .filter(sql_query)
         .all(conn)
         .await
-        .unwrap();
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok(web::Json(bank_transfers))
 }
@@ -59,7 +60,7 @@ async fn get_bank_transfer(
     let bank_transfer: models::bank_transfer::Model = BankTransfer::find_by_id(bank_transfer_id)
         .one(conn)
         .await
-        .unwrap()
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
         .unwrap();
 
     Ok(web::Json(bank_transfer))
@@ -86,7 +87,7 @@ async fn create_bank_transfer(
     }
     .insert(conn)
     .await
-    .unwrap();
+    .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     Ok((web::Json(bank_transfer), http::StatusCode::CREATED))
 }

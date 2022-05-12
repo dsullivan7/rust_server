@@ -10,6 +10,8 @@ mod handlers;
 mod models;
 mod plaid;
 mod services;
+
+#[cfg(test)]
 mod test_utils;
 
 pub struct AppState {

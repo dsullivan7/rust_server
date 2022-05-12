@@ -1,3 +1,4 @@
+#[cfg(test)]
 use super::AppState;
 use crate::authentication;
 use crate::plaid;

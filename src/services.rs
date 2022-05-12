@@ -52,7 +52,7 @@ fn list_portfolio_holdings(
         }
         holdings_total += amount;
         portfolio_holdings.push(PortfolioHolding {
-            security_id: security_id,
+            security_id,
             amount: ((weight as f64 / total_weight as f64) * 1000.0).round() / 1000.0,
         });
         iter += 1;

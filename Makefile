@@ -36,7 +36,7 @@ run:
 
 .PHONY: run-docker
 run-docker:
-	docker-compose --verbose up run
+	docker-compose --verbose up --build run
 
 .PHONY: build-docker
 build-docker:

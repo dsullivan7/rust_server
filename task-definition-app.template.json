@@ -10,7 +10,7 @@
   "containerDefinitions": [
     {
       "name": "pongo-app-rust",
-      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com/pongo-app-rust-72db723:${CIRCLE_SHA1}",
+      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com/pongo-app-rust-03c0bae:${IMAGE_TAG}",
       "essential": true,
       "cpu": 10,
       "memory": 512,

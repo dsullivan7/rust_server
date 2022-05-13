@@ -1,5 +1,5 @@
 {
-  "family": "pongo-app",
+  "family": "pongo-app-rust",
   "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/pongo-ecs-exec-role",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [

@@ -1,0 +1,97 @@
+version: '3.8'
+
+x-app-environment: &app-environment
+  DB_HOST: $DB_HOST
+  DB_PORT: $DB_PORT
+  DB_USER: $DB_USER
+  DB_NAME: $DB_NAME
+  DB_PASSWORD: $DB_PASSWORD
+  DB_SSL: $DB_SSL
+  PORT: $PORT
+  TWO_CAPTCHA_KEY: $TWO_CAPTCHA_KEY
+  PLAID_API_URL: $PLAID_API_URL
+  PLAID_REDIRECT_URI: $PLAID_REDIRECT_URI
+  PLAID_CLIENT_ID: $PLAID_CLIENT_ID
+  PLAID_SECRET: $PLAID_SECRET
+  AUTH0_DOMAIN: $AUTH0_DOMAIN
+  AUTH0_AUDIENCE: $AUTH0_AUDIENCE
+  ALPACA_API_URL: $ALPACA_API_URL
+  ALPACA_API_KEY: $ALPACA_API_KEY
+  ALPACA_API_SECRET: $ALPACA_API_SECRET
+  DWOLLA_API_URL: $DWOLLA_API_URL
+  DWOLLA_API_KEY: $DWOLLA_API_KEY
+  DWOLLA_API_SECRET: $DWOLLA_API_SECRET
+  DWOLLA_WEBHOOK_URL: $DWOLLA_WEBHOOK_URL
+  DWOLLA_WEBHOOK_SECRET: $DWOLLA_WEBHOOK_SECRET
+  ALLOWED_ORIGINS: $ALLOWED_ORIGINS
+  ENCRYPTION_KEY: $ENCRYPTION_KEY
+
+x-db-environment: &db-environment
+  DB_SSL_MODE: $DB_SSL_MODE
+  DB_HOST: $DB_HOST
+  DB_PORT: $DB_PORT
+  DB_USER: $DB_USER
+  DB_NAME: $DB_NAME
+  DB_PASSWORD: $DB_PASSWORD
+  DB_DROP: $DB_DROP
+  SEEDER_DIR: $SEEDER_DIR
+  PGPASSWORD: $DB_PASSWORD
+
+services:
+  run:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    working_dir: /app
+    volumes:
+      - ./bin:/app
+    ports:
+      - '${PORT:-7000}:${PORT:-7000}'
+    environment:
+      *app-environment
+
+  rust:
+    build:
+      context: .
+      dockerfile: Dockerfile.rust
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      *app-environment
+
+  postgres:
+    image: postgres:12.7
+    environment:
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_USER: $DB_USER
+    ports:
+      - '${DB_PORT:-5432}:5432'
+    volumes:
+      - dbdata_12.7:/var/lib/postgresql/data
+
+  db-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    environment:
+      *db-environment
+
+  db-init:
+    command: 'sh -c /app/dbinit.sh'
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    environment:
+      *db-environment
+
+  db-seed:
+    command: 'sh -c /app/dbseed.sh'
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    environment:
+      *db-environment
+
+volumes:
+  dbdata_12.7:

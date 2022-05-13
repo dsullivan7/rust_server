@@ -9,15 +9,15 @@
   "memory": "1024",
   "containerDefinitions": [
     {
-      "name": "pongo-app",
-      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com/pongo-app-72db723:${CIRCLE_SHA1}",
+      "name": "pongo-app-rust",
+      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com/pongo-app-rust-72db723:${CIRCLE_SHA1}",
       "essential": true,
       "cpu": 10,
       "memory": 512,
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/pongo/app",
+          "awslogs-group": "/pongo/app-rust",
           "awslogs-region": "us-east-2",
           "awslogs-stream-prefix": "app"
         }

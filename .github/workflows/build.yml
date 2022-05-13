@@ -23,7 +23,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: pongo-app-rust
+          ECR_REPOSITORY: pongo-app-rust-03c0bae
           DOCKER_FILE: Dockerfile.app
           IMAGE_TAG: ${{ github.sha }}
         run: |

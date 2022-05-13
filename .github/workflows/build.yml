@@ -42,5 +42,7 @@ jobs:
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
+          service: pongo-service-app-rust
+          cluster: pongo-ecs-cluster-1520594
           task-definition: task-definition.json
           wait-for-service-stability: true

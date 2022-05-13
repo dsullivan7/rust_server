@@ -49,6 +49,11 @@ async fn main() -> std::io::Result<()> {
     let auth0_domain = std::env::var("AUTH0_DOMAIN").expect("AUTH0_DOMAIN must be set");
     let auth0_audience = std::env::var("AUTH0_AUDIENCE").expect("AUTH0_AUDIENCE must be set");
 
+    let port = std::env::var("PORT")
+        .unwrap_or("7000".to_owned())
+        .parse::<u16>()
+        .expect("PORT must be a number");
+
     let auth = authentication::Authentication {
         audience: auth0_audience,
         domain: auth0_domain,
@@ -69,7 +74,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .service(handlers::routes())
     })
-    .bind(("127.0.0.1", 7000))?
+    .bind(("127.0.0.1", port))?
     .run()
     .await
 }

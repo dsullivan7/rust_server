@@ -1,7 +1,6 @@
-name: pipeline
 on: [push]
 jobs:
-  build:
+  pipeline:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

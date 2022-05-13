@@ -34,7 +34,9 @@ async fn list_bank_accounts(
     let mut sql_query = sea_orm::Condition::all();
 
     if let Some(user_id) = &query.user_id {
-        sql_query = sql_query.add(models::bank_account::Column::UserId.eq(user_id.to_owned()));
+        let user_id = uuid::Uuid::parse_str(user_id)
+            .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
+        sql_query = sql_query.add(models::bank_account::Column::UserId.eq(user_id));
     }
 
     let bank_accounts: Vec<models::bank_account::Model> = BankAccount::find()

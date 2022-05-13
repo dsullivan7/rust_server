@@ -35,8 +35,10 @@ async fn list_bank_transfers(
     let mut sql_query = sea_orm::Condition::all();
 
     if let Some(bank_account_id) = &query.bank_account_id {
+        let bank_account_id = uuid::Uuid::parse_str(bank_account_id)
+            .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
         sql_query = sql_query
-            .add(models::bank_transfer::Column::BankAccountId.eq(bank_account_id.to_owned()));
+            .add(models::bank_transfer::Column::BankAccountId.eq(bank_account_id));
     }
 
     let bank_transfers: Vec<models::bank_transfer::Model> = BankTransfer::find()

@@ -42,9 +42,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.app
-    working_dir: /app
-    volumes:
-      - ./bin:/app
     ports:
       - '${PORT:-7000}:${PORT:-7000}'
     environment:

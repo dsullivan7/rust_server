@@ -49,7 +49,7 @@ services:
       *app-environment
 
   build:
-    command: 'sh -c "cargo build && chown -R"'
+    command: 'cargo build --profile=release-with-debug'
     build:
       context: .
       dockerfile: Dockerfile.rust

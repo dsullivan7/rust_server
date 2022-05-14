@@ -36,11 +36,11 @@ run:
 
 .PHONY: run-docker
 run-docker:
-	docker-compose up --build run
+	docker-compose up run
 
 .PHONY: build-docker
 build-docker:
-	docker-compose up --build build
+	docker-compose up build
 
 .PHONY: test-docker
 test-docker:

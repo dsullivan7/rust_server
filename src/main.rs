@@ -76,7 +76,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::routes())
             .service(handlers::health::get_health)
     })
-    .bind(("127.0.0.1", port))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }

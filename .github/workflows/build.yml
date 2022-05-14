@@ -7,11 +7,6 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: make build-docker
-      - name: Archive build
-        uses: actions/upload-artifact@v3
-        with:
-          name: target
-          path: target/release/rust_server
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

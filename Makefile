@@ -36,11 +36,11 @@ run:
 
 .PHONY: run-docker
 run-docker:
-	docker-compose --verbose up --build run
+	docker-compose up --build run
 
 .PHONY: build-docker
 build-docker:
-	docker-compose run rust cargo build --release
+	docker-compose up --build build
 
 .PHONY: test-docker
 test-docker:

@@ -47,15 +47,14 @@ services:
     environment:
       *app-environment
 
-  rust:
+  build:
+    command: 'cargo build --release'
     build:
       context: .
       dockerfile: Dockerfile.rust
     working_dir: /app
     volumes:
       - ./:/app
-    environment:
-      *app-environment
 
   postgres:
     image: postgres:12.7

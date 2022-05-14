@@ -5,41 +5,41 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Cache
-        uses: Swatinem/rust-cache@v1
-      - name: Build
-        run: make build-docker
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-to-assume: arn:aws:iam::247564283327:role/dev-admin
-          aws-region: us-east-2
-          role-skip-session-tagging: true
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-      - name: Build, tag, and push app-rust image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: pongo-app-rust-03c0bae
-          DOCKER_FILE: Dockerfile.app
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -f $DOCKER_FILE -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-      - name: Env substitution
-        id: env-substitution
-        env:
-          INPUT: task-definition-app.template.json
-          OUTPUT: task-definition.json
-          AWS_ACCOUNT_ID: 247564283327
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          envsubst < $INPUT > $OUTPUT
+      # - name: Cache
+      #   uses: Swatinem/rust-cache@v1
+      # - name: Build
+      #   run: make build-docker
+      # - name: Configure AWS Credentials
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     role-to-assume: arn:aws:iam::247564283327:role/dev-admin
+      #     aws-region: us-east-2
+      #     role-skip-session-tagging: true
+      # - name: Login to Amazon ECR
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@v1
+      # - name: Build, tag, and push app-rust image to Amazon ECR
+      #   id: build-image
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     ECR_REPOSITORY: pongo-app-rust-03c0bae
+      #     DOCKER_FILE: Dockerfile.app
+      #     IMAGE_TAG: ${{ github.sha }}
+      #   run: |
+      #     docker build -f $DOCKER_FILE -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+      #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      # - name: Env substitution
+      #   id: env-substitution
+      #   env:
+      #     INPUT: task-definition-app.template.json
+      #     OUTPUT: task-definition.json
+      #     AWS_ACCOUNT_ID: 247564283327
+      #     IMAGE_TAG: ${{ github.sha }}
+      #   run: |
+      #     envsubst < $INPUT > $OUTPUT
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:

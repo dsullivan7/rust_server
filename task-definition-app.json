@@ -1,0 +1,131 @@
+{
+  "family": "pongo-app-rust",
+  "executionRoleArn": "arn:aws:iam::247564283327:role/pongo-ecs-exec-role",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "pongo-app-rust",
+      "image": "httpd:2.4",
+      "essential": true,
+      "cpu": 10,
+      "memory": 512,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/pongo/app-rust",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "app"
+        }
+      },
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80
+        }
+      ],
+      "secrets": [
+        {
+          "name": "ALLOWED_ORIGINS",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/ALLOWED_ORIGINS"
+        },
+        {
+          "name": "AUTH0_DOMAIN",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/AUTH0_DOMAIN"
+        },
+        {
+          "name": "AUTH0_AUDIENCE",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/AUTH0_AUDIENCE"
+        },
+        {
+          "name": "PORT",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/PORT"
+        },
+        {
+          "name": "DB_USER",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DB_USER"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DB_PASSWORD"
+        },
+        {
+          "name": "DB_HOST",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DB_HOST"
+        },
+        {
+          "name": "DB_PORT",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DB_PORT"
+        },
+        {
+          "name": "DB_SSL",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DB_SSL"
+        },
+        {
+          "name": "DB_NAME",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DB_NAME"
+        },
+        {
+          "name": "TWO_CAPTCHA_KEY",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/TWO_CAPTCHA_KEY"
+        },
+        {
+          "name": "ALPACA_API_URL",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/ALPACA_API_URL"
+        },
+        {
+          "name": "ALPACA_API_KEY",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/ALPACA_API_KEY"
+        },
+        {
+          "name": "ALPACA_API_SECRET",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/ALPACA_API_SECRET"
+        },
+        {
+          "name": "DWOLLA_API_URL",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DWOLLA_API_URL"
+        },
+        {
+          "name": "DWOLLA_API_KEY",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DWOLLA_API_KEY"
+        },
+        {
+          "name": "DWOLLA_API_SECRET",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DWOLLA_API_SECRET"
+        },
+        {
+          "name": "DWOLLA_WEBHOOK_URL",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DWOLLA_WEBHOOK_URL"
+        },
+        {
+          "name": "DWOLLA_WEBHOOK_SECRET",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/DWOLLA_WEBHOOK_SECRET"
+        },
+        {
+          "name": "ENCRYPTION_KEY",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/ENCRYPTION_KEY"
+        },
+        {
+          "name": "PLAID_API_URL",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/PLAID_API_URL"
+        },
+        {
+          "name": "PLAID_REDIRECT_URI",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/PLAID_REDIRECT_URI"
+        },
+        {
+          "name": "PLAID_CLIENT_ID",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/PLAID_CLIENT_ID"
+        },
+        {
+          "name": "PLAID_SECRET",
+          "valueFrom": "arn:aws:ssm:us-east-2:247564283327:parameter/dev/pongo/PLAID_SECRET"
+        }
+      ]
+    }
+  ]
+}

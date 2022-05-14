@@ -49,7 +49,7 @@ services:
       *app-environment
 
   build:
-    command: 'cargo build'
+    command: 'cargo build --release'
     build:
       context: .
       dockerfile: Dockerfile.rust

@@ -49,7 +49,7 @@ services:
       *app-environment
 
   build:
-    command: 'cargo build && chown -R'
+    command: 'sh -c "cargo build && chown -R"'
     build:
       context: .
       dockerfile: Dockerfile.rust

@@ -48,7 +48,7 @@ services:
       *app-environment
 
   build:
-    command: 'cargo build --profile=release-with-debug'
+    command: 'cargo build --release'
     build:
       context: .
       dockerfile: Dockerfile.rust

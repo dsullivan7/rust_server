@@ -22,7 +22,7 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    println!("starting!");
+    log::info!("initializing the web server...");
 
     env_logger::init();
 
@@ -31,9 +31,6 @@ async fn main() -> std::io::Result<()> {
     let db_host = env::var("DB_HOST").expect("DB_HOST must be set");
     let db_user = env::var("DB_USER").expect("DB_USER must be set");
     let db_password = env::var("DB_PASSWORD").expect("DB_PASSWORD must be set");
-
-    println!("db_host");
-    println!("{}", db_host);
 
     let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
 
@@ -73,6 +70,7 @@ async fn main() -> std::io::Result<()> {
         authentication: Box::new(auth),
     });
 
+    log::info!("starting the web server...");
     HttpServer::new(move || {
         let cors = Cors::permissive();
 

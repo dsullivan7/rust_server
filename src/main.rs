@@ -26,15 +26,20 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init();
 
-    // let db_name = env::var("DB_NAME").expect("DB_NAME must be set");
-    // let db_port = env::var("DB_PORT").expect("DB_PORT must be set");
-    // let db_host = env::var("DB_HOST").expect("DB_HOST must be set");
-    // let db_user = env::var("DB_USER").expect("DB_USER must be set");
-    // let db_password = env::var("DB_PASSWORD").expect("DB_PASSWORD must be set");
-    //
-    // let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
-    //
-    // let conn = sea_orm::Database::connect(&db_url).await.unwrap();
+    let db_name = env::var("DB_NAME").expect("DB_NAME must be set");
+    let db_port = env::var("DB_PORT").expect("DB_PORT must be set");
+    let db_host = env::var("DB_HOST").expect("DB_HOST must be set");
+    let db_user = env::var("DB_USER").expect("DB_USER must be set");
+    let db_password = env::var("DB_PASSWORD").expect("DB_PASSWORD must be set");
+
+    println!("db_host");
+    println!("{}", db_host);
+
+    let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
+
+    let conn = sea_orm::Database::connect(&db_url)
+        .await
+        .unwrap_or_else(|err| panic!("error connecting to the database: {:?}", err));
 
     let plaid_client_id = std::env::var("PLAID_CLIENT_ID").expect("PLAID_CLIENT_ID must be set");
     let plaid_secret = std::env::var("PLAID_SECRET").expect("PLAID_SECRET must be set");
@@ -62,20 +67,20 @@ async fn main() -> std::io::Result<()> {
         domain: auth0_domain,
     };
 
-    // let state = web::Data::new(AppState {
-    //     conn,
-    //     plaid_client: Box::new(plaid_client),
-    //     authentication: Box::new(auth),
-    // });
+    let state = web::Data::new(AppState {
+        conn,
+        plaid_client: Box::new(plaid_client),
+        authentication: Box::new(auth),
+    });
 
     HttpServer::new(move || {
         let cors = Cors::permissive();
 
         App::new()
-            // .app_data(state.clone())
+            .app_data(state.clone())
             .wrap(middleware::Logger::default())
             .wrap(cors)
-            // .service(handlers::routes())
+            .service(handlers::routes())
             .service(handlers::health::get_health)
     })
     .bind(("0.0.0.0", port))?

@@ -38,6 +38,8 @@ async fn main() -> std::io::Result<()> {
         .await
         .unwrap_or_else(|err| panic!("error connecting to the database: {:?}", err));
 
+    log::info!("connected to database");
+    
     let plaid_client_id = std::env::var("PLAID_CLIENT_ID").expect("PLAID_CLIENT_ID must be set");
     let plaid_secret = std::env::var("PLAID_SECRET").expect("PLAID_SECRET must be set");
     let plaid_api_url = std::env::var("PLAID_API_URL").expect("PLAID_API_URL must be set");

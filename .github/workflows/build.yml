@@ -12,8 +12,6 @@ jobs:
         with:
           name: rust_server
           path: target/release/rust_server
-      - name: Cache
-        uses: Swatinem/rust-cache@v1
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

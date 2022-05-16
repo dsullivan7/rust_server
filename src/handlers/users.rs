@@ -8,6 +8,8 @@ use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
 
+use jsonwebtoken::jwk::JwkSet;
+
 use crate::authentication::Claims;
 use crate::errors;
 use crate::models;
@@ -30,10 +32,25 @@ struct CreateParams {
 #[get("/users")]
 async fn list_users(
     data: web::Data<AppState>,
-    _claims: Claims,
     query: web::Query<QueryParams>,
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
+
+    log::info!("making request");
+    let jwks_endpoint = format!("https://go-server-dev.us.auth0.com/.well-known/jwks.json");
+    let res:JwkSet = reqwest::get(&jwks_endpoint)
+        .await
+        .map_err(|err| {
+            log::error!("request failed 1: {:?}", err);
+            errors::ServerError::Internal(anyhow!(err))
+        })?
+        .json()
+        .await
+        .map_err(|err| {
+            log::error!("request failed 2: {:?}", err);
+            errors::ServerError::Internal(anyhow!(err))
+        })?;
+    log::info!("res: {:?}", res);
 
     let mut sql_query = sea_orm::Condition::all();
 
@@ -57,7 +74,6 @@ async fn list_users(
 #[get("/users/{user_id}")]
 async fn get_user(
     data: web::Data<AppState>,
-    claims: Claims,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
     let user_id = &path.into_inner();
@@ -67,7 +83,7 @@ async fn get_user(
     let user: models::user::Model = (|| -> Result<_, Error> {
         if user_id == "me" {
             return Ok(User::find()
-                .filter(models::user::Column::Auth0Id.eq(claims.sub))
+                .filter(models::user::Column::Auth0Id.eq("random"))
                 .one(conn));
         }
         let user_id_uuid = uuid::Uuid::parse_str(user_id)
@@ -84,7 +100,6 @@ async fn get_user(
 #[post("/users")]
 async fn create_user(
     data: web::Data<AppState>,
-    _claims: Claims,
     body: web::Json<CreateParams>,
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
@@ -125,7 +140,6 @@ async fn create_user(
 #[put("/users/{user_id}")]
 async fn modify_user(
     data: web::Data<AppState>,
-    _claims: Claims,
     path: web::Path<String>,
     body: web::Json<CreateParams>,
 ) -> Result<impl Responder, Error> {
@@ -160,7 +174,6 @@ async fn modify_user(
 #[delete("/users/{user_id}")]
 async fn delete_user(
     data: web::Data<AppState>,
-    _claims: Claims,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;

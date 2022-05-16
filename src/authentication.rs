@@ -55,14 +55,14 @@ impl IAuthentication for Authentication {
         let jwks: JwkSet = reqwest::get(&jwks_endpoint)
             .await
             .map_err(|err| {
-                log::error("auth error: {:?}", err)
-                AuthError::RequestFailed
+                log::error!("request failed 1: {:?}", err);
+                AuthError::RequestFailed(err)
             })?
             .json()
             .await
             .map_err(|err| {
-                log::error("auth error: {:?}", err)
-                AuthError::RequestFailed
+                log::error!("request failed 2: {:?}", err);
+                AuthError::RequestFailed(err)
             })?;
         log::info!("found jwks");
         let jwk = jwks

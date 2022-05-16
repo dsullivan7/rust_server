@@ -25,7 +25,6 @@ x-app-environment: &app-environment
   DWOLLA_WEBHOOK_SECRET: $DWOLLA_WEBHOOK_SECRET
   ALLOWED_ORIGINS: $ALLOWED_ORIGINS
   ENCRYPTION_KEY: $ENCRYPTION_KEY
-  RUST_LOG: $RUST_LOG
 
 x-db-environment: &db-environment
   DB_SSL_MODE: $DB_SSL_MODE

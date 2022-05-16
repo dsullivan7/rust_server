@@ -1,5 +1,6 @@
 use actix_cors::Cors;
 use actix_web::{middleware, web, App, HttpServer};
+use anyhow::anyhow;
 use sea_orm::DatabaseConnection;
 use std::env;
 
@@ -22,10 +23,10 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::init();
+
     log::info!("initializing the web server...");
     println!("initializing the web server...");
-
-    env_logger::init();
 
     let db_name = env::var("DB_NAME").expect("DB_NAME must be set");
     let db_port = env::var("DB_PORT").expect("DB_PORT must be set");
@@ -40,10 +41,12 @@ async fn main() -> std::io::Result<()> {
 
     let conn = sea_orm::Database::connect(&db_url)
         .await
-        .unwrap_or_else(|err| {
+        .map_err(|err| {
             println!("error connecting to the database: {:?}", err);
-            panic!("error connecting to the database: {:?}", err)
-        });
+            log::error!("error connecting to the database: {:?}", err);
+            anyhow!(err)
+        })
+        .expect("Error unwrapping connection to the database");
 
     log::info!("connected to database");
     println!("connected to database");

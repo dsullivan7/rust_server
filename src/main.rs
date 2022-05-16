@@ -23,6 +23,7 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     log::info!("initializing the web server...");
+    println!("initializing the web server...");
 
     env_logger::init();
 
@@ -36,10 +37,14 @@ async fn main() -> std::io::Result<()> {
 
     let conn = sea_orm::Database::connect(&db_url)
         .await
-        .unwrap_or_else(|err| panic!("error connecting to the database: {:?}", err));
+        .unwrap_or_else(|err| {
+            println!("error connecting to the database: {:?}", err);
+            panic!("error connecting to the database: {:?}", err)
+        });
 
     log::info!("connected to database");
-    
+    println!("connected to database");
+
     let plaid_client_id = std::env::var("PLAID_CLIENT_ID").expect("PLAID_CLIENT_ID must be set");
     let plaid_secret = std::env::var("PLAID_SECRET").expect("PLAID_SECRET must be set");
     let plaid_api_url = std::env::var("PLAID_API_URL").expect("PLAID_API_URL must be set");

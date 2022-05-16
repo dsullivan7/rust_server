@@ -50,12 +50,20 @@ impl IAuthentication for Authentication {
             .kid
             .ok_or_else(|| AuthError::NotFound("kid not found in token header".to_string()))?;
         log::info!("found kid");
-        let jwks: JwkSet = reqwest::get(&format!("https://{}/.well-known/jwks.json", self.domain))
+        let jwks_endpoint = format!("https://{}/.well-known/jwks.json", self.domain);
+        log::info!("{}", jwks_endpoint);
+        let jwks: JwkSet = reqwest::get(&jwks_endpoint)
             .await
-            .map_err(AuthError::RequestFailed)?
+            .map_err(|err| {
+                log::error("auth error: {:?}", err)
+                AuthError::RequestFailed
+            })?
             .json()
             .await
-            .map_err(AuthError::RequestFailed)?;
+            .map_err(|err| {
+                log::error("auth error: {:?}", err)
+                AuthError::RequestFailed
+            })?;
         log::info!("found jwks");
         let jwk = jwks
             .find(&kid)

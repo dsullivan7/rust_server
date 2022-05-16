@@ -39,6 +39,7 @@ async fn main() -> std::io::Result<()> {
     log::info!("connecting to database");
     println!("connecting to database");
 
+    log::error!("test error");
     let conn = sea_orm::Database::connect(&db_url)
         .await
         .map_err(|err| {

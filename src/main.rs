@@ -22,7 +22,7 @@ pub struct AppState {
 }
 
 #[tokio::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> anyhow::Result<(), anyhow::Error> {
     env_logger::init();
 
     log::info!("initializing the web server...");
@@ -39,15 +39,11 @@ async fn main() -> std::io::Result<()> {
     log::info!("connecting to database");
     println!("connecting to database");
 
-    log::error!("test error");
-    let conn = sea_orm::Database::connect(&db_url)
-        .await
-        .map_err(|err| {
-            println!("error connecting to the database: {:?}", err);
-            log::error!("error connecting to the database: {:?}", err);
-            anyhow!(err)
-        })
-        .expect("Error unwrapping connection to the database");
+    let conn = sea_orm::Database::connect(&db_url).await.map_err(|err| {
+        println!("error connecting to the database: {:?}", err);
+        log::error!("error connecting to the database: {:?}", err);
+        anyhow!(err)
+    })?;
 
     log::info!("connected to database");
     println!("connected to database");
@@ -98,4 +94,5 @@ async fn main() -> std::io::Result<()> {
     .bind(("0.0.0.0", port))?
     .run()
     .await
+    .map_err(|err| anyhow!(err))
 }

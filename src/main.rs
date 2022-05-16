@@ -1,7 +1,9 @@
 use actix_cors::Cors;
 use actix_web::{middleware, web, App, HttpServer};
 use anyhow::anyhow;
+// use postgres::{Client, NoTls};
 use sea_orm::DatabaseConnection;
+use sqlx::postgres::PgPoolOptions;
 use std::env;
 
 mod authentication;
@@ -35,6 +37,36 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
     let db_password = env::var("DB_PASSWORD").expect("DB_PASSWORD must be set");
 
     let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
+
+    // let pool = PgPoolOptions::new()
+    //     .max_connections(5)
+    //     .connect(db_url)
+    //     .await?;
+
+    // log::info!("connecting to test database");
+    // println!("connecting to test database");
+    //
+    // let conn_string = format!(
+    //     "host={} user={} password={} port={} dbname={}",
+    //     db_host, db_user, db_password, db_port, db_name
+    // );
+    // let mut test_conn = Client::connect(&conn_string, NoTls).unwrap();
+    // let rows = &test_conn.query("SELECT user_id FROM users", &[]).unwrap();
+    // println!("rows: {}", rows.len());
+
+    log::info!("connecting to test database");
+    println!("connecting to test database");
+
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&db_url)
+        .await?;
+
+    let rows = sqlx::query("SELECT user_id from users")
+        .fetch_all(&pool)
+        .await?;
+
+    println!("rows: {}", rows.len());
 
     log::info!("connecting to database");
     println!("connecting to database");

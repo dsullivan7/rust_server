@@ -42,19 +42,25 @@ pub struct Authentication {
 #[async_trait]
 impl IAuthentication for Authentication {
     async fn validate_token(&self, token: String) -> Result<Claims, AuthError> {
+        log::info!("validating token");
+
         let header = decode_header(token.as_str()).map_err(AuthError::Decode)?;
+        log::info!("found header");
         let kid = header
             .kid
             .ok_or_else(|| AuthError::NotFound("kid not found in token header".to_string()))?;
+        log::info!("found kid");
         let jwks: JwkSet = reqwest::get(&format!("https://{}/.well-known/jwks.json", self.domain))
             .await
             .map_err(AuthError::RequestFailed)?
             .json()
             .await
             .map_err(AuthError::RequestFailed)?;
+        log::info!("found jwks");
         let jwk = jwks
             .find(&kid)
             .ok_or_else(|| AuthError::NotFound("No JWK found for kid".to_string()))?;
+        log::info!("matched kid");
         match jwk.clone().algorithm {
             AlgorithmParameters::RSA(ref rsa) => {
                 let mut validation = Validation::new(Algorithm::RS256);
@@ -64,6 +70,7 @@ impl IAuthentication for Authentication {
                     DecodingKey::from_rsa_components(&rsa.n, &rsa.e).map_err(AuthError::Decode)?;
                 let token = decode::<Claims>(token.as_str(), &key, &validation)
                     .map_err(AuthError::Decode)?;
+                log::info!("found claims");
                 Ok(token.claims)
             }
             algorithm => Err(AuthError::UnsupportedAlgortithm(algorithm).into()),

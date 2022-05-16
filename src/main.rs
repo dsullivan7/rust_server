@@ -35,6 +35,9 @@ async fn main() -> std::io::Result<()> {
 
     let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
 
+    log::info!("connecting to database");
+    println!("connecting to database");
+
     let conn = sea_orm::Database::connect(&db_url)
         .await
         .unwrap_or_else(|err| {

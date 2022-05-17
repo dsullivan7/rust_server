@@ -17,10 +17,26 @@ pub enum PlaidError {
     FieldNotFound,
 }
 
+pub struct PlaidAccount {
+    name: Option<String>,
+    account_id: Option<String>,
+    access_token: String,
+}
+pub struct PlaidProcessorToken {
+    value: String,
+}
+
 #[automock]
 #[async_trait]
 pub trait IPlaidClient: Send + Sync {
     async fn create_token(&self, user_id: String) -> Result<String, PlaidError>;
+    // async fn get_access_token(&self, public_token: String) -> Result<PlaidAccount, PlaidError>;
+    // async fn get_account(&self, account: PlaidAccount) -> Result<PlaidAccount, PlaidError>;
+    // async fn get_processor_token(
+    //     &self,
+    //     account: PlaidAccount,
+    //     accessor: String,
+    // ) -> Result<PlaidProcessorToken, PlaidError>;
 }
 
 pub struct PlaidClient {

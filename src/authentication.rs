@@ -74,8 +74,10 @@ impl IAuthentication for Authentication {
                 let key = DecodingKey::from_rsa_components(&rsa.n, &rsa.e)
                     .map_err(|err| AuthError::Decode(anyhow!(err)))?;
                 log::debug!("decoded key");
-                let token = decode::<Claims>(token.as_str(), &key, &validation)
-                    .map_err(|err| AuthError::Decode(anyhow!(err)))?;
+                let token = decode::<Claims>(token.as_str(), &key, &validation).map_err(|err| {
+                    log::error!("decoding error: {:?}", err);
+                    AuthError::Decode(anyhow!(err))
+                })?;
                 log::debug!("found claims");
                 Ok(token.claims)
             }

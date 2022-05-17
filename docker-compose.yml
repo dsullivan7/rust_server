@@ -48,10 +48,8 @@ services:
       *app-environment
 
   build:
-    command: 'cargo build'
-    build:
-      context: .
-      dockerfile: Dockerfile.rust
+    image: rust:latest
+    command: 'cargo build --release'
     working_dir: /app
     volumes:
       - ./:/app

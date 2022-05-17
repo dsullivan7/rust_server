@@ -2,11 +2,22 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
 use mockall::*;
+use reqwest::header::LOCATION;
 use thiserror::Error;
 
-use crate::models::user::Model as User;
-use crate::models::bank_account::Model as BankAccount;
-use crate::models::bank_transfer::Model as BankTransfer;
+pub struct BankAccount {
+    dwolla_funding_source_id: Option<String>,
+}
+
+pub struct BankTransfer {
+    dwolla_transfer_id: Option<String>,
+}
+
+pub struct User {
+    first_name: String,
+    last_name: String,
+    dwolla_customer_id: Option<String>,
+}
 
 #[derive(Error, Debug)]
 pub enum BankingError {
@@ -24,8 +35,17 @@ pub enum BankingError {
 #[async_trait]
 pub trait BankingClient: Send + Sync {
     async fn create_customer(&self, user: User) -> Result<User, BankingError>;
-    async fn create_bank_account(&self, user: User) -> Result<BankAccount, BankingError>;
-    async fn create_bank_transfer(&self, bank_account: BankAccount) -> Result<BankTransfer, BankingError>;
+    async fn create_bank_account(
+        &self,
+        user: User,
+        plaid_processor_token: String,
+    ) -> Result<BankAccount, BankingError>;
+    async fn create_transfer(
+        &self,
+        source: BankAccount,
+        destination: BankAccount,
+        amount: i64,
+    ) -> Result<BankTransfer, BankingError>;
 }
 
 pub struct DwollaClient {
@@ -48,43 +68,47 @@ impl DwollaClient {
     }
 
     async fn request(
-        &self,
+        &mut self,
         method: reqwest::Method,
         path: String,
         body: Option<serde_json::Value>,
-    ) -> Result<serde_json::Value, BankingError> {
+    ) -> Result<String, BankingError> {
         self.authenticate().await?;
 
-        let api_access_token = self.api_access_token.ok_or(BankingError::AccessTokenNotSet)?;
+        let api_access_token = self
+            .api_access_token
+            .clone()
+            .ok_or(BankingError::AccessTokenNotSet)?;
 
         let client = reqwest::Client::new();
         let url = format!("{}{}", self.api_url, path);
-        let mut req = client
+        let req = client
             .request(method, url)
-            .header("Authorization", format!("Bearer {}", self.api_access_token));
+            .header("Authorization", format!("Bearer {}", api_access_token));
 
-        if let Some(body) = &body {
-            req = req.json(body);
+        let res = req
+            .send()
+            .await
+            .map_err(|err| BankingError::HTTPRequest(anyhow!(err)))?;
+
+        if let Some(location) = res.headers().get(LOCATION) {
+            return Ok(location.to_str().expect("location expected").to_owned());
         }
-
-        req.send()
-            .await
-            .map_err(|err| BankingError::HTTPRequest(anyhow!(err)))?
-            .json()
-            .await
-            .map_err(|err| BankingError::JSONDecode(anyhow!(err)))?
+        Err(BankingError::HTTPRequest(anyhow!("request error")))
     }
 
-    async fn authenticate(&self) -> Result<(), BankingError> {
-        if self.expires_at > Utc::now() {
-            return Ok(());
+    async fn authenticate(&mut self) -> Result<(), BankingError> {
+        if let Some(expires_at) = self.api_access_token_expires_at {
+            if expires_at > Utc::now() {
+                return Ok(());
+            }
         }
 
         let client = reqwest::Client::new();
         let url = format!("{}{}", self.api_url, "/token");
-        let res = client
+        let res: serde_json::value::Value = client
             .request(reqwest::Method::POST, url)
-            .basic_auth(self.api_key, self.api_secret)
+            .basic_auth(self.api_key.to_owned(), Some(self.api_secret.to_owned()))
             .send()
             .await
             .map_err(|err| BankingError::HTTPRequest(anyhow!(err)))?
@@ -98,7 +122,7 @@ impl DwollaClient {
             .to_owned();
 
         let expires_in = res["expires_in"]
-            .as_u64()
+            .as_i64()
             .ok_or(BankingError::FieldNotFound)?
             .to_owned();
 
@@ -133,43 +157,88 @@ impl BankingClient for DwollaClient {
             )
             .await?;
 
-        let dwolla_customer_id = res["customer_id"]
-            .as_str()
+        let dwolla_customer_id = res
+            .split("/")
+            .collect::<Vec<&str>>()
+            .last()
             .ok_or(BankingError::FieldNotFound)?
-            .to_owned();
+            .to_string();
 
-        user.dwolla_customer_id = dwolla_customer_id;
+        user.dwolla_customer_id = Some(dwolla_customer_id);
 
         Ok(user)
     }
 
-    async fn create_bank_account(&self, user: User) -> Result<BankAccount, BankingError> {
+    async fn create_bank_account(
+        &self,
+        user: User,
+        plaid_processor_token: String,
+    ) -> Result<BankAccount, BankingError> {
         let res = self
             .request(
                 reqwest::Method::POST,
-                "/customers".to_owned(),
+                format!(
+                    "/customers/{}/funding-sources",
+                    user.dwolla_customer_id.ok_or(BankingError::FieldNotFound)?
+                ),
                 Some(serde_json::json!({
-                    "firstName":   user.first_name,
-                    "lastName":    user.last_name,
-                    // "email":       user.Email,
-                    // "type":        "personal",
-                    // "address1":    user.Address,
-                    // "city":        user.City,
-                    // "state":       user.State,
-                    // "postalCode":  user.PostalCode,
-                    // "dateOfBirth": user.DateOfBirth,
-                    // "ssn":         user.SSN,
+                    "plaidToken":    plaid_processor_token,
                 })),
             )
             .await?;
 
-        let dwolla_customer_id = res["customer_id"]
-            .as_str()
+        let dwolla_funding_source_id = res
+            .split("/")
+            .collect::<Vec<&str>>()
+            .last()
             .ok_or(BankingError::FieldNotFound)?
-            .to_owned();
+            .to_string();
 
-        user.dwolla_customer_id = dwolla_customer_id;
+        let bank_account = BankAccount {
+            dwolla_funding_source_id: Some(dwolla_funding_source_id),
+        };
 
-        Ok(user)
+        Ok(bank_account)
+    }
+
+    async fn create_transfer(
+        &self,
+        source: BankAccount,
+        destination: BankAccount,
+        amount: i64,
+    ) -> Result<BankTransfer, BankingError> {
+        let res = self
+            .request(
+                reqwest::Method::POST,
+                "/transfers".to_owned(),
+                Some(serde_json::json!({
+                    "_links": {
+        			"source": {
+        				"href": format!("{}/funding-sources/{}", self.api_url, source.dwolla_funding_source_id.ok_or(BankingError::FieldNotFound)?),
+        			},
+        			"destination": {
+        				"href": format!("{}/funding-sources/{}", self.api_url, destination.dwolla_funding_source_id.ok_or(BankingError::FieldNotFound)?),
+        			},
+        		},
+        		"amount":{
+        			"value": amount / 100,
+        			"currency": "USD",
+        		},
+        	})),
+            )
+            .await?;
+
+        let dwolla_transfer_id = res
+            .split("/")
+            .collect::<Vec<&str>>()
+            .last()
+            .ok_or(BankingError::FieldNotFound)?
+            .to_string();
+
+        let bank_transfer = BankTransfer {
+            dwolla_transfer_id: Some(dwolla_transfer_id),
+        };
+
+        Ok(bank_transfer)
     }
 }

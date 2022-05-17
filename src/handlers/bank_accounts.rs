@@ -109,21 +109,30 @@ async fn create_bank_account(
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
-    let bank_user = banking::User {
-        first_name: user.first_name.ok_or(errors::ServerError::User(
-            anyhow!("first_name must be set"),
-            "First name must be set".to_owned(),
-        ))?,
-        last_name: user.last_name.ok_or(errors::ServerError::User(
-            anyhow!("last_name must be set"),
-            "Last name must be set".to_owned(),
-        ))?,
+    let user_external = banking::User {
+        // first_name: user.first_name.ok_or(errors::ServerError::User(
+        //     anyhow!("first_name must be set"),
+        //     "First name must be set".to_owned(),
+        // ))?,
+        // last_name: user.last_name.ok_or(errors::ServerError::User(
+        //     anyhow!("last_name must be set"),
+        //     "Last name must be set".to_owned(),
+        // ))?,
+        first_name: "first_name".to_owned(),
+        last_name: "last_name".to_owned(),
         dwolla_customer_id: None,
     };
 
+    println!("creating bank customer");
+    let user_external = banking_client
+        .create_customer(user_external)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
+    println!("creating bank account");
     let bank_account_external = banking_client
         .create_bank_account(
-            bank_user,
+            user_external,
             plaid_account
                 .name
                 .clone()

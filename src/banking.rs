@@ -1,8 +1,13 @@
+#[path = "banking_test.rs"]
+#[cfg(test)]
+mod banking_test;
+
 use anyhow::anyhow;
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
 use mockall::*;
 use reqwest::header::LOCATION;
+use std::collections::HashMap;
 use thiserror::Error;
 use tokio::sync::RwLock;
 
@@ -117,11 +122,15 @@ impl DwollaClient {
             }
         }
 
+        let mut params = HashMap::new();
+        params.insert("grant_type", "client_credentials");
+
         let client = reqwest::Client::new();
         let url = format!("{}{}", self.api_url, "/token");
         let res: serde_json::value::Value = client
             .request(reqwest::Method::POST, url)
             .basic_auth(self.api_key.to_owned(), Some(self.api_secret.to_owned()))
+            .form(&params)
             .send()
             .await
             .map_err(|err| BankingError::HTTPRequest(anyhow!(err)))?
@@ -162,17 +171,20 @@ impl BankingClient for DwollaClient {
                 Some(serde_json::json!({
                     "firstName":   user.first_name,
                     "lastName":    user.last_name,
-                    // "email":       user.Email,
-                    // "type":        "personal",
-                    // "address1":    user.Address,
-                    // "city":        user.City,
-                    // "state":       user.State,
-                    // "postalCode":  user.PostalCode,
-                    // "dateOfBirth": user.DateOfBirth,
-                    // "ssn":         user.SSN,
+                    "email":       format!("dbsullivan+{}@gmail.com", uuid::Uuid::new_v4()),
+                    "type":        "personal",
+                    "address1":    "address1",
+                    "city":        "Brooklyn",
+                    "state":       "NY",
+                    "postalCode":  "11222",
+                    "dateOfBirth": "1980-01-01",
+                    "ssn":         "666-55-4321",
                 })),
             )
             .await?;
+
+        println!("res");
+        println!("{}", res);
 
         let dwolla_customer_id = res
             .split("/")

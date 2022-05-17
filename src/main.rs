@@ -18,6 +18,7 @@ mod test_utils;
 pub struct AppState {
     conn: DatabaseConnection,
     plaid_client: Box<dyn plaid::IPlaidClient>,
+    banking_client: Box<dyn banking::BankingClient>,
     authentication: Box<dyn authentication::IAuthentication>,
 }
 
@@ -57,21 +58,30 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         plaid_redirect_uri,
     );
 
+    let dwolla_api_key = std::env::var("DWOLLA_API_KEY").expect("DWOLLA_API_KEY must be set");
+    let dwolla_api_secret =
+        std::env::var("DWOLLA_API_SECRET").expect("DWOLLA_API_SECRET must be set");
+    let dwolla_api_url = std::env::var("DWOLLA_API_URL").expect("DWOLLA_API_URL must be set");
+
+    let dwolla_client =
+        banking::DwollaClient::new(dwolla_api_key, dwolla_api_secret, dwolla_api_url);
+
     let auth0_domain = std::env::var("AUTH0_DOMAIN").expect("AUTH0_DOMAIN must be set");
     let auth0_audience = std::env::var("AUTH0_AUDIENCE").expect("AUTH0_AUDIENCE must be set");
-
-    let port = std::env::var("PORT")
-        .unwrap_or("7000".to_owned())
-        .parse::<u16>()
-        .expect("PORT must be a number");
 
     let auth = authentication::Authentication {
         audience: auth0_audience,
         domain: auth0_domain,
     };
 
+    let port = std::env::var("PORT")
+        .unwrap_or("7000".to_owned())
+        .parse::<u16>()
+        .expect("PORT must be a number");
+
     let state = web::Data::new(AppState {
         conn,
+        banking_client: Box::new(dwolla_client),
         plaid_client: Box::new(plaid_client),
         authentication: Box::new(auth),
     });

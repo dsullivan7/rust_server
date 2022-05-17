@@ -6,8 +6,8 @@ use thiserror::Error;
 pub enum ServerError {
     #[error("not found")]
     NotFound,
-    // #[error("user error")]
-    // User(anyhow::Error, String),
+    #[error("user error")]
+    User(anyhow::Error, String),
     #[error("invalid uuid error")]
     InvalidUUID(anyhow::Error),
     #[error("required body parameter")]
@@ -20,7 +20,7 @@ impl ServerError {
     pub fn code(&self) -> String {
         match self {
             Self::NotFound => "not_found".to_owned(),
-            // Self::User(_, _) => "user".to_owned(),
+            Self::User(_, _) => "user".to_owned(),
             Self::Internal(_) => "internal".to_owned(),
             Self::InvalidUUID(_) => "invalid_uuid".to_owned(),
             Self::RequiredBodyParameter => "required_body_param".to_owned(),
@@ -29,7 +29,7 @@ impl ServerError {
     pub fn message(&self) -> String {
         match self {
             Self::NotFound => "record not found".to_owned(),
-            // Self::User(_, user_message) => user_message.to_owned(),
+            Self::User(_, user_message) => user_message.to_owned(),
             Self::Internal(_) => "internal".to_owned(),
             Self::InvalidUUID(_) => "invalid uuid".to_owned(),
             Self::RequiredBodyParameter => "required body parameter".to_owned(),
@@ -55,7 +55,7 @@ impl ResponseError for ServerError {
     fn status_code(&self) -> StatusCode {
         match self {
             Self::NotFound => StatusCode::NOT_FOUND,
-            // Self::User(_, _) => StatusCode::BAD_REQUEST,
+            Self::User(_, _) => StatusCode::BAD_REQUEST,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::InvalidUUID(_) => StatusCode::BAD_REQUEST,
             Self::RequiredBodyParameter => StatusCode::BAD_REQUEST,

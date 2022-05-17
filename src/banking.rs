@@ -6,17 +6,17 @@ use reqwest::header::LOCATION;
 use thiserror::Error;
 
 pub struct BankAccount {
-    dwolla_funding_source_id: Option<String>,
+    pub dwolla_funding_source_id: Option<String>,
 }
 
 pub struct BankTransfer {
-    dwolla_transfer_id: Option<String>,
+    pub dwolla_transfer_id: Option<String>,
 }
 
 pub struct User {
-    first_name: String,
-    last_name: String,
-    dwolla_customer_id: Option<String>,
+    pub first_name: String,
+    pub last_name: String,
+    pub dwolla_customer_id: Option<String>,
 }
 
 #[derive(Error, Debug)]
@@ -34,6 +34,7 @@ pub enum BankingError {
 #[automock]
 #[async_trait]
 pub trait BankingClient: Send + Sync {
+    fn get_plaid_accessor(&self) -> Option<String>;
     async fn create_customer(&mut self, user: User) -> Result<User, BankingError>;
     async fn create_bank_account(
         &mut self,
@@ -141,6 +142,10 @@ impl DwollaClient {
 
 #[async_trait]
 impl BankingClient for DwollaClient {
+    fn get_plaid_accessor(&self) -> Option<String> {
+        Some("dwolla".to_owned())
+    }
+
     async fn create_customer(&mut self, mut user: User) -> Result<User, BankingError> {
         let res = self
             .request(

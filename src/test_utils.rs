@@ -1,7 +1,9 @@
 #[cfg(test)]
 use super::AppState;
 use crate::authentication;
+use crate::banking;
 use crate::plaid;
+
 use sea_orm::{DatabaseBackend, MockDatabase};
 
 use mockall::predicate::*;
@@ -12,6 +14,7 @@ const DEFAULT_AUTH0_TOKEN: &str = "default_auth0_token";
 pub struct TestState {
     pub conn: sea_orm::DatabaseConnection,
     pub plaid_client: Box<dyn plaid::IPlaidClient>,
+    pub banking_client: Box<dyn banking::BankingClient>,
     pub authentication: Box<dyn authentication::IAuthentication>,
 }
 
@@ -20,6 +23,7 @@ impl Default for TestState {
         TestState {
             conn: MockDatabase::new(DatabaseBackend::Postgres).into_connection(),
             plaid_client: Box::new(plaid::MockIPlaidClient::new()),
+            banking_client: Box::new(banking::MockBankingClient::new()),
             authentication: Box::new(authentication::MockIAuthentication::new()),
         }
     }
@@ -37,6 +41,7 @@ impl TestState {
         AppState {
             conn: self.conn,
             plaid_client: self.plaid_client,
+            banking_client: self.banking_client,
             authentication: self.authentication,
         }
     }

@@ -18,9 +18,9 @@ pub enum PlaidError {
 }
 
 pub struct PlaidAccount {
-    name: Option<String>,
-    account_id: Option<String>,
-    access_token: String,
+    pub name: Option<String>,
+    pub account_id: Option<String>,
+    pub access_token: String,
 }
 
 #[automock]

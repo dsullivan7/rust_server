@@ -59,7 +59,7 @@ async fn list_users(
 #[get("/users/{user_id}")]
 async fn get_user(
     data: web::Data<AppState>,
-    _claims: Claims,
+    claims: Claims,
     path: web::Path<String>,
 ) -> Result<impl Responder, Error> {
     let user_id = &path.into_inner();
@@ -69,7 +69,7 @@ async fn get_user(
     let user: models::user::Model = (|| -> Result<_, Error> {
         if user_id == "me" {
             return Ok(User::find()
-                .filter(models::user::Column::Auth0Id.eq("random"))
+                .filter(models::user::Column::Auth0Id.eq(claims.sub))
                 .one(conn));
         }
         let user_id_uuid = uuid::Uuid::parse_str(user_id)

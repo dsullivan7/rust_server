@@ -1,7 +1,0 @@
-FROM rust:1.60-alpine
-
-RUN apk update
-
-RUN apk add pkgconfig
-RUN apk add build-base
-RUN apk add libressl-dev

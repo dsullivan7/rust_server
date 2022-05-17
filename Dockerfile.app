@@ -1,8 +1,11 @@
-FROM alpine:latest
+FROM debian:latest
 
-COPY ./target /app/target
+COPY ./target/release/rust_server /app/rust_server
+
+RUN apt-get update -y
+RUN apt-get install -y ca-certificates
 
 ENV RUST_BACKTRACE=1
 ENV RUST_LOG="debug,rust_server=debug,actix_web=debug,sqlx=debug"
 
-ENTRYPOINT ["/app/target/debug/rust_server"]
+ENTRYPOINT ["/app/rust_server"]

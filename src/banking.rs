@@ -4,6 +4,7 @@ use chrono::{DateTime, Duration, Utc};
 use mockall::*;
 use reqwest::header::LOCATION;
 use thiserror::Error;
+use tokio::sync::RwLock;
 
 pub struct BankAccount {
     pub dwolla_funding_source_id: Option<String>,
@@ -35,14 +36,15 @@ pub enum BankingError {
 #[async_trait]
 pub trait BankingClient: Send + Sync {
     fn get_plaid_accessor(&self) -> Option<String>;
-    async fn create_customer(&mut self, user: User) -> Result<User, BankingError>;
+    async fn create_customer(&self, user: User) -> Result<User, BankingError>;
     async fn create_bank_account(
-        &mut self,
+        &self,
         user: User,
+        name: String,
         plaid_processor_token: String,
     ) -> Result<BankAccount, BankingError>;
     async fn create_transfer(
-        &mut self,
+        &self,
         source: BankAccount,
         destination: BankAccount,
         amount: i32,
@@ -53,8 +55,8 @@ pub struct DwollaClient {
     api_key: String,
     api_secret: String,
     api_url: String,
-    api_access_token: Option<String>,
-    api_access_token_expires_at: Option<DateTime<Utc>>,
+    api_access_token: RwLock<Option<String>>,
+    api_access_token_expires_at: RwLock<Option<DateTime<Utc>>>,
 }
 
 impl DwollaClient {
@@ -63,13 +65,13 @@ impl DwollaClient {
             api_key,
             api_secret,
             api_url,
-            api_access_token: None,
-            api_access_token_expires_at: None,
+            api_access_token: RwLock::new(None),
+            api_access_token_expires_at: RwLock::new(None),
         }
     }
 
     async fn request(
-        &mut self,
+        &self,
         method: reqwest::Method,
         path: String,
         body: Option<serde_json::Value>,
@@ -78,8 +80,11 @@ impl DwollaClient {
 
         let api_access_token = self
             .api_access_token
-            .clone()
-            .ok_or(BankingError::AccessTokenNotSet)?;
+            .read()
+            .await
+            .as_ref()
+            .ok_or(BankingError::AccessTokenNotSet)?
+            .clone();
 
         let client = reqwest::Client::new();
         let url = format!("{}{}", self.api_url, path);
@@ -102,8 +107,11 @@ impl DwollaClient {
         Err(BankingError::HTTPRequest(anyhow!("request error")))
     }
 
-    async fn authenticate(&mut self) -> Result<(), BankingError> {
-        if let Some(expires_at) = self.api_access_token_expires_at {
+    async fn authenticate(&self) -> Result<(), BankingError> {
+        let mut api_access_token = self.api_access_token.write().await;
+        let mut api_access_token_expires_at = self.api_access_token_expires_at.write().await;
+
+        if let Some(expires_at) = *api_access_token_expires_at {
             if expires_at > Utc::now() {
                 return Ok(());
             }
@@ -133,8 +141,8 @@ impl DwollaClient {
 
         let expires_at = Utc::now() + Duration::seconds(expires_in);
 
-        self.api_access_token = Some(access_token);
-        self.api_access_token_expires_at = Some(expires_at);
+        *api_access_token = Some(access_token);
+        *api_access_token_expires_at = Some(expires_at);
 
         Ok(())
     }
@@ -146,7 +154,7 @@ impl BankingClient for DwollaClient {
         Some("dwolla".to_owned())
     }
 
-    async fn create_customer(&mut self, mut user: User) -> Result<User, BankingError> {
+    async fn create_customer(&self, mut user: User) -> Result<User, BankingError> {
         let res = self
             .request(
                 reqwest::Method::POST,
@@ -179,8 +187,9 @@ impl BankingClient for DwollaClient {
     }
 
     async fn create_bank_account(
-        &mut self,
+        &self,
         user: User,
+        name: String,
         plaid_processor_token: String,
     ) -> Result<BankAccount, BankingError> {
         let res = self
@@ -191,6 +200,7 @@ impl BankingClient for DwollaClient {
                     user.dwolla_customer_id.ok_or(BankingError::FieldNotFound)?
                 ),
                 Some(serde_json::json!({
+                    "name": name,
                     "plaidToken":    plaid_processor_token,
                 })),
             )
@@ -211,7 +221,7 @@ impl BankingClient for DwollaClient {
     }
 
     async fn create_transfer(
-        &mut self,
+        &self,
         source: BankAccount,
         destination: BankAccount,
         amount: i32,

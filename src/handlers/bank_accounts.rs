@@ -77,7 +77,7 @@ async fn create_bank_account(
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
     let plaid_client = &data.plaid_client;
-    // let banking_client = &data.banking_client;
+    let banking_client = &data.banking_client;
 
     let user_id = Set(Some(body.user_id.to_owned()));
     let plaid_public_token = body.plaid_public_token.to_owned();
@@ -94,37 +94,47 @@ async fn create_bank_account(
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     let plaid_account = plaid_client
-        .get_account(plaid_account)
+        .get_account(plaid_account.clone())
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
-    // let accessor = banking_client
-    //     .get_plaid_accessor()
-    //     .ok_or(errors::ServerError::Internal(anyhow!(
-    //         "accessor must be set"
-    //     )))?;
-    //
-    // let processor_token = plaid_client
-    //     .create_processor_token(plaid_account, accessor)
-    //     .await
-    //     .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+    let accessor = banking_client
+        .get_plaid_accessor()
+        .ok_or(errors::ServerError::Internal(anyhow!(
+            "accessor must be set"
+        )))?;
 
-    // let bank_user = banking::User {
-    //     first_name: user.first_name.ok_or(errors::ServerError::User(
-    //         anyhow!("first_name must be set"),
-    //         "First name must be set".to_owned(),
-    //     ))?,
-    //     last_name: user.last_name.ok_or(errors::ServerError::User(
-    //         anyhow!("last_name must be set"),
-    //         "Last name must be set".to_owned(),
-    //     ))?,
-    //     dwolla_customer_id: None,
-    // };
-    //
-    // let bank_account_external = banking_client
-    //     .create_bank_account(bank_user, processor_token)
-    //     .await
-    //     .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+    let processor_token = plaid_client
+        .create_processor_token(plaid_account.clone(), accessor)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
+    let bank_user = banking::User {
+        first_name: user.first_name.ok_or(errors::ServerError::User(
+            anyhow!("first_name must be set"),
+            "First name must be set".to_owned(),
+        ))?,
+        last_name: user.last_name.ok_or(errors::ServerError::User(
+            anyhow!("last_name must be set"),
+            "Last name must be set".to_owned(),
+        ))?,
+        dwolla_customer_id: None,
+    };
+
+    let bank_account_external = banking_client
+        .create_bank_account(
+            bank_user,
+            plaid_account
+                .name
+                .clone()
+                .ok_or(errors::ServerError::Internal(anyhow!(
+                    "bank name must be set"
+                )))?
+                .to_owned(),
+            processor_token,
+        )
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
     let bank_account: models::bank_account::Model = models::bank_account::ActiveModel {
         bank_account_id: NotSet,
@@ -132,7 +142,7 @@ async fn create_bank_account(
         name: Set(plaid_account.name),
         plaid_account_id: Set(plaid_account.account_id),
         plaid_access_token: Set(Some(plaid_account.access_token)),
-        dwolla_funding_source_id: NotSet,
+        dwolla_funding_source_id: Set(bank_account_external.dwolla_funding_source_id),
         created_at: NotSet,
         updated_at: NotSet,
     }

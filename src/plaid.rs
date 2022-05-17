@@ -17,6 +17,7 @@ pub enum PlaidError {
     FieldNotFound,
 }
 
+#[derive(Clone)]
 pub struct PlaidAccount {
     pub name: Option<String>,
     pub account_id: Option<String>,

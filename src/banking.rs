@@ -34,14 +34,14 @@ pub enum BankingError {
 #[automock]
 #[async_trait]
 pub trait BankingClient: Send + Sync {
-    async fn create_customer(&self, user: User) -> Result<User, BankingError>;
+    async fn create_customer(&mut self, user: User) -> Result<User, BankingError>;
     async fn create_bank_account(
-        &self,
+        &mut self,
         user: User,
         plaid_processor_token: String,
     ) -> Result<BankAccount, BankingError>;
     async fn create_transfer(
-        &self,
+        &mut self,
         source: BankAccount,
         destination: BankAccount,
         amount: i64,
@@ -82,9 +82,13 @@ impl DwollaClient {
 
         let client = reqwest::Client::new();
         let url = format!("{}{}", self.api_url, path);
-        let req = client
+        let mut req = client
             .request(method, url)
             .header("Authorization", format!("Bearer {}", api_access_token));
+
+        if let Some(body) = &body {
+            req = req.json(body);
+        }
 
         let res = req
             .send()
@@ -137,7 +141,7 @@ impl DwollaClient {
 
 #[async_trait]
 impl BankingClient for DwollaClient {
-    async fn create_customer(&self, user: User) -> Result<User, BankingError> {
+    async fn create_customer(&mut self, mut user: User) -> Result<User, BankingError> {
         let res = self
             .request(
                 reqwest::Method::POST,
@@ -170,7 +174,7 @@ impl BankingClient for DwollaClient {
     }
 
     async fn create_bank_account(
-        &self,
+        &mut self,
         user: User,
         plaid_processor_token: String,
     ) -> Result<BankAccount, BankingError> {
@@ -202,7 +206,7 @@ impl BankingClient for DwollaClient {
     }
 
     async fn create_transfer(
-        &self,
+        &mut self,
         source: BankAccount,
         destination: BankAccount,
         amount: i64,

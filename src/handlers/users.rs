@@ -109,6 +109,7 @@ async fn create_user(
 
     let user: models::user::Model = models::user::ActiveModel {
         user_id: NotSet,
+        dwolla_customer_id: NotSet,
         auth0_id,
         first_name,
         last_name,

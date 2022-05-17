@@ -74,7 +74,7 @@ async fn create_bank_account(
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
 
-    let user_id = Set(body.user_id.to_owned());
+    let user_id = Set(Some(body.user_id.to_owned()));
 
     let bank_account: models::bank_account::Model = models::bank_account::ActiveModel {
         bank_account_id: NotSet,

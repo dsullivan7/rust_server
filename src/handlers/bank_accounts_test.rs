@@ -13,7 +13,7 @@ async fn test_get_bank_account() {
 
     let bank_account_db: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
-        user_id: user_id.to_owned(),
+        user_id: Some(user_id.to_owned()),
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
@@ -73,7 +73,7 @@ async fn test_list_bank_account() {
 
     let bank_account_db: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
-        user_id: user_id.to_owned(),
+        user_id: Some(user_id.to_owned()),
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
@@ -133,7 +133,7 @@ async fn test_create_bank_account() {
 
     let bank_account_db: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
-        user_id: user_id.to_owned(),
+        user_id: Some(user_id.to_owned()),
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
@@ -205,7 +205,7 @@ async fn test_modify_bank_account() {
 
     let bank_account_db: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
-        user_id: user_id.to_owned(),
+        user_id: Some(user_id.to_owned()),
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
@@ -218,7 +218,7 @@ async fn test_modify_bank_account() {
 
     let bank_account_db_modified: models::bank_account::Model = models::bank_account::Model {
         bank_account_id: bank_account_id.to_owned(),
-        user_id: user_id.to_owned(),
+        user_id: Some(user_id.to_owned()),
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),

@@ -7,7 +7,7 @@ use uuid::Uuid;
 pub struct Model {
     #[sea_orm(primary_key)]
     pub bank_account_id: Uuid,
-    pub user_id: Uuid,
+    pub user_id: Option<Uuid>,
     pub plaid_account_id: Option<String>,
     pub plaid_access_token: Option<String>,
     pub dwolla_funding_source_id: Option<String>,

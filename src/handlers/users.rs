@@ -8,8 +8,6 @@ use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
 
-use jsonwebtoken::jwk::JwkSet;
-
 use crate::authentication::Claims;
 use crate::errors;
 use crate::models;

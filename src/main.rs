@@ -5,7 +5,7 @@ use sea_orm::DatabaseConnection;
 use std::env;
 
 mod authentication;
-// mod banking;
+mod banking;
 mod errors;
 mod extractors;
 mod handlers;

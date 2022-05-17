@@ -44,7 +44,7 @@ pub trait BankingClient: Send + Sync {
         &mut self,
         source: BankAccount,
         destination: BankAccount,
-        amount: i64,
+        amount: i32,
     ) -> Result<BankTransfer, BankingError>;
 }
 
@@ -209,7 +209,7 @@ impl BankingClient for DwollaClient {
         &mut self,
         source: BankAccount,
         destination: BankAccount,
-        amount: i64,
+        amount: i32,
     ) -> Result<BankTransfer, BankingError> {
         let res = self
             .request(

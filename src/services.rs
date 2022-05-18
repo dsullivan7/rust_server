@@ -9,9 +9,9 @@ use serde::Serialize;
 pub struct Services {}
 
 pub struct Order {
-    amount: i32,
-    side: String,
-    status: String,
+    pub amount: i32,
+    pub side: String,
+    pub status: String,
 }
 
 #[derive(Serialize)]

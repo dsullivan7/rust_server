@@ -39,10 +39,15 @@ async fn get_balances(
             amount: order.amount,
             side: order.side.to_owned(),
             status: order.status.to_owned(),
+            completed_at: order.completed_at,
         })
         .collect();
 
-    let balance = services.get_balance(orders, INTEREST_RATE);
+    let balance = services.get_balance(
+        orders,
+        INTEREST_RATE,
+        chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+    );
 
     Ok(web::Json(balance))
 }

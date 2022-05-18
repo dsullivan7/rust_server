@@ -13,6 +13,8 @@ pub struct Model {
     pub side: String,
     pub status: String,
     #[sea_orm(column_type = "TimestampWithTimeZone")]
+    pub completed_at: Option<chrono::DateTime<chrono::FixedOffset>>,
+    #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
     #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub updated_at: chrono::DateTime<chrono::FixedOffset>,

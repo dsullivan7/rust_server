@@ -3,6 +3,7 @@ use actix_web::{web, Scope};
 use super::balances;
 use super::bank_accounts;
 use super::bank_transfers;
+use super::orders;
 use super::plaid;
 use super::users;
 
@@ -23,6 +24,11 @@ pub fn routes() -> Scope {
         .service(bank_transfers::create_bank_transfer)
         .service(bank_transfers::modify_bank_transfer)
         .service(bank_transfers::delete_bank_transfer)
+        .service(orders::get_order)
+        .service(orders::list_orders)
+        .service(orders::create_order)
+        .service(orders::modify_order)
+        .service(orders::delete_order)
         .service(balances::get_balances)
         .service(plaid::create_token)
 }

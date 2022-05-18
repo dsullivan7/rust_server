@@ -3,6 +3,7 @@ use super::AppState;
 use crate::authentication;
 use crate::banking;
 use crate::plaid;
+use crate::services;
 
 use sea_orm::{DatabaseBackend, MockDatabase};
 
@@ -16,6 +17,7 @@ pub struct TestState {
     pub plaid_client: Box<dyn plaid::IPlaidClient>,
     pub banking_client: Box<dyn banking::BankingClient>,
     pub authentication: Box<dyn authentication::IAuthentication>,
+    pub services: Box<dyn services::IServices>,
 }
 
 impl Default for TestState {
@@ -25,6 +27,7 @@ impl Default for TestState {
             plaid_client: Box::new(plaid::MockIPlaidClient::new()),
             banking_client: Box::new(banking::MockBankingClient::new()),
             authentication: Box::new(authentication::MockIAuthentication::new()),
+            services: Box::new(services::MockIServices::new()),
         }
     }
 }
@@ -43,6 +46,7 @@ impl TestState {
             plaid_client: self.plaid_client,
             banking_client: self.banking_client,
             authentication: self.authentication,
+            services: self.services,
         }
     }
 

@@ -123,13 +123,11 @@ async fn create_bank_account(
         dwolla_customer_id: None,
     };
 
-    println!("creating bank customer");
     let user_external = banking_client
         .create_customer(user_external)
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
-    println!("creating bank account");
     let bank_account_external = banking_client
         .create_bank_account(
             user_external,

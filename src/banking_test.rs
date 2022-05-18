@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod dwolla_tests {
-    // use crate::banking::BankingClient;
+    use crate::banking;
+    use crate::banking::BankingClient;
     use crate::banking::BankingError;
     use crate::banking::DwollaClient;
 
@@ -14,17 +15,24 @@ mod dwolla_tests {
 
         let dwolla_client = DwollaClient::new(dwolla_api_key, dwolla_api_secret, dwolla_api_url);
 
-        dwolla_client.authenticate().await?;
+        let user_external = banking::User {
+            // first_name: user.first_name.ok_or(errors::ServerError::User(
+            //     anyhow!("first_name must be set"),
+            //     "First name must be set".to_owned(),
+            // ))?,
+            // last_name: user.last_name.ok_or(errors::ServerError::User(
+            //     anyhow!("last_name must be set"),
+            //     "Last name must be set".to_owned(),
+            // ))?,
+            first_name: "first_name".to_owned(),
+            last_name: "last_name".to_owned(),
+            dwolla_customer_id: None,
+        };
 
-        assert_eq!(
-            "test",
-            dwolla_client
-                .api_access_token
-                .read()
-                .await
-                .as_ref()
-                .unwrap()
-        );
+        println!("creating bank customer");
+        let user_external = dwolla_client.create_customer(user_external).await?;
+
+        assert_eq!("test", user_external.dwolla_customer_id.unwrap().to_owned());
         Ok(())
     }
 }

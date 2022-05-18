@@ -7,18 +7,22 @@ use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
 use mockall::*;
 use reqwest::header::LOCATION;
+use reqwest::StatusCode;
 use std::collections::HashMap;
 use thiserror::Error;
 use tokio::sync::RwLock;
 
+#[derive(Clone)]
 pub struct BankAccount {
     pub dwolla_funding_source_id: Option<String>,
 }
 
+#[derive(Clone)]
 pub struct BankTransfer {
     pub dwolla_transfer_id: Option<String>,
 }
 
+#[derive(Clone)]
 pub struct User {
     pub first_name: String,
     pub last_name: String,
@@ -95,7 +99,8 @@ impl DwollaClient {
         let url = format!("{}{}", self.api_url, path);
         let mut req = client
             .request(method, url)
-            .header("Authorization", format!("Bearer {}", api_access_token));
+            .header("Authorization", format!("Bearer {}", api_access_token))
+            .header("Accept", "application/vnd.dwolla.v1.hal+json");
 
         if let Some(body) = &body {
             req = req.json(body);
@@ -106,10 +111,20 @@ impl DwollaClient {
             .await
             .map_err(|err| BankingError::HTTPRequest(anyhow!(err)))?;
 
-        if let Some(location) = res.headers().get(LOCATION) {
-            return Ok(location.to_str().expect("location expected").to_owned());
+        if res.status() == StatusCode::CREATED {
+            if let Some(location) = res.headers().get(LOCATION) {
+                return Ok(location.to_str().expect("location expected").to_owned());
+            }
         }
-        Err(BankingError::HTTPRequest(anyhow!("request error")))
+
+        log::error!("Unexpected response from dwolla: {}", res.status());
+
+        let text = res
+            .text()
+            .await
+            .map_err(|err| BankingError::HTTPRequest(anyhow!(err)))?;
+
+        return Err(BankingError::HTTPRequest(anyhow!(text)));
     }
 
     async fn authenticate(&self) -> Result<(), BankingError> {
@@ -163,7 +178,7 @@ impl BankingClient for DwollaClient {
         Some("dwolla".to_owned())
     }
 
-    async fn create_customer(&self, mut user: User) -> Result<User, BankingError> {
+    async fn create_customer(&self, user: User) -> Result<User, BankingError> {
         let res = self
             .request(
                 reqwest::Method::POST,
@@ -183,9 +198,6 @@ impl BankingClient for DwollaClient {
             )
             .await?;
 
-        println!("res");
-        println!("{}", res);
-
         let dwolla_customer_id = res
             .split("/")
             .collect::<Vec<&str>>()
@@ -193,6 +205,7 @@ impl BankingClient for DwollaClient {
             .ok_or(BankingError::FieldNotFound)?
             .to_string();
 
+        let mut user = user.clone();
         user.dwolla_customer_id = Some(dwolla_customer_id);
 
         Ok(user)

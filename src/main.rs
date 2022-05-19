@@ -8,6 +8,7 @@ mod authentication;
 mod banking;
 mod errors;
 mod extractors;
+mod gov;
 mod handlers;
 mod models;
 mod plaid;
@@ -77,6 +78,8 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         audience: auth0_audience,
         domain: auth0_domain,
     };
+
+    gov::Government::new();
 
     let port = std::env::var("PORT")
         .unwrap_or("7000".to_owned())

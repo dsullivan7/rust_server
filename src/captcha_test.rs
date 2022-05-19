@@ -13,10 +13,7 @@ mod captcha_tests {
 
         let captcha_client = TwoCaptcha::new(two_captcha_key);
         let response = captcha_client
-            .solve_recaptcha_v2(
-                "something".to_owned(),
-                "someurl".to_owned(),
-            )
+            .solve_recaptcha_v2("something".to_owned(), "someurl".to_owned())
             .await;
 
         assert_eq!(response.unwrap(), "");

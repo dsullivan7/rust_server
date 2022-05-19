@@ -6,6 +6,7 @@ use std::env;
 
 mod authentication;
 mod banking;
+mod captcha;
 mod errors;
 mod extractors;
 mod gov;

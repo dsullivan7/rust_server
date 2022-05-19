@@ -10,6 +10,8 @@ use std::collections::HashMap;
 use std::fs;
 use thiserror::Error;
 
+use crate::captcha;
+
 #[derive(Error, Debug)]
 pub enum GovernmentError {
     #[error("http request error")]
@@ -22,6 +24,8 @@ pub enum GovernmentError {
     Unauthorized,
     #[error("client initialization error")]
     ClientInit(anyhow::Error),
+    #[error("captcha error")]
+    Captcha(anyhow::Error),
     #[error("unrecognized portal type")]
     UnrecognizedPortalType,
     #[error("could not find html element")]
@@ -29,7 +33,9 @@ pub enum GovernmentError {
 }
 
 #[derive(Clone)]
-pub struct Government {}
+pub struct Government {
+    // captcha: Box<dyn captcha::Captcha>,
+}
 
 pub struct Profile {
     ebt_snap_balance: String,
@@ -48,8 +54,10 @@ pub trait IGovernment: Send + Sync {
 }
 
 impl Government {
-    pub fn new() -> Government {
-        Government {}
+    pub fn new(captcha_client: Box<dyn captcha::Captcha>) -> Government {
+        Government {
+            // captcha: captcha_client,
+        }
     }
     async fn get_accesshra_profile(
         &self,
@@ -118,32 +126,30 @@ impl Government {
         username: String,
         password: String,
     ) -> Result<Profile, GovernmentError> {
-        // let client = reqwest::Client::builder()
-        //     .cookie_store(true)
-        //     .build()
-        //     .map_err(|err| GovernmentError::ClientInit(anyhow!(err)))?;
-        //
-        // let base_url = "https://www.connectebt.com";
-        //
-        // let mut params = HashMap::new();
-        // params.insert("login", username);
-        // params.insert("password", password);
-        //
-        // let res_login = client
-        //     .request(
-        //         reqwest::Method::POST,
-        //         format!("{}/nyebtclient/siteLogonClient.recip", base_url),
-        //     )
-        //     .form(&params)
-        //     .send()
-        //     .await
-        //     .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
-        //     .text()
-        //     .await
-        //     .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+        let client = reqwest::Client::builder()
+            .cookie_store(true)
+            .build()
+            .map_err(|err| GovernmentError::ClientInit(anyhow!(err)))?;
 
-        let res_login = fs::read_to_string("recaptcha_doc.html")
-            .expect("Something went wrong reading the file");
+        let base_url = "https://www.connectebt.com";
+        let login_url = format!("{}/nyebtclient/siteLogonClient.recip", base_url);
+
+        let mut params = HashMap::new();
+        params.insert("login", username);
+        params.insert("password", password);
+
+        let res_login = client
+            .request(reqwest::Method::POST, login_url.clone())
+            .form(&params)
+            .send()
+            .await
+            .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
+            .text()
+            .await
+            .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+
+        // let res_login = fs::read_to_string("recaptcha_doc.html")
+        //     .expect("Something went wrong reading the file");
 
         let document = Html::parse_document(&res_login);
         let selector = Selector::parse("#main-iframe").unwrap();
@@ -157,20 +163,20 @@ impl Government {
             .attr("src")
             .ok_or(GovernmentError::HTMLDocumentParse("src".to_owned()))?;
 
-        println!("captcha_path");
-        println!("{}", captcha_path);
+        let res_captcha = client
+            .request(
+                reqwest::Method::GET,
+                format!("{}{}", base_url, captcha_path),
+            )
+            .send()
+            .await
+            .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
+            .text()
+            .await
+            .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
 
-        // let res_captcha = client
-        //     .request(reqwest::Method::GET, format!("{}{}", base_url, captcha_path))
-        //     .send()
-        //     .await
-        //     .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
-        //     .text()
-        //     .await
-        //     .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
-
-        let res_captcha = fs::read_to_string("recaptcha_doc_iframe.html")
-            .expect("Something went wrong reading the file");
+        // let res_captcha = fs::read_to_string("recaptcha_doc_iframe.html")
+        //     .expect("Something went wrong reading the file");
 
         let document = Html::parse_document(&res_captcha);
         let selector = Selector::parse(".g-recaptcha").unwrap();
@@ -186,26 +192,40 @@ impl Government {
                 "data-sitekey".to_owned(),
             ))?;
 
-        println!("google_sitekey");
-        println!("{}", google_sitekey);
+        let recaptcha_response = self
+            .captcha
+            .solve_recaptcha_v2(google_sitekey.to_owned(), login_url.clone())
+            .await
+            .map_err(|err| GovernmentError::Captcha(anyhow!(err)))?;
 
-        // let recaptcha_response = "recaptcha_response";
-        //
-        // let mut params = HashMap::new();
-        // params.insert("g-recaptcha-response", recaptcha_response);
-        //
-        // client
-        //     .request(
-        //         reqwest::Method::POST,
-        //         format!("{}/_Incapsula_Resource?SWCGHOEL=v2&cts=NA", base_url),
-        //     )
-        //     .form(&params)
-        //     .send()
-        //     .await
-        //     .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
-        //     .text()
-        //     .await
-        //     .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+        let mut params = HashMap::new();
+        params.insert("g-recaptcha-response", recaptcha_response);
+
+        client
+            .request(
+                reqwest::Method::POST,
+                format!("{}/_Incapsula_Resource?SWCGHOEL=v2&cts=NA", base_url),
+            )
+            .form(&params)
+            .send()
+            .await
+            .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
+            .text()
+            .await
+            .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+
+        let res_login = client
+            .request(reqwest::Method::POST, login_url.clone())
+            .form(&params)
+            .send()
+            .await
+            .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
+            .text()
+            .await
+            .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+
+        println!("res_login");
+        println!("{}", res_login);
 
         Ok(Profile {
             ebt_snap_balance: "".to_owned(),

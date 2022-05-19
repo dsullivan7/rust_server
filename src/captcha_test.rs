@@ -3,7 +3,7 @@ mod captcha_tests {
     use crate::captcha::Captcha;
     use crate::captcha::TwoCaptcha;
 
-    // #[ignore]
+    #[ignore]
     #[tokio::test]
     async fn test_get_profile() {
         env_logger::init();

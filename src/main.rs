@@ -80,8 +80,6 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         domain: auth0_domain,
     };
 
-    gov::Government::new();
-
     let port = std::env::var("PORT")
         .unwrap_or("7000".to_owned())
         .parse::<u16>()

@@ -32,9 +32,8 @@ pub enum GovernmentError {
     HTMLDocumentParse(String),
 }
 
-#[derive(Clone)]
 pub struct Government {
-    // captcha: Box<dyn captcha::Captcha>,
+    captcha: Box<dyn captcha::Captcha>,
 }
 
 pub struct Profile {
@@ -56,9 +55,10 @@ pub trait IGovernment: Send + Sync {
 impl Government {
     pub fn new(captcha_client: Box<dyn captcha::Captcha>) -> Government {
         Government {
-            // captcha: captcha_client,
+            captcha: captcha_client,
         }
     }
+
     async fn get_accesshra_profile(
         &self,
         username: String,
@@ -121,6 +121,22 @@ impl Government {
         Ok(Profile { ebt_snap_balance })
     }
 
+    fn get_document_value(
+        &self,
+        doc: String,
+        selector: String,
+        attribute: String,
+    ) -> Option<String> {
+        let document = Html::parse_document(&doc);
+        let selector = Selector::parse(&selector).unwrap();
+        if let Some(found) = document.select(&selector).next() {
+            if let Some(attr) = found.value().attr(&attribute) {
+                return Some(attr.to_owned());
+            }
+        }
+        None
+    }
+
     async fn get_connectebt_profile(
         &self,
         username: String,
@@ -132,6 +148,7 @@ impl Government {
             .map_err(|err| GovernmentError::ClientInit(anyhow!(err)))?;
 
         let base_url = "https://www.connectebt.com";
+
         let login_url = format!("{}/nyebtclient/siteLogonClient.recip", base_url);
 
         let mut params = HashMap::new();
@@ -151,16 +168,9 @@ impl Government {
         // let res_login = fs::read_to_string("recaptcha_doc.html")
         //     .expect("Something went wrong reading the file");
 
-        let document = Html::parse_document(&res_login);
-        let selector = Selector::parse("#main-iframe").unwrap();
-        let captcha_path = document
-            .select(&selector)
-            .next()
-            .ok_or(GovernmentError::HTMLDocumentParse(
-                "#main-iframe".to_owned(),
-            ))?
-            .value()
-            .attr("src")
+        // let captcha_path = "blah";
+        let captcha_path = self
+            .get_document_value(res_login, "#main-iframe".to_owned(), "src".to_owned())
             .ok_or(GovernmentError::HTMLDocumentParse("src".to_owned()))?;
 
         let res_captcha = client
@@ -178,16 +188,13 @@ impl Government {
         // let res_captcha = fs::read_to_string("recaptcha_doc_iframe.html")
         //     .expect("Something went wrong reading the file");
 
-        let document = Html::parse_document(&res_captcha);
-        let selector = Selector::parse(".g-recaptcha").unwrap();
-        let google_sitekey = document
-            .select(&selector)
-            .next()
-            .ok_or(GovernmentError::HTMLDocumentParse(
+        // let google_sitekey = "blah";
+        let google_sitekey = self
+            .get_document_value(
+                res_captcha,
                 ".g-recaptcha".to_owned(),
-            ))?
-            .value()
-            .attr("data-sitekey")
+                "data-sitekey".to_owned(),
+            )
             .ok_or(GovernmentError::HTMLDocumentParse(
                 "data-sitekey".to_owned(),
             ))?;
@@ -214,7 +221,7 @@ impl Government {
             .await
             .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
 
-        let res_login = client
+        let res_after_captcha = client
             .request(reqwest::Method::POST, login_url.clone())
             .form(&params)
             .send()
@@ -224,8 +231,8 @@ impl Government {
             .await
             .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
 
-        println!("res_login");
-        println!("{}", res_login);
+        println!("res_after_captcha");
+        println!("{}", res_after_captcha);
 
         Ok(Profile {
             ebt_snap_balance: "".to_owned(),

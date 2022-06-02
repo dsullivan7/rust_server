@@ -7,7 +7,6 @@ use async_trait::async_trait;
 use mockall::*;
 use scraper::{Html, Selector};
 use std::collections::HashMap;
-use std::fs;
 use thiserror::Error;
 
 use crate::captcha;

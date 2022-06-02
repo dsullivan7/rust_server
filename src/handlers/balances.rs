@@ -36,6 +36,8 @@ async fn get_balances(
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
         .iter()
         .map(|order| services::Order {
+            order_id: order.order_id,
+            parent_order_id: order.parent_order_id,
             amount: order.amount,
             side: order.side.to_owned(),
             status: order.status.to_owned(),

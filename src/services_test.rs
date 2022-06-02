@@ -34,7 +34,7 @@ mod services_tests {
 
         let orders = services.get_orders(open_orders, child_orders);
 
-        let buy_order = orders.iter().find(|order| order.side == "buy").unwrap();
+        let buy_order = orders[0];
 
         assert!(buy_order.parent_order_id.is_some());
         assert_eq!(buy_order.parent_order_id.unwrap(), order_id_1);
@@ -42,7 +42,7 @@ mod services_tests {
         assert_eq!(buy_order.side, "buy");
         assert_eq!(buy_order.status, "complete");
 
-        let sell_order = orders.iter().find(|order| order.side == "sell").unwrap();
+        let sell_order = orders[1];
 
         assert!(sell_order.parent_order_id.is_some());
         assert_eq!(sell_order.parent_order_id.unwrap(), order_id_2);

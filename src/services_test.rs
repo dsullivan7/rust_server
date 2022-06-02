@@ -149,4 +149,72 @@ mod services_tests {
         assert_eq!(order_6.side, "sell");
         assert_eq!(order_6.status, "complete");
     }
+
+    #[test]
+    fn test_get_orders_child_orders() {
+        let services = services::Services {};
+
+        let order_id_1 = Uuid::new_v4();
+        let order_id_2 = Uuid::new_v4();
+        let order_id_3 = Uuid::new_v4();
+        let order_id_4 = Uuid::new_v4();
+
+        let open_orders = vec![
+            services::Order {
+                order_id: order_id_1,
+                parent_order_id: None,
+                amount: 20,
+                side: "buy".to_owned(),
+                status: "pending".to_owned(),
+                completed_at: None,
+            },
+            services::Order {
+                order_id: order_id_2,
+                parent_order_id: None,
+                amount: 20,
+                side: "sell".to_owned(),
+                status: "pending".to_owned(),
+                completed_at: None,
+            },
+        ];
+
+        let child_orders = vec![
+            services::Order {
+                order_id: order_id_3,
+                parent_order_id: Some(order_id_1),
+                amount: 10,
+                side: "buy".to_owned(),
+                status: "pending".to_owned(),
+                completed_at: None,
+            },
+            services::Order {
+                order_id: order_id_4,
+                parent_order_id: Some(order_id_2),
+                amount: 10,
+                side: "sell".to_owned(),
+                status: "pending".to_owned(),
+                completed_at: None,
+            },
+        ];
+
+        let orders = services.get_orders(open_orders, child_orders);
+
+        assert_eq!(orders.len(), 2);
+
+        let order_1 = &orders[0];
+
+        assert!(order_1.parent_order_id.is_some());
+        assert_eq!(order_1.parent_order_id.unwrap(), order_id_1);
+        assert_eq!(order_1.amount, 10);
+        assert_eq!(order_1.side, "buy");
+        assert_eq!(order_1.status, "complete");
+
+        let order_2 = &orders[1];
+
+        assert!(order_2.parent_order_id.is_some());
+        assert_eq!(order_2.parent_order_id.unwrap(), order_id_2);
+        assert_eq!(order_2.amount, 10);
+        assert_eq!(order_2.side, "sell");
+        assert_eq!(order_2.status, "complete");
+    }
 }

@@ -40,18 +40,7 @@ pub trait IServices: Send + Sync {
     fn get_orders(&self, parent_orders: Vec<Order>, child_orders: Vec<Order>) -> Vec<Order>;
 }
 
-impl Services {
-    fn get_amount_remaining(&self, order: Order, child_orders: Vec<Order>) -> i32 {
-        child_orders.iter().fold(0, |acc, child_order| {
-            if let Some(parent_order_id) = child_order.parent_order_id {
-                if parent_order_id == order.order_id {
-                    return acc + order.amount;
-                }
-            }
-            return acc;
-        })
-    }
-}
+impl Services {}
 
 impl IServices for Services {
     fn get_balance(

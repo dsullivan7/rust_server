@@ -87,7 +87,7 @@ async fn create_order(
         user_id,
         amount,
         side,
-        status: Set("complete".to_owned()),
+        status: Set("pending".to_owned()),
         completed_at: Set(Some(
             chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
         )),

@@ -7,6 +7,7 @@ use async_trait::async_trait;
 use mockall::*;
 use scraper::{Html, Selector};
 use std::collections::HashMap;
+use std::fs;
 use thiserror::Error;
 
 use crate::captcha;
@@ -36,7 +37,8 @@ pub struct Government {
 }
 
 pub struct Profile {
-    ebt_snap_balance: String,
+    ebt_food_stamp_balance: String,
+    ebt_cash_balance: String,
 }
 
 #[automock]
@@ -112,12 +114,15 @@ impl Government {
             .await
             .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
 
-        let ebt_snap_balance = res_json["snapEBTBalance"]
+        let ebt_food_stamp_balance = res_json["snapEBTBalance"]
             .as_str()
             .ok_or(GovernmentError::FieldNotFound)?
             .to_owned();
 
-        Ok(Profile { ebt_snap_balance })
+        Ok(Profile {
+            ebt_food_stamp_balance,
+            ebt_cash_balance: "".to_owned(),
+        })
     }
 
     fn get_document_value(
@@ -141,100 +146,121 @@ impl Government {
         username: String,
         password: String,
     ) -> Result<Profile, GovernmentError> {
-        let client = reqwest::Client::builder()
-            .cookie_store(true)
-            .build()
-            .map_err(|err| GovernmentError::ClientInit(anyhow!(err)))?;
+        // let client = reqwest::Client::builder()
+        //     .cookie_store(true)
+        //     .build()
+        //     .map_err(|err| GovernmentError::ClientInit(anyhow!(err)))?;
+        //
+        // let base_url = "https://www.connectebt.com";
+        //
+        // let login_url = format!("{}/nyebtclient/siteLogonClient.recip", base_url);
+        //
+        // let mut params = HashMap::new();
+        // params.insert("login", username);
+        // params.insert("password", password);
+        //
+        // let res_login = client
+        //     .request(reqwest::Method::POST, login_url.clone())
+        //     .form(&params)
+        //     .send()
+        //     .await
+        //     .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
+        //     .text()
+        //     .await
+        //     .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+        //
+        // // let res_login = fs::read_to_string("recaptcha_doc.html")
+        // //     .expect("Something went wrong reading the file");
+        //
+        // // let captcha_path = "blah";
+        // let captcha_path = self
+        //     .get_document_value(res_login, "#main-iframe".to_owned(), "src".to_owned())
+        //     .ok_or(GovernmentError::HTMLDocumentParse("src".to_owned()))?;
+        //
+        // let res_captcha = client
+        //     .request(
+        //         reqwest::Method::GET,
+        //         format!("{}{}", base_url, captcha_path),
+        //     )
+        //     .send()
+        //     .await
+        //     .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
+        //     .text()
+        //     .await
+        //     .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+        //
+        // // let res_captcha = fs::read_to_string("recaptcha_doc_iframe.html")
+        // //     .expect("Something went wrong reading the file");
+        //
+        // // let google_sitekey = "blah";
+        // let google_sitekey = self
+        //     .get_document_value(
+        //         res_captcha,
+        //         ".g-recaptcha".to_owned(),
+        //         "data-sitekey".to_owned(),
+        //     )
+        //     .ok_or(GovernmentError::HTMLDocumentParse(
+        //         "data-sitekey".to_owned(),
+        //     ))?;
+        //
+        // let recaptcha_response = self
+        //     .captcha
+        //     .solve_recaptcha_v2(google_sitekey.to_owned(), login_url.clone())
+        //     .await
+        //     .map_err(|err| GovernmentError::Captcha(anyhow!(err)))?;
+        //
+        // let mut params = HashMap::new();
+        // params.insert("g-recaptcha-response", recaptcha_response);
+        //
+        // client
+        //     .request(
+        //         reqwest::Method::POST,
+        //         format!("{}/_Incapsula_Resource?SWCGHOEL=v2&cts=NA", base_url),
+        //     )
+        //     .form(&params)
+        //     .send()
+        //     .await
+        //     .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
+        //     .text()
+        //     .await
+        //     .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+        //
+        // let res_after_captcha = client
+        //     .request(reqwest::Method::POST, login_url.clone())
+        //     .form(&params)
+        //     .send()
+        //     .await
+        //     .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
+        //     .text()
+        //     .await
+        //     .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
 
-        let base_url = "https://www.connectebt.com";
+        let res_after_captcha =
+            fs::read_to_string("ebt_homepage.html").expect("Something went wrong reading the file");
 
-        let login_url = format!("{}/nyebtclient/siteLogonClient.recip", base_url);
+        let document = Html::parse_document(&res_after_captcha);
 
-        let mut params = HashMap::new();
-        params.insert("login", username);
-        params.insert("password", password);
+        let food_stamp_selector =
+            Selector::parse("body center center table tr:nth-last-child(1) td:nth-child(2) b")
+                .unwrap();
 
-        let res_login = client
-            .request(reqwest::Method::POST, login_url.clone())
-            .form(&params)
-            .send()
-            .await
-            .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
-            .text()
-            .await
-            .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+        let mut ebt_food_stamp_balance = "".to_owned();
+        if let Some(balance_element) = document.select(&food_stamp_selector).next() {
+            ebt_food_stamp_balance = balance_element.inner_html().trim().to_owned();
+        }
 
-        // let res_login = fs::read_to_string("recaptcha_doc.html")
-        //     .expect("Something went wrong reading the file");
+        let cash_selector =
+            Selector::parse("body center center table tr:nth-last-child(1) td:nth-child(3) b")
+                .unwrap();
 
-        // let captcha_path = "blah";
-        let captcha_path = self
-            .get_document_value(res_login, "#main-iframe".to_owned(), "src".to_owned())
-            .ok_or(GovernmentError::HTMLDocumentParse("src".to_owned()))?;
-
-        let res_captcha = client
-            .request(
-                reqwest::Method::GET,
-                format!("{}{}", base_url, captcha_path),
-            )
-            .send()
-            .await
-            .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
-            .text()
-            .await
-            .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
-
-        // let res_captcha = fs::read_to_string("recaptcha_doc_iframe.html")
-        //     .expect("Something went wrong reading the file");
-
-        // let google_sitekey = "blah";
-        let google_sitekey = self
-            .get_document_value(
-                res_captcha,
-                ".g-recaptcha".to_owned(),
-                "data-sitekey".to_owned(),
-            )
-            .ok_or(GovernmentError::HTMLDocumentParse(
-                "data-sitekey".to_owned(),
-            ))?;
-
-        let recaptcha_response = self
-            .captcha
-            .solve_recaptcha_v2(google_sitekey.to_owned(), login_url.clone())
-            .await
-            .map_err(|err| GovernmentError::Captcha(anyhow!(err)))?;
-
-        let mut params = HashMap::new();
-        params.insert("g-recaptcha-response", recaptcha_response);
-
-        client
-            .request(
-                reqwest::Method::POST,
-                format!("{}/_Incapsula_Resource?SWCGHOEL=v2&cts=NA", base_url),
-            )
-            .form(&params)
-            .send()
-            .await
-            .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
-            .text()
-            .await
-            .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
-
-        let res_after_captcha = client
-            .request(reqwest::Method::POST, login_url.clone())
-            .form(&params)
-            .send()
-            .await
-            .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?
-            .text()
-            .await
-            .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
-
-        println!("res_after_captcha");
-        println!("{}", res_after_captcha);
+        let mut ebt_cash_balance = "".to_owned();
+        if let Some(balance_element) = document.select(&cash_selector).next() {
+            ebt_cash_balance = balance_element.inner_html().trim().to_owned();
+        }
 
         Ok(Profile {
-            ebt_snap_balance: "".to_owned(),
+            ebt_food_stamp_balance,
+            ebt_cash_balance,
         })
     }
 }

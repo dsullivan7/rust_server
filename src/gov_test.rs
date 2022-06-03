@@ -14,7 +14,7 @@ mod gov_tests {
 
         let captcha = TwoCaptcha::new(two_captcha_key);
         let gov_client = Government::new(Box::new(captcha));
-        let profile = gov_client
+        let response = gov_client
             .get_profile(
                 "username".to_owned(),
                 "password".to_owned(),
@@ -23,6 +23,9 @@ mod gov_tests {
             )
             .await;
 
-        assert_eq!(profile.unwrap().ebt_snap_balance, "");
+        let profile = response.unwrap();
+
+        assert_eq!(profile.ebt_food_stamp_balance, "$455.97");
+        assert_eq!(profile.ebt_cash_balance, "$2.37");
     }
 }

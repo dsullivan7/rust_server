@@ -4,7 +4,7 @@ mod gov_tests {
     use crate::gov::Government;
     use crate::gov::IGovernment;
 
-    // #[ignore]
+    #[ignore]
     #[tokio::test]
     async fn test_get_profile() {
         env_logger::init();

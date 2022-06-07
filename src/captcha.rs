@@ -103,8 +103,6 @@ impl TwoCaptcha {
                 .to_owned();
 
             if response != TWO_CAPTCHA_NOT_READY {
-                println!("response");
-                println!("{}", response);
                 return Ok(response);
             }
 

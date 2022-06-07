@@ -2153,6 +2153,7 @@ dependencies = [
  "jsonwebtoken",
  "log",
  "mockall",
+ "regex",
  "reqwest",
  "scraper",
  "sea-orm",

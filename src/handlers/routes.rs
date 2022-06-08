@@ -5,6 +5,7 @@ use super::bank_accounts;
 use super::bank_transfers;
 use super::orders;
 use super::plaid;
+use super::profiles;
 use super::users;
 
 pub fn routes() -> Scope {
@@ -30,5 +31,6 @@ pub fn routes() -> Scope {
         .service(orders::modify_order)
         .service(orders::delete_order)
         .service(balances::get_balances)
+        .service(profiles::create_profile)
         .service(plaid::create_token)
 }

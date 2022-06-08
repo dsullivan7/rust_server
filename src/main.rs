@@ -21,6 +21,7 @@ mod test_utils;
 pub struct AppState {
     conn: DatabaseConnection,
     services: Box<dyn services::IServices>,
+    gov_client: Box<dyn gov::IGovernment>,
     plaid_client: Box<dyn plaid::IPlaidClient>,
     banking_client: Box<dyn banking::BankingClient>,
     authentication: Box<dyn authentication::IAuthentication>,
@@ -70,6 +71,11 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
     let dwolla_client =
         banking::DwollaClient::new(dwolla_api_key, dwolla_api_secret, dwolla_api_url);
 
+    let two_captcha_key = std::env::var("TWO_CAPTCHA_KEY").expect("TWO_CAPTCHA_KEY must be set");
+
+    let cptcha = captcha::TwoCaptcha::new(two_captcha_key);
+    let gov_client = gov::Government::new(Box::new(cptcha));
+
     let services = services::Services {};
 
     let auth0_domain = std::env::var("AUTH0_DOMAIN").expect("AUTH0_DOMAIN must be set");
@@ -89,6 +95,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         conn,
         services: Box::new(services),
         banking_client: Box::new(dwolla_client),
+        gov_client: Box::new(gov_client),
         plaid_client: Box::new(plaid_client),
         authentication: Box::new(auth),
     });

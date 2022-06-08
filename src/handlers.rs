@@ -4,6 +4,7 @@ mod bank_transfers;
 pub mod health;
 mod orders;
 mod plaid;
+mod profiles;
 mod users;
 
 mod routes;

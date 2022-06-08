@@ -7,6 +7,7 @@ use async_trait::async_trait;
 use mockall::*;
 use regex::Regex;
 use scraper::{Html, Selector};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use thiserror::Error;
 
@@ -36,6 +37,7 @@ pub struct Government {
     captcha: Box<dyn captcha::Captcha>,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Profile {
     ebt_food_stamp_balance: String,
     ebt_cash_balance: String,
@@ -46,10 +48,10 @@ pub struct Profile {
 pub trait IGovernment: Send + Sync {
     async fn get_profile(
         &self,
+        portal_type: String,
         username: String,
         password: String,
         ip_address: String,
-        portal_type: String,
     ) -> Result<Profile, GovernmentError>;
 }
 
@@ -153,10 +155,6 @@ impl Government {
 
         let base_url = "https://www.connectebt.com";
 
-        let mut params = HashMap::new();
-        params.insert("login", username);
-        params.insert("password", password);
-
         let home_url = format!("{}/nyebtclient/siteLogonClient.recip", base_url);
         let res_initial = client
             .request(reqwest::Method::GET, home_url.clone())
@@ -168,6 +166,9 @@ impl Government {
             .text()
             .await
             .map_err(|err| GovernmentError::Decode(anyhow!(err)))?;
+
+        println!("res_initial_text");
+        println!("{}", res_initial_text);
 
         // let res_login = fs::read_to_string("recaptcha_doc.html")
         //     .expect("Something went wrong reading the file");
@@ -233,6 +234,10 @@ impl Government {
             .await
             .map_err(|err| GovernmentError::HTTPRequest(anyhow!(err)))?;
 
+        let mut params = HashMap::new();
+        params.insert("login", username);
+        params.insert("password", password);
+
         let res_after_captcha = client
             .request(reqwest::Method::POST, home_url.clone())
             .form(&params)
@@ -279,10 +284,10 @@ impl Government {
 impl IGovernment for Government {
     async fn get_profile(
         &self,
+        portal_type: String,
         username: String,
         password: String,
         ip_address: String,
-        portal_type: String,
     ) -> Result<Profile, GovernmentError> {
         match portal_type.as_str() {
             "accesshra" => {

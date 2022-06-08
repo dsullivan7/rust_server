@@ -16,10 +16,10 @@ mod gov_tests {
         let gov_client = Government::new(Box::new(captcha));
         let response = gov_client
             .get_profile(
+                "connectebt".to_owned(),
                 "username".to_owned(),
                 "password".to_owned(),
                 "71.167.248.83".to_owned(),
-                "connectebt".to_owned(),
             )
             .await;
 

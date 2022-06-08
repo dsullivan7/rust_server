@@ -3,6 +3,7 @@ use super::AppState;
 use crate::authentication;
 use crate::banking;
 use crate::plaid;
+use crate::gov;
 use crate::services;
 
 use sea_orm::{DatabaseBackend, MockDatabase};
@@ -16,6 +17,7 @@ pub struct TestState {
     pub conn: sea_orm::DatabaseConnection,
     pub plaid_client: Box<dyn plaid::IPlaidClient>,
     pub banking_client: Box<dyn banking::BankingClient>,
+    pub gov_client: Box<dyn gov::IGovernment>,
     pub authentication: Box<dyn authentication::IAuthentication>,
     pub services: Box<dyn services::IServices>,
 }
@@ -26,6 +28,7 @@ impl Default for TestState {
             conn: MockDatabase::new(DatabaseBackend::Postgres).into_connection(),
             plaid_client: Box::new(plaid::MockIPlaidClient::new()),
             banking_client: Box::new(banking::MockBankingClient::new()),
+            gov_client: Box::new(gov::MockIGovernment::new()),
             authentication: Box::new(authentication::MockIAuthentication::new()),
             services: Box::new(services::MockIServices::new()),
         }
@@ -45,6 +48,7 @@ impl TestState {
             conn: self.conn,
             plaid_client: self.plaid_client,
             banking_client: self.banking_client,
+            gov_client: self.gov_client,
             authentication: self.authentication,
             services: self.services,
         }

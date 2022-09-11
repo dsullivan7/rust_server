@@ -80,7 +80,7 @@ impl Auth0Client {
         let url = format!("{}{}", self.api_url, path);
         let mut req = client
             .request(method, url)
-            .header("authorization", access_token);
+            .header("authorization", format!("Bearer {}", access_token));
 
         if body.is_some() {
             req = req.json(&body.unwrap());

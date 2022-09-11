@@ -19,7 +19,11 @@ mod auth0_tests {
             auth0_client_secret,
             format!("https://{}", auth0_domain),
         );
+
         let user: Auth0User = auth0_client.get_user("someuserid".to_owned()).await?;
+
+        println!(format!("{:?}", user));
+
         Ok(())
     }
 }

@@ -23,7 +23,8 @@ mod auth0_tests {
             .get_user("google-oauth2|107121023659381840258".to_owned())
             .await?;
 
-        println!("{:?}", user);
+        println!("identity provider");
+        println!("{}", user.identities[0].provider);
 
         Ok(())
     }

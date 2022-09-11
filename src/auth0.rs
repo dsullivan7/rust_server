@@ -5,12 +5,19 @@ mod auth0_test;
 use anyhow::anyhow;
 use async_trait::async_trait;
 use mockall::*;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use thiserror::Error;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Auth0Identity {
+    pub provider: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Auth0User {
     pub user_id: String,
+    pub identities: Vec<Auth0Identity>,
 }
 
 #[derive(Error, Debug)]
@@ -52,17 +59,21 @@ impl Auth0Client {
     ) -> Result<serde_json::Value, Auth0Error> {
         let client = reqwest::Client::new();
 
+        let mut access_token_params = HashMap::new();
+        access_token_params.insert("client_id", self.client_id.to_owned());
+        access_token_params.insert("client_secret", self.client_secret.to_owned());
+        access_token_params.insert(
+            "audience",
+            format!("{}{}", self.api_url, "/api/v2/").to_owned(),
+        );
+        access_token_params.insert("grant_type", "client_credentials".to_owned());
+
         let access_token_req = client
             .request(
-                reqwest::Method::GET,
+                reqwest::Method::POST,
                 format!("{}{}", self.api_url, "/oauth/token"),
             )
-            .json(&json!({
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-                "audience": format!("{}{}", self.api_url, "/api/v2/"),
-                "grant_type": "client_credentials",
-            }));
+            .form(&access_token_params);
 
         let access_token_res: serde_json::Value = access_token_req
             .send()
@@ -78,6 +89,7 @@ impl Auth0Client {
             .to_owned();
 
         let url = format!("{}{}", self.api_url, path);
+        println!("{}", url);
         let mut req = client
             .request(method, url)
             .header("authorization", format!("Bearer {}", access_token));
@@ -99,7 +111,11 @@ impl Auth0Client {
 impl IAuth0Client for Auth0Client {
     async fn get_user(&self, auth0_id: String) -> Result<Auth0User, Auth0Error> {
         let res = self
-            .request(reqwest::Method::GET, format!("/users/{}", auth0_id), None)
+            .request(
+                reqwest::Method::GET,
+                format!("/api/v2/users/{}", auth0_id),
+                None,
+            )
             .await?;
 
         let user_id = res["user_id"]
@@ -107,7 +123,7 @@ impl IAuth0Client for Auth0Client {
             .ok_or(Auth0Error::FieldNotFound)?
             .to_owned();
 
-        let user: Auth0User = Auth0User { user_id };
+        let user: Auth0User = serde_json::value::from_value(res).unwrap();
 
         Ok(user)
     }

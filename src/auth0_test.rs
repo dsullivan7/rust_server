@@ -5,7 +5,6 @@ mod auth0_tests {
     use crate::auth0::Auth0User;
     use crate::auth0::IAuth0Client;
 
-    #[ignore]
     #[tokio::test]
     async fn test_get_user() -> Result<(), Auth0Error> {
         let auth0_client_id =
@@ -20,9 +19,11 @@ mod auth0_tests {
             format!("https://{}", auth0_domain),
         );
 
-        let user: Auth0User = auth0_client.get_user("someuserid".to_owned()).await?;
+        let user: Auth0User = auth0_client
+            .get_user("google-oauth2|107121023659381840258".to_owned())
+            .await?;
 
-        println!(format!("{:?}", user));
+        println!("{:?}", user);
 
         Ok(())
     }

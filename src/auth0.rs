@@ -8,7 +8,7 @@ use mockall::*;
 use serde_json::json;
 use thiserror::Error;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Auth0User {
     pub user_id: String,
 }

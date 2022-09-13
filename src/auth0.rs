@@ -118,11 +118,6 @@ impl IAuth0Client for Auth0Client {
             )
             .await?;
 
-        let user_id = res["user_id"]
-            .as_str()
-            .ok_or(Auth0Error::FieldNotFound)?
-            .to_owned();
-
         let user: Auth0User = serde_json::value::from_value(res).unwrap();
 
         Ok(user)

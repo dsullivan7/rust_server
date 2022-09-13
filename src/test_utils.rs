@@ -2,8 +2,8 @@
 use super::AppState;
 use crate::authentication;
 use crate::banking;
-use crate::plaid;
 use crate::gov;
+use crate::plaid;
 use crate::services;
 
 use sea_orm::{DatabaseBackend, MockDatabase};

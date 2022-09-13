@@ -4,6 +4,7 @@ use anyhow::anyhow;
 use sea_orm::DatabaseConnection;
 use std::env;
 
+mod auth0;
 mod authentication;
 mod banking;
 mod captcha;

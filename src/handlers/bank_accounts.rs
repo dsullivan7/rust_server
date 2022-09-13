@@ -82,7 +82,7 @@ async fn create_bank_account(
     let user_id = Set(Some(body.user_id.to_owned()));
     let plaid_public_token = body.plaid_public_token.to_owned();
 
-    let user: models::user::Model = User::find_by_id(body.user_id)
+    let _user: models::user::Model = User::find_by_id(body.user_id)
         .one(conn)
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?

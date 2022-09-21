@@ -10,6 +10,7 @@ mod banking;
 mod captcha;
 mod errors;
 mod extractors;
+mod linked_in;
 mod gov;
 mod handlers;
 mod models;

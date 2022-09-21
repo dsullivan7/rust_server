@@ -12,6 +12,7 @@ use thiserror::Error;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Auth0Identity {
     pub provider: String,
+    pub access_token: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

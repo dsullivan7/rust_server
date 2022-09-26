@@ -63,7 +63,6 @@ impl Auth0Client {
         let client = reqwest::Client::new();
 
         let url = format!("{}{}", self.api_url, path);
-        println!("{}", url);
 
         let mut req = client
             .request(method, url)
@@ -94,8 +93,6 @@ impl IAuth0Client for Auth0Client {
             )
             .await?;
 
-        println!("res");
-        println!("{}", serde_json::to_string_pretty(&res).unwrap());
         let user: Auth0User = serde_json::value::from_value(res).unwrap();
 
         Ok(user)

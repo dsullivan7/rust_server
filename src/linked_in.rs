@@ -80,6 +80,8 @@ impl ILinkedInClient for LinkedInClient {
             )
             .await?;
 
+        println!("res");
+        println!("{}", serde_json::to_string_pretty(&res).unwrap());
         let user: LinkedInUser = serde_json::value::from_value(res).unwrap();
 
         Ok(user)

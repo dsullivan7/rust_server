@@ -19,11 +19,18 @@ mod auth0_tests {
             format!("https://{}", auth0_domain),
         );
 
+        let access_token = auth0_client.get_access_token().await?;
+
         let user: Auth0User = auth0_client
-            .get_user("linkedin|ZKdNjriNNl".to_owned())
+            .get_user(access_token, "linkedin|ZKdNjriNNl".to_owned())
             .await?;
 
-        println!("access_token: {}", user.identities[0].access_token);
+        if let Some(access_token) = &user.identities[0].access_token {
+          println!("access_token: {}", access_token);
+        } else {
+          println!("no access_token found");
+        }
+
         Ok(())
     }
 }

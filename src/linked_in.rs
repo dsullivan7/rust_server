@@ -13,6 +13,11 @@ pub struct LinkedInUser {
     pub id: String,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LinkedInShareContent {
+    pub share_commentary: String,
+}
+
 #[derive(Error, Debug)]
 pub enum LinkedInError {
     #[error("http request error")]
@@ -27,6 +32,12 @@ pub enum LinkedInError {
 #[async_trait]
 pub trait ILinkedInClient: Send + Sync {
     async fn get_me(&self, access_token: String) -> Result<LinkedInUser, LinkedInError>;
+    async fn share(
+        &self,
+        access_token: String,
+        author: String,
+        specific_content: String,
+    ) -> Result<(), LinkedInError>;
 }
 
 pub struct LinkedInClient {
@@ -35,9 +46,7 @@ pub struct LinkedInClient {
 
 impl LinkedInClient {
     pub fn new(api_url: String) -> LinkedInClient {
-        LinkedInClient {
-            api_url,
-        }
+        LinkedInClient { api_url }
     }
 
     async fn request(
@@ -85,5 +94,33 @@ impl ILinkedInClient for LinkedInClient {
         let user: LinkedInUser = serde_json::value::from_value(res).unwrap();
 
         Ok(user)
+    }
+
+    async fn share(
+        &self,
+        access_token: String,
+        author: String,
+        specific_content: String,
+    ) -> Result<(), LinkedInError> {
+        self.request(
+            reqwest::Method::POST,
+            "/v2/ugcPosts".to_owned(),
+            access_token,
+            Some(serde_json::json!({
+              "author": format!("urn:li:person:{}", author),
+              "specificContent": {
+                "com.linkedin.ugc.ShareContent": {
+                    "shareCommentary": specific_content.to_owned(),
+                    "shareMediaCategory": "NONE",
+                },
+              },
+              "visibility": {
+                "com.linkedin.ugc.MemberNetworkVisibility": "CONNECTIONS"
+            },
+            })),
+        )
+        .await?;
+
+        Ok(())
     }
 }

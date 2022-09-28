@@ -34,7 +34,11 @@ pub enum Auth0Error {
 #[automock]
 #[async_trait]
 pub trait IAuth0Client: Send + Sync {
-    async fn get_user(&self, access_token: String, user_id: String) -> Result<Auth0User, Auth0Error>;
+    async fn get_user(
+        &self,
+        access_token: String,
+        user_id: String,
+    ) -> Result<Auth0User, Auth0Error>;
     async fn get_access_token(&self) -> Result<String, Auth0Error>;
 }
 
@@ -83,7 +87,11 @@ impl Auth0Client {
 
 #[async_trait]
 impl IAuth0Client for Auth0Client {
-    async fn get_user(&self, access_token: String, auth0_id: String) -> Result<Auth0User, Auth0Error> {
+    async fn get_user(
+        &self,
+        access_token: String,
+        auth0_id: String,
+    ) -> Result<Auth0User, Auth0Error> {
         let res = self
             .request(
                 access_token,
@@ -98,40 +106,38 @@ impl IAuth0Client for Auth0Client {
         Ok(user)
     }
 
-    async fn get_access_token(
-      &self,
-  ) -> Result<String, Auth0Error> {
-      let client = reqwest::Client::new();
+    async fn get_access_token(&self) -> Result<String, Auth0Error> {
+        let client = reqwest::Client::new();
 
-      let mut access_token_params = HashMap::new();
-      access_token_params.insert("client_id", self.client_id.to_owned());
-      access_token_params.insert("client_secret", self.client_secret.to_owned());
-      access_token_params.insert(
-          "audience",
-          format!("{}{}", self.api_url, "/api/v2/").to_owned(),
-      );
-      access_token_params.insert("grant_type", "client_credentials".to_owned());
+        let mut access_token_params = HashMap::new();
+        access_token_params.insert("client_id", self.client_id.to_owned());
+        access_token_params.insert("client_secret", self.client_secret.to_owned());
+        access_token_params.insert(
+            "audience",
+            format!("{}{}", self.api_url, "/api/v2/").to_owned(),
+        );
+        access_token_params.insert("grant_type", "client_credentials".to_owned());
 
-      let access_token_req = client
-          .request(
-              reqwest::Method::POST,
-              format!("{}{}", self.api_url, "/oauth/token"),
-          )
-          .form(&access_token_params);
+        let access_token_req = client
+            .request(
+                reqwest::Method::POST,
+                format!("{}{}", self.api_url, "/oauth/token"),
+            )
+            .form(&access_token_params);
 
-      let access_token_res: serde_json::Value = access_token_req
-          .send()
-          .await
-          .map_err(|err| Auth0Error::HTTPRequest(anyhow!(err)))?
-          .json()
-          .await
-          .map_err(|err| Auth0Error::JSONDecode(anyhow!(err)))?;
+        let access_token_res: serde_json::Value = access_token_req
+            .send()
+            .await
+            .map_err(|err| Auth0Error::HTTPRequest(anyhow!(err)))?
+            .json()
+            .await
+            .map_err(|err| Auth0Error::JSONDecode(anyhow!(err)))?;
 
-      let access_token = access_token_res["access_token"]
-          .as_str()
-          .ok_or(Auth0Error::FieldNotFound)?
-          .to_owned();
+        let access_token = access_token_res["access_token"]
+            .as_str()
+            .ok_or(Auth0Error::FieldNotFound)?
+            .to_owned();
 
-      Ok(access_token)
-  }
+        Ok(access_token)
+    }
 }

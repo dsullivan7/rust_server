@@ -26,9 +26,9 @@ mod auth0_tests {
             .await?;
 
         if let Some(access_token) = &user.identities[0].access_token {
-          println!("access_token: {}", access_token);
+            println!("access_token: {}", access_token);
         } else {
-          println!("no access_token found");
+            println!("no access_token found");
         }
 
         Ok(())

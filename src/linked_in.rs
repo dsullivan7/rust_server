@@ -36,7 +36,7 @@ pub trait ILinkedInClient: Send + Sync {
         &self,
         access_token: String,
         author: String,
-        specific_content: String,
+        commentary: String,
     ) -> Result<(), LinkedInError>;
 }
 
@@ -62,6 +62,7 @@ impl LinkedInClient {
 
         let mut req = client
             .request(method, url)
+            .header("LinkedIn-Version", "202208")
             .header("authorization", format!("Bearer {}", access_token));
 
         if body.is_some() {
@@ -100,27 +101,28 @@ impl ILinkedInClient for LinkedInClient {
         &self,
         access_token: String,
         author: String,
-        specific_content: String,
+        commentary: String,
     ) -> Result<(), LinkedInError> {
-        self.request(
-            reqwest::Method::POST,
-            "/v2/ugcPosts".to_owned(),
-            access_token,
-            Some(serde_json::json!({
-              "author": format!("urn:li:person:{}", author),
-              "specificContent": {
-                "com.linkedin.ugc.ShareContent": {
-                    "shareCommentary": specific_content.to_owned(),
-                    "shareMediaCategory": "NONE",
-                },
-              },
-              "visibility": {
-                "com.linkedin.ugc.MemberNetworkVisibility": "CONNECTIONS"
-            },
-            })),
-        )
-        .await?;
+        let res = self
+            .request(
+                reqwest::Method::POST,
+                "/rest/posts".to_owned(),
+                access_token,
+                Some(serde_json::json!({
+                  "author": format!("urn:li:person:{}", author),
+                  "commentary": commentary.to_owned(),
+                  "visibility": "CONNECTIONS",
+                  "lifecycleState": "PUBLISHED",
+                  "distribution": {
+                    "feedDistribution": "NONE",
+                    "targetEntities": [],
+                    "thirdPartyDistributionChannels": []
+                  }
+                })),
+            )
+            .await?;
 
+        println!("{}", serde_json::to_string_pretty(&res).unwrap());
         Ok(())
     }
 }

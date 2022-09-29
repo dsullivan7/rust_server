@@ -44,7 +44,7 @@ mod linked_in_tests {
         println!("{}", user.id);
 
         linked_in_client
-            .share(access_token.to_owned(), user.id, "test post".to_owned())
+            .share(access_token.to_owned(), user.id, "test post 2".to_owned())
             .await?;
 
         println!("successfully posted");

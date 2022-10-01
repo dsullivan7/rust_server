@@ -12,6 +12,7 @@ use thiserror::Error;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Auth0Identity {
     pub provider: String,
+    pub access_token: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -33,7 +34,12 @@ pub enum Auth0Error {
 #[automock]
 #[async_trait]
 pub trait IAuth0Client: Send + Sync {
-    async fn get_user(&self, user_id: String) -> Result<Auth0User, Auth0Error>;
+    async fn get_user(
+        &self,
+        access_token: String,
+        user_id: String,
+    ) -> Result<Auth0User, Auth0Error>;
+    async fn get_access_token(&self) -> Result<String, Auth0Error>;
 }
 
 pub struct Auth0Client {
@@ -53,10 +59,54 @@ impl Auth0Client {
 
     async fn request(
         &self,
+        access_token: String,
         method: reqwest::Method,
         path: String,
         body: Option<serde_json::Value>,
     ) -> Result<serde_json::Value, Auth0Error> {
+        let client = reqwest::Client::new();
+
+        let url = format!("{}{}", self.api_url, path);
+
+        let mut req = client
+            .request(method, url)
+            .header("authorization", format!("Bearer {}", access_token));
+
+        if body.is_some() {
+            req = req.json(&body.unwrap());
+        }
+
+        req.send()
+            .await
+            .map_err(|err| Auth0Error::HTTPRequest(anyhow!(err)))?
+            .json()
+            .await
+            .map_err(|err| Auth0Error::JSONDecode(anyhow!(err)))
+    }
+}
+
+#[async_trait]
+impl IAuth0Client for Auth0Client {
+    async fn get_user(
+        &self,
+        access_token: String,
+        auth0_id: String,
+    ) -> Result<Auth0User, Auth0Error> {
+        let res = self
+            .request(
+                access_token,
+                reqwest::Method::GET,
+                format!("/api/v2/users/{}", auth0_id),
+                None,
+            )
+            .await?;
+
+        let user: Auth0User = serde_json::value::from_value(res).unwrap();
+
+        Ok(user)
+    }
+
+    async fn get_access_token(&self) -> Result<String, Auth0Error> {
         let client = reqwest::Client::new();
 
         let mut access_token_params = HashMap::new();
@@ -88,38 +138,6 @@ impl Auth0Client {
             .ok_or(Auth0Error::FieldNotFound)?
             .to_owned();
 
-        let url = format!("{}{}", self.api_url, path);
-        println!("{}", url);
-        let mut req = client
-            .request(method, url)
-            .header("authorization", format!("Bearer {}", access_token));
-
-        if body.is_some() {
-            req = req.json(&body.unwrap());
-        }
-
-        req.send()
-            .await
-            .map_err(|err| Auth0Error::HTTPRequest(anyhow!(err)))?
-            .json()
-            .await
-            .map_err(|err| Auth0Error::JSONDecode(anyhow!(err)))
-    }
-}
-
-#[async_trait]
-impl IAuth0Client for Auth0Client {
-    async fn get_user(&self, auth0_id: String) -> Result<Auth0User, Auth0Error> {
-        let res = self
-            .request(
-                reqwest::Method::GET,
-                format!("/api/v2/users/{}", auth0_id),
-                None,
-            )
-            .await?;
-
-        let user: Auth0User = serde_json::value::from_value(res).unwrap();
-
-        Ok(user)
+        Ok(access_token)
     }
 }

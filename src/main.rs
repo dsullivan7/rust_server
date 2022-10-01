@@ -12,6 +12,7 @@ mod errors;
 mod extractors;
 mod gov;
 mod handlers;
+mod linked_in;
 mod models;
 mod plaid;
 mod services;

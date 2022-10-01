@@ -1,6 +1,7 @@
 mod balances;
 mod bank_accounts;
 mod bank_transfers;
+mod groups;
 pub mod health;
 mod orders;
 mod plaid;

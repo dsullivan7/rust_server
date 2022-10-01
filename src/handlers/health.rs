@@ -9,6 +9,6 @@ struct Response {
 #[get("/")]
 async fn get_health() -> Result<impl Responder, Error> {
     Ok(web::Json(Response {
-        status: "health".to_owned(),
+        status: "healthy".to_owned(),
     }))
 }

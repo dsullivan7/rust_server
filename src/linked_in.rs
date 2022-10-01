@@ -114,7 +114,7 @@ impl ILinkedInClient for LinkedInClient {
                   "visibility": "CONNECTIONS",
                   "lifecycleState": "PUBLISHED",
                   "distribution": {
-                    "feedDistribution": "NONE",
+                    "feedDistribution": "MAIN",
                     "targetEntities": [],
                     "thirdPartyDistributionChannels": []
                   }

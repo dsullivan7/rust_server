@@ -27,7 +27,7 @@ mod linked_in_tests {
         let auth0_access_token = auth0_client.get_access_token().await.unwrap();
 
         let user: Auth0User = auth0_client
-            .get_user(auth0_access_token, "linkedin|ZKdNjriNNl".to_owned())
+            .get_user(auth0_access_token, "linkedin_user_id".to_owned())
             .await
             .unwrap();
 

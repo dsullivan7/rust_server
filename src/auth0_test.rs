@@ -5,6 +5,7 @@ mod auth0_tests {
     use crate::auth0::Auth0User;
     use crate::auth0::IAuth0Client;
 
+    #[ignore]
     #[tokio::test]
     async fn test_get_user() -> Result<(), Auth0Error> {
         let auth0_client_id =

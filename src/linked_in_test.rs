@@ -9,6 +9,7 @@ mod linked_in_tests {
     use crate::auth0::Auth0User;
     use crate::auth0::IAuth0Client;
 
+    #[ignore]
     #[tokio::test]
     async fn test_get_user() -> Result<(), LinkedInError> {
         let auth0_client_id =

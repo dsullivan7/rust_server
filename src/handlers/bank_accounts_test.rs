@@ -125,6 +125,7 @@ async fn test_list_bank_account() {
     assert_eq!(bank_accounts_resp[0].updated_at, bank_account_db.updated_at);
 }
 
+#[ignore]
 #[cfg(test)]
 #[tokio::test]
 async fn test_create_bank_account() {

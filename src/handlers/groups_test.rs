@@ -61,7 +61,7 @@ async fn test_get_group() {
 
 #[cfg(test)]
 #[tokio::test]
-async fn test_list_group() {
+async fn test_list_groups() {
     use super::*;
 
     let group_id_1 = Uuid::new_v4();

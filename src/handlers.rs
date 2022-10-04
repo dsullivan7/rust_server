@@ -6,6 +6,7 @@ mod groups;
 pub mod health;
 mod orders;
 mod plaid;
+mod points;
 mod posts;
 mod profiles;
 mod users;

@@ -119,6 +119,7 @@ async fn test_create_user_post() {
     let user_post_id_1 = Uuid::new_v4();
     let post_id_1 = Uuid::new_v4();
     let user_id_1 = Uuid::new_v4();
+    let point_id_1 = Uuid::new_v4();
 
     let user_post_db: models::user_post::Model = models::user_post::Model {
         user_post_id: user_post_id_1.to_owned(),
@@ -128,8 +129,21 @@ async fn test_create_user_post() {
         updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
     };
 
+    let point_db: models::point::Model = models::point::Model {
+        point_id: point_id_1.to_owned(),
+        user_id: user_id_1.to_owned(),
+        amount: 100,
+        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+    };
+
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
         .append_query_results(vec![vec![user_post_db.clone()]])
+        .append_exec_results(vec![MockExecResult {
+            last_insert_id: 1,
+            rows_affected: 1,
+        }])
+        .append_query_results(vec![vec![point_db.clone()]])
         .append_exec_results(vec![MockExecResult {
             last_insert_id: 1,
             rows_affected: 1,

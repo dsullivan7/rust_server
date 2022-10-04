@@ -87,13 +87,21 @@ async fn create_user_post(
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
 
-    let user_id = Set(body.user_id);
-    let post_id = Set(body.post_id);
-
     let user_post: models::user_post::Model = models::user_post::ActiveModel {
         user_post_id: NotSet,
-        user_id,
-        post_id,
+        user_id: Set(body.user_id),
+        post_id: Set(body.post_id),
+        created_at: NotSet,
+        updated_at: NotSet,
+    }
+    .insert(conn)
+    .await
+    .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
+    models::point::ActiveModel {
+        point_id: NotSet,
+        user_id: Set(body.user_id),
+        amount: Set(100),
         created_at: NotSet,
         updated_at: NotSet,
     }

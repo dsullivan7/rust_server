@@ -3,9 +3,14 @@ use actix_web::{web, Scope};
 use super::balances;
 use super::bank_accounts;
 use super::bank_transfers;
+use super::group_users;
+use super::groups;
 use super::orders;
 use super::plaid;
+use super::points;
+use super::posts;
 use super::profiles;
+use super::user_posts;
 use super::users;
 
 pub fn routes() -> Scope {
@@ -30,6 +35,28 @@ pub fn routes() -> Scope {
         .service(orders::create_order)
         .service(orders::modify_order)
         .service(orders::delete_order)
+        .service(groups::get_group)
+        .service(groups::list_groups)
+        .service(groups::create_group)
+        .service(groups::modify_group)
+        .service(groups::delete_group)
+        .service(group_users::get_group_user)
+        .service(group_users::list_group_users)
+        .service(group_users::create_group_user)
+        .service(group_users::modify_group_user)
+        .service(group_users::delete_group_user)
+        .service(posts::get_post)
+        .service(posts::list_posts)
+        .service(posts::create_post)
+        .service(posts::modify_post)
+        .service(posts::delete_post)
+        .service(user_posts::get_user_post)
+        .service(user_posts::list_user_posts)
+        .service(user_posts::create_user_post)
+        .service(user_posts::modify_user_post)
+        .service(user_posts::delete_user_post)
+        .service(points::get_point)
+        .service(points::list_points)
         .service(balances::get_balances)
         .service(profiles::create_profile)
         .service(plaid::create_token)

@@ -2,9 +2,7 @@
   "family": "pongo-app-rust",
   "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/pongo-ecs-exec-role",
   "networkMode": "awsvpc",
-  "requiresCompatibilities": [
-    "FARGATE"
-  ],
+  "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "1024",
   "containerDefinitions": [
@@ -40,6 +38,10 @@
         {
           "name": "AUTH0_AUDIENCE",
           "valueFrom": "arn:aws:ssm:us-east-2:${AWS_ACCOUNT_ID}:parameter/dev/pongo/AUTH0_AUDIENCE"
+        },
+        {
+          "name": "RUST_LOG",
+          "valueFrom": "arn:aws:ssm:us-east-2:${AWS_ACCOUNT_ID}:parameter/dev/pongo/RUST_LOG"
         },
         {
           "name": "PORT",

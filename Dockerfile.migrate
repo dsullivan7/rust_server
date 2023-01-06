@@ -1,0 +1,7 @@
+FROM rust:latest
+COPY ./migrations /app
+
+RUN cargo install sqlx-cli
+
+ENTRYPOINT ["sh", "-c"]
+CMD ["PGPASSWORD=${DB_PASSWORD} sqlx migrate run --database-url postgres://${DB_USER}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSL_MODE} --source /app"]

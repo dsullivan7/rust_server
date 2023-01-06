@@ -89,6 +89,16 @@ async fn create_user(
 ) -> Result<impl Responder, Error> {
     let conn = &data.conn;
 
+    let user_found_res = User::find()
+        .filter(models::user::Column::Auth0Id.eq(body.auth0_id.to_owned()))
+        .one(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
+    if let Some(user_found) = user_found_res {
+        return Ok((web::Json(user_found), http::StatusCode::OK));
+    }
+
     let mut first_name = NotSet;
 
     if body.first_name.is_some() {

@@ -124,7 +124,7 @@ async fn modify_user_post(
 
     let conn = &data.conn;
 
-    let mut user_post_found: models::user_post::ActiveModel = Share::find_by_id(user_post_id)
+    let user_post_found: models::user_post::ActiveModel = Share::find_by_id(user_post_id)
         .one(conn)
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?

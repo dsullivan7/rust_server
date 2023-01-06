@@ -131,6 +131,7 @@ async fn test_create_user() {
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
+        .append_query_results(vec![Vec::<models::user::Model>::new()])
         .append_query_results(vec![vec![user_db.clone()]])
         .append_exec_results(vec![MockExecResult {
             last_insert_id: 1,
@@ -151,6 +152,7 @@ async fn test_create_user() {
     let body = serde_json::json!({
         "first_name": "first_name",
         "last_name": "last_name",
+        "auth0_id": "auth0_id",
     });
 
     let req = test::TestRequest::post()

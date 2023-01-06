@@ -11,9 +11,7 @@ pub struct Model {
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub dwolla_customer_id: Option<String>,
-    #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
-    #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub updated_at: chrono::DateTime<chrono::FixedOffset>,
 }
 

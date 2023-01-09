@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 x-app-environment: &app-environment
   DB_HOST: $DB_HOST
@@ -43,13 +43,12 @@ services:
       context: .
       dockerfile: Dockerfile.app
     ports:
-      - '${PORT:-7000}:${PORT:-7000}'
-    environment:
-      *app-environment
+      - "${PORT:-7000}:${PORT:-7000}"
+    environment: *app-environment
 
   build:
     image: rust:latest
-    command: 'cargo build --release'
+    command: "cargo build --release"
     working_dir: /app
     volumes:
       - ./:/app
@@ -60,7 +59,7 @@ services:
       POSTGRES_PASSWORD: $DB_PASSWORD
       POSTGRES_USER: $DB_USER
     ports:
-      - '${DB_PORT:-5432}:5432'
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - dbdata_12.7:/var/lib/postgresql/data
 
@@ -69,23 +68,23 @@ services:
       context: .
       dockerfile: Dockerfile.migrate
     environment:
-      *db-environment
-
-  db-init:
-    command: 'sh -c /app/dbinit.sh'
-    build:
-      context: .
-      dockerfile: Dockerfile.postgres
-    environment:
-      *db-environment
+      <<: *db-environment
+      MIGRATION_DIR: ./migrations
 
   db-seed:
-    command: 'sh -c /app/dbseed.sh'
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    environment:
+      <<: *db-environment
+      MIGRATION_DIR: ./seeders/development
+
+  db-init:
+    command: "sh -c /app/dbinit.sh"
     build:
       context: .
       dockerfile: Dockerfile.postgres
-    environment:
-      *db-environment
+    environment: *db-environment
 
 volumes:
   dbdata_12.7:

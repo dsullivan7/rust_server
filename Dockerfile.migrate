@@ -1,5 +1,6 @@
 FROM rust:latest
-COPY ${MIGRATION_DIR} /app
+
+COPY ./migrations /app
 
 RUN cargo install sqlx-cli
 

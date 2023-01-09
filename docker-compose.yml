@@ -63,21 +63,27 @@ services:
     volumes:
       - dbdata_12.7:/var/lib/postgresql/data
 
+  db-init:
+    command: 'sh -c /app/dbinit.sh'
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    environment:
+      *db-environment
+
   db-migrate:
     build:
       context: .
       dockerfile: Dockerfile.migrate
-    environment:
-      <<: *db-environment
-      MIGRATION_DIR: ./migrations
+    environment: *db-environment
 
   db-seed:
+    command: 'sh -c /app/dbseed.sh'
     build:
       context: .
-      dockerfile: Dockerfile.migrate
+      dockerfile: Dockerfile.postgres
     environment:
-      <<: *db-environment
-      MIGRATION_DIR: ./seeders/development
+      *db-environment
 
   db-init:
     command: "sh -c /app/dbinit.sh"

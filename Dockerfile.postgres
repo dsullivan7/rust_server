@@ -1,0 +1,5 @@
+FROM postgres:12.7 as postgres
+
+COPY ./dbinit.sh /app/dbinit.sh
+COPY ./dbseed.sh /app/dbseed.sh
+COPY ./seeders /app/seeders

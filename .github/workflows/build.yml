@@ -47,6 +47,13 @@ jobs:
         with:
           task-definition: task-definition.json
           wait-for-service-stability: true
+      - name: Execute ecs run-task db-init
+        run: |
+          aws ecs run-task \
+            --task-definition pongo-db-init \
+            --cluster pongo-ecs-cluster-1520594 \
+            --launch-type="FARGATE" \
+            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}'
       # migrate
       - name: Build, tag, and push migrate image to Amazon ECR
         env:
@@ -71,6 +78,13 @@ jobs:
         with:
           task-definition: task-definition.json
           wait-for-service-stability: true
+      - name: Execute ecs run task
+        run: |
+          aws ecs run-task migrate \
+            --task-definition pongo-migrate \
+            --cluster pongo-ecs-cluster-1520594 \
+            --launch-type="FARGATE" \
+            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}'
       # seed
       - name: Env substitution
         env:
@@ -85,6 +99,13 @@ jobs:
         with:
           task-definition: task-definition.json
           wait-for-service-stability: true
+      - name: Execute ecs run-task seed
+        run: |
+          aws ecs run-task \
+            --task-definition pongo-seed \
+            --cluster pongo-ecs-cluster-1520594 \
+            --launch-type="FARGATE" \
+            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}'
       # app
       - name: Build, tag, and push app-rust image to Amazon ECR
         env:

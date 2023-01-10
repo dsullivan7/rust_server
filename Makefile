@@ -44,7 +44,7 @@ build-docker:
 
 .PHONY: test-docker
 test-docker:
-	docker-compose run --rm golang go test -v $(TESTS)
+	docker-compose up --build test
 
 .PHONY: docs
 docs:

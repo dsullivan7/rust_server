@@ -2,15 +2,13 @@
   "family": "pongo-migrate",
   "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/pongo-ecs-exec-role",
   "networkMode": "awsvpc",
-  "requiresCompatibilities": [
-    "FARGATE"
-  ],
+  "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "1024",
   "containerDefinitions": [
     {
       "name": "pongo-migrate",
-      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com/pongo-migrate-990bd9f:${CIRCLE_SHA1}",
+      "image": "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com/pongo-migrate-990bd9f:${IMAGE_TAG}",
       "essential": true,
       "cpu": 10,
       "memory": 512,

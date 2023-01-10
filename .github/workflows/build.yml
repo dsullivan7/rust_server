@@ -78,9 +78,9 @@ jobs:
         with:
           task-definition: task-definition.json
           wait-for-service-stability: true
-      - name: Execute ecs run task
+      - name: Execute ecs run-task migrate
         run: |
-          aws ecs run-task migrate \
+          aws ecs run-task \
             --task-definition pongo-migrate \
             --cluster pongo-ecs-cluster-1520594 \
             --launch-type="FARGATE" \

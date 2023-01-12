@@ -15,8 +15,8 @@ async fn test_get_point() {
         point_id: point_id.to_owned(),
         user_id: user_id.to_owned(),
         amount: 100,
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -73,8 +73,8 @@ async fn test_list_points() {
         point_id: point_id_1.to_owned(),
         user_id: user_id_1.to_owned(),
         amount: 100,
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)

@@ -17,8 +17,8 @@ async fn test_get_user() {
         last_name: Some("last_name".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
         dwolla_customer_id: Some("dwolla_customer_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -77,8 +77,8 @@ async fn test_list_user() {
         last_name: Some("last_name".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
         dwolla_customer_id: Some("dwolla_customer_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -126,8 +126,8 @@ async fn test_create_user() {
         last_name: Some("last_name".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
         dwolla_customer_id: Some("dwolla_customer_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -187,8 +187,8 @@ async fn test_modify_user() {
         last_name: Some("last_name".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
         dwolla_customer_id: Some("dwolla_customer_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let user_db_modified: models::user::Model = models::user::Model {
@@ -197,8 +197,8 @@ async fn test_modify_user() {
         last_name: Some("last_name_different".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
         dwolla_customer_id: Some("dwolla_customer_id_different".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)

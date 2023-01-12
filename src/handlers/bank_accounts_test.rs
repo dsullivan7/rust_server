@@ -18,8 +18,8 @@ async fn test_get_bank_account() {
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -79,8 +79,8 @@ async fn test_list_bank_account() {
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -141,8 +141,8 @@ async fn test_create_bank_account() {
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -214,8 +214,8 @@ async fn test_modify_bank_account() {
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let bank_account_id = Uuid::new_v4();
@@ -228,8 +228,8 @@ async fn test_modify_bank_account() {
         plaid_account_id: Some("plaid_account_id".to_owned()),
         plaid_access_token: Some("plaid_access_token".to_owned()),
         dwolla_funding_source_id: Some("dwolla_funding_source_id".to_owned()),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)

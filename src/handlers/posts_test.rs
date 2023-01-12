@@ -17,8 +17,8 @@ async fn test_get_post() {
         name: "name".to_owned(),
         message: "message".to_owned(),
         url: "url".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -79,8 +79,8 @@ async fn test_list_post() {
         name: "name".to_owned(),
         message: "message".to_owned(),
         url: "url".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -130,8 +130,8 @@ async fn test_create_post() {
         name: "name".to_owned(),
         message: "message".to_owned(),
         url: "url".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -193,8 +193,8 @@ async fn test_modify_post() {
         name: "name".to_owned(),
         message: "message".to_owned(),
         url: "url".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let post_db_modified: models::post::Model = models::post::Model {
@@ -203,8 +203,8 @@ async fn test_modify_post() {
         name: "name_different".to_owned(),
         message: "message_different".to_owned(),
         url: "url_different".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)

@@ -16,8 +16,8 @@ async fn test_get_group_user() {
         group_user_id: group_user_id.to_owned(),
         group_id: group_id.to_owned(),
         user_id: user_id.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -75,8 +75,8 @@ async fn test_list_group_user() {
         group_user_id: group_user_id_1.to_owned(),
         group_id: group_id_1.to_owned(),
         user_id: user_id_1.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -127,8 +127,8 @@ async fn test_create_group_user() {
         group_user_id: group_user_id_1.to_owned(),
         group_id: group_id_1.to_owned(),
         user_id: user_id_1.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -185,16 +185,16 @@ async fn test_modify_group_user() {
         group_user_id: group_user_id.to_owned(),
         group_id: group_id.to_owned(),
         user_id: user_id.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let group_user_db_modified: models::group_user::Model = models::group_user::Model {
         group_user_id: group_user_id.to_owned(),
         group_id: group_id.to_owned(),
         user_id: user_id.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)

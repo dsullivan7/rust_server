@@ -17,8 +17,8 @@ async fn test_get_bank_transfer() {
         amount: 100,
         dwolla_transfer_id: Some("dwolla_transfer_id".to_owned()),
         status: "status".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -74,8 +74,8 @@ async fn test_list_bank_transfer() {
         amount: 100,
         dwolla_transfer_id: Some("dwolla_transfer_id".to_owned()),
         status: "status".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -137,8 +137,8 @@ async fn test_create_bank_transfer() {
         amount: 100,
         dwolla_transfer_id: Some("dwolla_transfer_id".to_owned()),
         status: "status".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -206,8 +206,8 @@ async fn test_modify_bank_transfer() {
         amount: 100,
         dwolla_transfer_id: Some("dwolla_transfer_id".to_owned()),
         status: "status".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let bank_transfer_id = Uuid::new_v4();
@@ -218,8 +218,8 @@ async fn test_modify_bank_transfer() {
         amount: 100,
         dwolla_transfer_id: Some("dwolla_transfer_id".to_owned()),
         status: "status".to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)

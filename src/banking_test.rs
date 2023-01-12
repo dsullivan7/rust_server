@@ -32,7 +32,7 @@ mod dwolla_tests {
         println!("creating bank customer");
         let user_external = dwolla_client.create_customer(user_external).await?;
 
-        assert_eq!("test", user_external.dwolla_customer_id.unwrap().to_owned());
+        assert_eq!("test", user_external.dwolla_customer_id.unwrap());
         Ok(())
     }
 }

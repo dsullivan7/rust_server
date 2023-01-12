@@ -16,8 +16,8 @@ async fn test_get_user_post() {
         user_post_id: user_post_id.to_owned(),
         post_id: post_id.to_owned(),
         user_id: user_id.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -75,8 +75,8 @@ async fn test_list_user_post() {
         user_post_id: user_post_id_1.to_owned(),
         post_id: post_id_1.to_owned(),
         user_id: user_id_1.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -125,16 +125,16 @@ async fn test_create_user_post() {
         user_post_id: user_post_id_1.to_owned(),
         post_id: post_id_1.to_owned(),
         user_id: user_id_1.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let point_db: models::point::Model = models::point::Model {
         point_id: point_id_1.to_owned(),
         user_id: user_id_1.to_owned(),
         amount: 100,
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)
@@ -196,16 +196,16 @@ async fn test_modify_user_post() {
         user_post_id: user_post_id.to_owned(),
         post_id: post_id.to_owned(),
         user_id: user_id.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let user_post_db_modified: models::user_post::Model = models::user_post::Model {
         user_post_id: user_post_id.to_owned(),
         post_id: post_id.to_owned(),
         user_id: user_id.to_owned(),
-        created_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        updated_at: chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
+        created_at: chrono::Utc::now().into(),
+        updated_at: chrono::Utc::now().into(),
     };
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres)

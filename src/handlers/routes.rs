@@ -8,6 +8,8 @@ use super::groups;
 use super::orders;
 use super::plaid;
 use super::points;
+use super::portfolio_tags;
+use super::portfolios;
 use super::posts;
 use super::profiles;
 use super::tags;
@@ -51,6 +53,16 @@ pub fn routes() -> Scope {
         .service(posts::create_post)
         .service(posts::modify_post)
         .service(posts::delete_post)
+        .service(portfolios::get_portfolio)
+        .service(portfolios::list_portfolios)
+        .service(portfolios::create_portfolio)
+        .service(portfolios::modify_portfolio)
+        .service(portfolios::delete_portfolio)
+        .service(portfolio_tags::get_portfolio_tag)
+        .service(portfolio_tags::list_portfolio_tags)
+        .service(portfolio_tags::create_portfolio_tag)
+        .service(portfolio_tags::modify_portfolio_tag)
+        .service(portfolio_tags::delete_portfolio_tag)
         .service(tags::get_tag)
         .service(tags::list_tags)
         .service(tags::create_tag)

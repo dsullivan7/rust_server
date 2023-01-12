@@ -89,7 +89,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
     };
 
     let port = std::env::var("PORT")
-        .unwrap_or("7000".to_owned())
+        .unwrap_or_else(|_| "7000".to_owned())
         .parse::<u16>()
         .expect("PORT must be a number");
 

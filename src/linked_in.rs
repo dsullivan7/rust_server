@@ -24,8 +24,6 @@ pub enum LinkedInError {
     HTTPRequest(anyhow::Error),
     #[error("json decode error")]
     JSONDecode(anyhow::Error),
-    #[error("field not found error")]
-    FieldNotFound,
 }
 
 #[automock]

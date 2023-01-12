@@ -76,11 +76,11 @@ impl IServices for Services {
 
         let interest = interest.round() as i32;
 
-        return Balance {
+        Balance {
             total: interest + principal,
             interest,
             principal,
-        };
+        }
     }
 
     fn get_orders(&self, open_orders: Vec<Order>, child_orders: Vec<Order>) -> Vec<Order> {
@@ -135,7 +135,7 @@ impl IServices for Services {
                 amount: order_amount,
                 side: "buy".to_owned(),
                 status: "complete".to_owned(),
-                completed_at: Some(chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0))),
+                completed_at: Some(chrono::Utc::now().into()),
             };
 
             let child_order_sell = Order {
@@ -144,7 +144,7 @@ impl IServices for Services {
                 amount: order_amount,
                 side: "sell".to_owned(),
                 status: "complete".to_owned(),
-                completed_at: Some(chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0))),
+                completed_at: Some(chrono::Utc::now().into()),
             };
 
             orders.push(child_order_buy);

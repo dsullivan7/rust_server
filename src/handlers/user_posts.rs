@@ -117,7 +117,6 @@ async fn modify_user_post(
     data: web::Data<AppState>,
     _claims: Claims,
     path: web::Path<String>,
-    body: web::Json<ModifyParams>,
 ) -> Result<impl Responder, Error> {
     let user_post_id = uuid::Uuid::parse_str(&path.into_inner())
         .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;

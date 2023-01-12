@@ -72,7 +72,7 @@ impl TwoCaptcha {
             .ok_or(CaptchaError::FieldNotFound)?
             .to_owned();
 
-        Ok(request_id.to_owned())
+        Ok(request_id)
     }
 
     async fn get_recaptcha_v2_response(&self, request_id: String) -> Result<String, CaptchaError> {
@@ -106,7 +106,7 @@ impl TwoCaptcha {
                 return Ok(response);
             }
 
-            i = i + 1;
+            i += 1;
 
             if i < MAX_RETRIES {
                 thread::sleep(Duration::from_secs(TWO_CAPTCHA_RETRY_WAIT));

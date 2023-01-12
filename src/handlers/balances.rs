@@ -45,11 +45,7 @@ async fn get_balances(
         })
         .collect();
 
-    let balance = services.get_balance(
-        orders,
-        INTEREST_RATE,
-        chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-    );
+    let balance = services.get_balance(orders, INTEREST_RATE, chrono::Utc::now().into());
 
     Ok(web::Json(balance))
 }

@@ -124,7 +124,7 @@ impl DwollaClient {
             .await
             .map_err(|err| BankingError::HTTPRequest(anyhow!(err)))?;
 
-        return Err(BankingError::HTTPRequest(anyhow!(text)));
+        Err(BankingError::HTTPRequest(anyhow!(text)))
     }
 
     async fn authenticate(&self) -> Result<(), BankingError> {
@@ -199,7 +199,7 @@ impl BankingClient for DwollaClient {
             .await?;
 
         let dwolla_customer_id = res
-            .split("/")
+            .split('/')
             .collect::<Vec<&str>>()
             .last()
             .ok_or(BankingError::FieldNotFound)?
@@ -232,7 +232,7 @@ impl BankingClient for DwollaClient {
             .await?;
 
         let dwolla_funding_source_id = res
-            .split("/")
+            .split('/')
             .collect::<Vec<&str>>()
             .last()
             .ok_or(BankingError::FieldNotFound)?
@@ -273,7 +273,7 @@ impl BankingClient for DwollaClient {
             .await?;
 
         let dwolla_transfer_id = res
-            .split("/")
+            .split('/')
             .collect::<Vec<&str>>()
             .last()
             .ok_or(BankingError::FieldNotFound)?

@@ -4,7 +4,6 @@
 
 use actix_web::{delete, get, http, post, put, web, Error, HttpResponse, Responder};
 use anyhow::anyhow;
-use chrono;
 use sea_orm::entity::*;
 use sea_orm::QueryFilter;
 use serde::Deserialize;
@@ -88,9 +87,7 @@ async fn create_order(
         amount,
         side,
         status: Set("pending".to_owned()),
-        completed_at: Set(Some(
-            chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        )),
+        completed_at: Set(Some(chrono::Utc::now().into())),
         created_at: NotSet,
         updated_at: NotSet,
     }
@@ -102,16 +99,14 @@ async fn create_order(
     let amount = Set(body.amount.to_owned());
     let side = Set(body.side.to_owned());
 
-    let child_order: models::order::Model = models::order::ActiveModel {
+    models::order::ActiveModel {
         parent_order_id: Set(Some(order.order_id)),
         order_id: NotSet,
         user_id,
         amount,
         side,
         status: Set("complete".to_owned()),
-        completed_at: Set(Some(
-            chrono::Utc::now().with_timezone(&chrono::FixedOffset::east(0)),
-        )),
+        completed_at: Set(Some(chrono::Utc::now().into())),
         created_at: NotSet,
         updated_at: NotSet,
     }

@@ -112,10 +112,7 @@ impl IAuth0Client for Auth0Client {
         let mut access_token_params = HashMap::new();
         access_token_params.insert("client_id", self.client_id.to_owned());
         access_token_params.insert("client_secret", self.client_secret.to_owned());
-        access_token_params.insert(
-            "audience",
-            format!("{}{}", self.api_url, "/api/v2/").to_owned(),
-        );
+        access_token_params.insert("audience", format!("{}{}", self.api_url, "/api/v2/"));
         access_token_params.insert("grant_type", "client_credentials".to_owned());
 
         let access_token_req = client

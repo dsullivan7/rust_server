@@ -81,7 +81,7 @@ impl IAuthentication for Authentication {
                 log::debug!("found claims");
                 Ok(token.claims)
             }
-            algorithm => Err(AuthError::UnsupportedAlgortithm(algorithm).into()),
+            algorithm => Err(AuthError::UnsupportedAlgortithm(algorithm)),
         }
     }
 }

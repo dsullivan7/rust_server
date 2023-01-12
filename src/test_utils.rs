@@ -3,6 +3,7 @@ use super::AppState;
 use crate::authentication;
 use crate::banking;
 use crate::gov;
+use crate::linked_in;
 use crate::plaid;
 use crate::services;
 
@@ -18,6 +19,7 @@ pub struct TestState {
     pub plaid_client: Box<dyn plaid::IPlaidClient>,
     pub banking_client: Box<dyn banking::BankingClient>,
     pub gov_client: Box<dyn gov::IGovernment>,
+    pub linked_in_client: Box<dyn linked_in::ILinkedInClient>,
     pub authentication: Box<dyn authentication::IAuthentication>,
     pub services: Box<dyn services::IServices>,
 }
@@ -28,6 +30,7 @@ impl Default for TestState {
             conn: MockDatabase::new(DatabaseBackend::Postgres).into_connection(),
             plaid_client: Box::new(plaid::MockIPlaidClient::new()),
             banking_client: Box::new(banking::MockBankingClient::new()),
+            linked_in_client: Box::new(linked_in::MockILinkedInClient::new()),
             gov_client: Box::new(gov::MockIGovernment::new()),
             authentication: Box::new(authentication::MockIAuthentication::new()),
             services: Box::new(services::MockIServices::new()),
@@ -47,6 +50,7 @@ impl TestState {
         AppState {
             conn: self.conn,
             plaid_client: self.plaid_client,
+            linked_in_client: self.linked_in_client,
             banking_client: self.banking_client,
             gov_client: self.gov_client,
             authentication: self.authentication,

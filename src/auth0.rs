@@ -49,6 +49,7 @@ pub struct Auth0Client {
 }
 
 impl Auth0Client {
+    #[allow(dead_code)]
     pub fn new(client_id: String, client_secret: String, api_url: String) -> Auth0Client {
         Auth0Client {
             client_id,

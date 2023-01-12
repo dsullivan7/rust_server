@@ -26,6 +26,8 @@ pub struct AppState {
     gov_client: Box<dyn gov::IGovernment>,
     plaid_client: Box<dyn plaid::IPlaidClient>,
     banking_client: Box<dyn banking::BankingClient>,
+    #[allow(dead_code)]
+    linked_in_client: Box<dyn linked_in::ILinkedInClient>,
     authentication: Box<dyn authentication::IAuthentication>,
 }
 
@@ -73,6 +75,10 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
     let dwolla_client =
         banking::DwollaClient::new(dwolla_api_key, dwolla_api_secret, dwolla_api_url);
 
+    let linked_in_api_url =
+        std::env::var("LINKED_IN_API_URL").expect("LINKED_IN_API_URL must be set");
+    let linked_in_client = linked_in::LinkedInClient::new(linked_in_api_url);
+
     let two_captcha_key = std::env::var("TWO_CAPTCHA_KEY").expect("TWO_CAPTCHA_KEY must be set");
 
     let cptcha = captcha::TwoCaptcha::new(two_captcha_key);
@@ -99,6 +105,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         banking_client: Box::new(dwolla_client),
         gov_client: Box::new(gov_client),
         plaid_client: Box::new(plaid_client),
+        linked_in_client: Box::new(linked_in_client),
         authentication: Box::new(auth),
     });
 

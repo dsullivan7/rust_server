@@ -62,6 +62,14 @@ services:
     environment:
       *app-environment
 
+  ci:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    working_dir: /app
+    volumes:
+      - ./:/app
+
   postgres:
     image: postgres:12.7
     environment:

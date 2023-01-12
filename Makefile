@@ -1,6 +1,6 @@
 DOCKER_POSTGRES = postgres:12.7
 DOCKER_ALPINE = alpine:3.13.5
-DOCKER_RUST = rust:1-alpine3.15
+DOCKER_RUST = rustdocker/rustfmt_clippy:stable
 
 ENVFILE ?= .env
 
@@ -52,12 +52,8 @@ docs:
 
 .PHONY: lint
 lint:
-	golangci-lint run
-
-.PHONY: lint-fix
-lint-fix:
-	golangci-lint run --fix
+	cargo clippy --all-targets --all-features -- -D warnings
 
 .PHONY: lint-docker
 lint-docker:
-	docker run --rm -v ${PWD}:/data -w /data ${DOCKER_GOLANG_LINT} golangci-lint run --timeout=3m
+	docker-compose run ci cargo clippy --all-targets --all-features -- -D warnings

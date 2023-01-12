@@ -9,6 +9,7 @@ mod plaid;
 mod points;
 mod posts;
 mod profiles;
+mod tags;
 mod user_posts;
 mod users;
 

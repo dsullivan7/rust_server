@@ -10,6 +10,7 @@ use super::plaid;
 use super::points;
 use super::posts;
 use super::profiles;
+use super::tags;
 use super::user_posts;
 use super::users;
 
@@ -50,6 +51,11 @@ pub fn routes() -> Scope {
         .service(posts::create_post)
         .service(posts::modify_post)
         .service(posts::delete_post)
+        .service(tags::get_tag)
+        .service(tags::list_tags)
+        .service(tags::create_tag)
+        .service(tags::modify_tag)
+        .service(tags::delete_tag)
         .service(user_posts::get_user_post)
         .service(user_posts::list_user_posts)
         .service(user_posts::create_user_post)

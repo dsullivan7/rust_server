@@ -5,5 +5,6 @@ pub mod group_user;
 pub mod order;
 pub mod point;
 pub mod post;
+pub mod tag;
 pub mod user;
 pub mod user_post;

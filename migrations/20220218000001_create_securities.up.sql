@@ -3,7 +3,7 @@ create table securities (
   symbol text not null,
   name text not null,
   description text,
-  beta numeric,
+  beta double precision,
   created_at timestamptz not null default (now()),
   updated_at timestamptz not null default (now())
 );

@@ -9,13 +9,12 @@ use uuid::Uuid;
 use crate::authentication::Claims;
 use crate::errors;
 use crate::models;
-use crate::models::portfolio::Entity as Portfolio;
 use crate::models::portfolio_tag::Entity as PortfolioTag;
 use crate::models::security::Entity as Security;
 use crate::models::security_tag::Entity as SecurityTag;
 use crate::AppState;
 
-const round_value: f64 = 10000.0;
+const ROUND_VALUE: f64 = 10000.0;
 
 #[derive(Deserialize)]
 struct QueryParams {
@@ -90,8 +89,8 @@ async fn list_portfolio_recommendations(
                     let amount = if i + 1 == total_securities {
                         remaining
                     } else {
-                        ((weight as f64) / (total_weight as f64) * round_value).round()
-                            / round_value
+                        ((weight as f64) / (total_weight as f64) * ROUND_VALUE).round()
+                            / ROUND_VALUE
                     };
 
                     remaining -= amount;

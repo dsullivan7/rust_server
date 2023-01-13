@@ -10,7 +10,7 @@ pub struct Model {
     pub symbol: String,
     pub name: String,
     pub description: String,
-    pub beta: String,
+    pub beta: f64,
     #[sea_orm(column_type = "TimestampWithTimeZone")]
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
     #[sea_orm(column_type = "TimestampWithTimeZone")]

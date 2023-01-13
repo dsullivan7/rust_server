@@ -7,6 +7,7 @@ pub mod health;
 mod orders;
 mod plaid;
 mod points;
+mod portfolio_recommendations;
 mod portfolio_tags;
 mod portfolios;
 mod posts;

@@ -77,20 +77,25 @@ async fn list_portfolio_recommendations(
         });
 
         let mut portfolio_holdings = vec![];
-        security_map.into_iter().for_each(|(security_id, weight)| {
-            let security_option = securities
-                .iter()
-                .find(|security| security.security_id == security_id);
+        let mut security_tuples = security_map.into_iter().collect::<Vec<(Uuid, i32)>>();
+        security_tuples.sort_by(|(id1, _), (id2, _)| id1.cmp(id2));
 
-            if let Some(security_found) = security_option {
-                portfolio_holdings.push(PortfolioHolding {
-                    symbol: security_found.symbol.to_owned(),
-                    name: security_found.name.to_owned(),
-                    description: security_found.description.to_owned(),
-                    amount: (weight as f64) / (total_weight as f64),
-                });
-            }
-        });
+        security_tuples
+            .into_iter()
+            .for_each(|(security_id, weight)| {
+                let security_option = securities
+                    .iter()
+                    .find(|security| security.security_id == security_id);
+
+                if let Some(security_found) = security_option {
+                    portfolio_holdings.push(PortfolioHolding {
+                        symbol: security_found.symbol.to_owned(),
+                        name: security_found.name.to_owned(),
+                        description: security_found.description.to_owned(),
+                        amount: (weight as f64) / (total_weight as f64),
+                    });
+                }
+            });
 
         return Ok(web::Json(portfolio_holdings));
     }

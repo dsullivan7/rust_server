@@ -15,6 +15,8 @@ use crate::models::security::Entity as Security;
 use crate::models::security_tag::Entity as SecurityTag;
 use crate::AppState;
 
+const round_value: f64 = 10000.0;
+
 #[derive(Deserialize)]
 struct QueryParams {
     portfolio_id: Option<Uuid>,
@@ -37,12 +39,6 @@ async fn list_portfolio_recommendations(
     let conn = &data.conn;
 
     if let Some(portfolio_id) = query.portfolio_id {
-        let portfolio: models::portfolio::Model = Portfolio::find_by_id(portfolio_id.to_owned())
-            .one(conn)
-            .await
-            .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
-            .ok_or(errors::ServerError::NotFound)?;
-
         let securities: Vec<models::security::Model> = Security::find()
             .all(conn)
             .await
@@ -76,23 +72,35 @@ async fn list_portfolio_recommendations(
             })
         });
 
+        let mut remaining = 1.0;
         let mut portfolio_holdings = vec![];
         let mut security_tuples = security_map.into_iter().collect::<Vec<(Uuid, i32)>>();
         security_tuples.sort_by(|(id1, _), (id2, _)| id1.cmp(id2));
 
+        let total_securities = security_tuples.len();
         security_tuples
             .into_iter()
-            .for_each(|(security_id, weight)| {
+            .enumerate()
+            .for_each(|(i, (security_id, weight))| {
                 let security_option = securities
                     .iter()
                     .find(|security| security.security_id == security_id);
 
                 if let Some(security_found) = security_option {
+                    let amount = if i + 1 == total_securities {
+                        remaining
+                    } else {
+                        ((weight as f64) / (total_weight as f64) * round_value).round()
+                            / round_value
+                    };
+
+                    remaining -= amount;
+
                     portfolio_holdings.push(PortfolioHolding {
                         symbol: security_found.symbol.to_owned(),
                         name: security_found.name.to_owned(),
                         description: security_found.description.to_owned(),
-                        amount: (weight as f64) / (total_weight as f64),
+                        amount,
                     });
                 }
             });

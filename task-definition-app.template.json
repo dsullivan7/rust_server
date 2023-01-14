@@ -112,6 +112,18 @@
           "valueFrom": "arn:aws:ssm:us-east-2:${AWS_ACCOUNT_ID}:parameter/dev/pongo/ENCRYPTION_KEY"
         },
         {
+          "name": "LINKED_IN_API_URL",
+          "valueFrom": "arn:aws:ssm:us-east-2:${AWS_ACCOUNT_ID}:parameter/dev/pongo/LINKED_IN_API_URL"
+        },
+        {
+          "name": "LINKED_IN_CLIENT_ID",
+          "valueFrom": "arn:aws:ssm:us-east-2:${AWS_ACCOUNT_ID}:parameter/dev/pongo/LINKED_IN_CLIENT_ID"
+        },
+        {
+          "name": "LINKED_IN_CLIENT_SECRET",
+          "valueFrom": "arn:aws:ssm:us-east-2:${AWS_ACCOUNT_ID}:parameter/dev/pongo/LINKED_IN_CLIENT_SECRET"
+        },
+        {
           "name": "PLAID_API_URL",
           "valueFrom": "arn:aws:ssm:us-east-2:${AWS_ACCOUNT_ID}:parameter/dev/pongo/PLAID_API_URL"
         },

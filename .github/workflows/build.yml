@@ -49,11 +49,17 @@ jobs:
           wait-for-service-stability: true
       - name: Execute ecs run-task db-init
         run: |
-          aws ecs run-task \
+          run_task_result=$(aws ecs run-task \
             --task-definition pongo-db-init \
             --cluster pongo-ecs-cluster-1520594 \
             --launch-type="FARGATE" \
-            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}'
+            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}')
+          echo ${run_task_result}
+          container_arn=$(echo $run_task_result | jq -r '.tasks[0].taskArn')
+          echo ${container_arn}
+          aws ecs wait tasks-stopped \
+            --cluster pongo-ecs-cluster-1520594 \
+            --tasks "${container_arn}"
       # migrate
       - name: Build, tag, and push migrate image to Amazon ECR
         env:
@@ -80,11 +86,17 @@ jobs:
           wait-for-service-stability: true
       - name: Execute ecs run-task migrate
         run: |
-          aws ecs run-task \
+          run_task_result=$(aws ecs run-task \
             --task-definition pongo-migrate \
             --cluster pongo-ecs-cluster-1520594 \
             --launch-type="FARGATE" \
-            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}'
+            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}')
+          echo ${run_task_result}
+          container_arn=$(echo $run_task_result | jq -r '.tasks[0].taskArn')
+          echo ${container_arn}
+          aws ecs wait tasks-stopped \
+            --cluster pongo-ecs-cluster-1520594 \
+            --tasks "${container_arn}"
       # seed
       - name: Env substitution
         env:
@@ -101,11 +113,15 @@ jobs:
           wait-for-service-stability: true
       - name: Execute ecs run-task seed
         run: |
-          aws ecs run-task \
+          run_task_result=$(aws ecs run-task \
             --task-definition pongo-seed \
             --cluster pongo-ecs-cluster-1520594 \
             --launch-type="FARGATE" \
-            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}'
+            --network-configuration '{ "awsvpcConfiguration": { "securityGroups": ["sg-0fc108c880310be04"], "subnets": ["subnet-075e79ab6b9ead172", "subnet-0548e2af7ea21ed1a"]}}')
+          container_arn=$(echo $run_task_result | jq -r '.tasks[0].taskArn')
+          aws ecs wait tasks-stopped \
+            --cluster pongo-ecs-cluster-1520594 \
+            --tasks "${container_arn}"
       # app
       - name: Build, tag, and push app-rust image to Amazon ECR
         env:

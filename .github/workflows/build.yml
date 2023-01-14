@@ -28,7 +28,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: pongo-postgres-0adb28f
-          DOCKER_FILE: Dockerfile.db-init
+          DOCKER_FILE: Dockerfile.postgres
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -f $DOCKER_FILE -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .

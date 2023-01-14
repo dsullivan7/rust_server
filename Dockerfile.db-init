@@ -1,3 +1,0 @@
-FROM postgres:12.7 as dbinit
-COPY ./dbinit.sh /app/dbinit.sh
-CMD ["sh", "-c", "/app/dbinit.sh"]

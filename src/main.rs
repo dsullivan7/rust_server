@@ -6,6 +6,7 @@ use std::env;
 
 mod auth0;
 mod authentication;
+mod authorization;
 mod banking;
 mod captcha;
 mod errors;

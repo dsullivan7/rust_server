@@ -1,23 +1,21 @@
-use async_trait::async_trait;
 use mockall::*;
-use uuid::Uuid;
+use thiserror::Error;
 
 pub mod oso;
 
-#[derive(Clone)]
-pub struct User {
-    pub user_id: Uuid,
-    pub role: String,
+#[derive(Error, Debug)]
+pub enum AuthorizationError {
+    #[error("authorization error")]
+    Error(anyhow::Error),
 }
 
 #[automock]
-#[async_trait]
-pub trait AuthorizationClient {
+pub trait AuthorizationClient<T> {
     fn allow_user_action_field(
         &self,
-        actor: User,
+        actor: T,
         action: String,
-        resource: User,
+        resource: T,
         field: String,
-    ) -> bool;
+    ) -> Result<bool, AuthorizationError>;
 }

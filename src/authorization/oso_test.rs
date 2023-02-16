@@ -17,14 +17,15 @@ mod test_authorization {
 
         let oso_authz_client = OsoAuthorizationClient::new(oso_client);
 
-        let user_id = Uuid::new_v4().to_string();
+        let user_id = Uuid::new_v4();
+
         let actor = authorization::oso::User {
-            user_id: user_id.to_owned(),
+            user_id: user_id.to_string(),
             role: "user".to_owned(),
         };
 
         let resource = authorization::oso::User {
-            user_id: user_id.to_owned(),
+            user_id: user_id.to_string(),
             role: "user".to_owned(),
         };
 

@@ -12,21 +12,19 @@ mod test_authorization {
     async fn test_allow_user_action_field() -> Result<(), authorization::AuthorizationError> {
         let mut oso_client = oso::Oso::new();
         oso_client
-            .load_str(
-                r#"allow_field(_actor: User, action, _resource: User, field) if
-        action in ["update"] and field in ["first_name"];"#,
-            )
+            .load_files(vec!["src/authorization/user.polar"])
             .map_err(|err| authorization::AuthorizationError::Error(anyhow!(err)))?;
 
         let oso_authz_client = OsoAuthorizationClient::new(oso_client);
 
+        let user_id = Uuid::new_v4().to_string();
         let actor = authorization::oso::User {
-            user_id: Uuid::new_v4().to_string(),
+            user_id: user_id.to_owned(),
             role: "user".to_owned(),
         };
 
         let resource = authorization::oso::User {
-            user_id: Uuid::new_v4().to_string(),
+            user_id: user_id.to_owned(),
             role: "user".to_owned(),
         };
 

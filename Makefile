@@ -32,7 +32,7 @@ db-init:
 
 .PHONY: run
 run:
-	go run ./cmd/app.go
+	cargo run
 
 .PHONY: run-docker
 run-docker:

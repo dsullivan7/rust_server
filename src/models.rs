@@ -1,14 +1,3 @@
-pub mod bank_account;
-pub mod bank_transfer;
 pub mod group;
 pub mod group_user;
-pub mod order;
-pub mod point;
-pub mod portfolio;
-pub mod portfolio_tag;
-pub mod post;
-pub mod security;
-pub mod security_tag;
-pub mod tag;
 pub mod user;
-pub mod user_post;

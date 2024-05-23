@@ -1,5 +1,3 @@
-version: "3.8"
-
 x-app-environment: &app-environment
   DB_HOST: $DB_HOST
   DB_PORT: $DB_PORT
@@ -8,21 +6,8 @@ x-app-environment: &app-environment
   DB_PASSWORD: $DB_PASSWORD
   DB_SSL: $DB_SSL
   PORT: $PORT
-  TWO_CAPTCHA_KEY: $TWO_CAPTCHA_KEY
-  PLAID_API_URL: $PLAID_API_URL
-  PLAID_REDIRECT_URI: $PLAID_REDIRECT_URI
-  PLAID_CLIENT_ID: $PLAID_CLIENT_ID
-  PLAID_SECRET: $PLAID_SECRET
   AUTH0_DOMAIN: $AUTH0_DOMAIN
   AUTH0_AUDIENCE: $AUTH0_AUDIENCE
-  ALPACA_API_URL: $ALPACA_API_URL
-  ALPACA_API_KEY: $ALPACA_API_KEY
-  ALPACA_API_SECRET: $ALPACA_API_SECRET
-  DWOLLA_API_URL: $DWOLLA_API_URL
-  DWOLLA_API_KEY: $DWOLLA_API_KEY
-  DWOLLA_API_SECRET: $DWOLLA_API_SECRET
-  DWOLLA_WEBHOOK_URL: $DWOLLA_WEBHOOK_URL
-  DWOLLA_WEBHOOK_SECRET: $DWOLLA_WEBHOOK_SECRET
   ALLOWED_ORIGINS: $ALLOWED_ORIGINS
   ENCRYPTION_KEY: $ENCRYPTION_KEY
 
@@ -59,8 +44,7 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
-    environment:
-      *app-environment
+    environment: *app-environment
 
   ci:
     build:
@@ -81,12 +65,11 @@ services:
       - dbdata_12.7:/var/lib/postgresql/data
 
   db-init:
-    command: 'sh -c /app/dbinit.sh'
+    command: "sh -c /app/dbinit.sh"
     build:
       context: .
       dockerfile: Dockerfile.postgres
-    environment:
-      *db-environment
+    environment: *db-environment
 
   db-migrate:
     build:
@@ -95,15 +78,7 @@ services:
     environment: *db-environment
 
   db-seed:
-    command: 'sh -c /app/dbseed.sh'
-    build:
-      context: .
-      dockerfile: Dockerfile.postgres
-    environment:
-      *db-environment
-
-  db-init:
-    command: "sh -c /app/dbinit.sh"
+    command: "sh -c /app/dbseed.sh"
     build:
       context: .
       dockerfile: Dockerfile.postgres

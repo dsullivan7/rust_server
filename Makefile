@@ -1,5 +1,5 @@
 DOCKER_POSTGRES = postgres:12.7
-DOCKER_ALPINE = alpine:3.13.5
+DOCKER_ALPINE = alpine:3.20.0
 DOCKER_RUST = rustdocker/rustfmt_clippy:stable
 
 ENVFILE ?= .env
@@ -20,7 +20,7 @@ db-remove:
 
 .PHONY: db-migrate
 db-migrate:
-	docker-compose up --build db-migrate
+	docker compose up --build db-migrate
 
 .PHONY: db-seed
 db-seed:
@@ -28,7 +28,7 @@ db-seed:
 
 .PHONY: db-init
 db-init:
-	docker-compose up --build db-init
+	docker compose up --build db-init
 
 .PHONY: run
 run:

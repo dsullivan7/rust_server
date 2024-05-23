@@ -16,7 +16,6 @@ async fn test_get_user() {
         first_name: Some("first_name".to_owned()),
         last_name: Some("last_name".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
-        dwolla_customer_id: Some("dwolla_customer_id".to_owned()),
         created_at: chrono::Utc::now().into(),
         updated_at: chrono::Utc::now().into(),
     };
@@ -76,7 +75,6 @@ async fn test_list_user() {
         first_name: Some("first_name".to_owned()),
         last_name: Some("last_name".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
-        dwolla_customer_id: Some("dwolla_customer_id".to_owned()),
         created_at: chrono::Utc::now().into(),
         updated_at: chrono::Utc::now().into(),
     };
@@ -125,7 +123,6 @@ async fn test_create_user() {
         first_name: Some("first_name".to_owned()),
         last_name: Some("last_name".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
-        dwolla_customer_id: Some("dwolla_customer_id".to_owned()),
         created_at: chrono::Utc::now().into(),
         updated_at: chrono::Utc::now().into(),
     };
@@ -186,7 +183,6 @@ async fn test_modify_user() {
         first_name: Some("first_name".to_owned()),
         last_name: Some("last_name".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
-        dwolla_customer_id: Some("dwolla_customer_id".to_owned()),
         created_at: chrono::Utc::now().into(),
         updated_at: chrono::Utc::now().into(),
     };
@@ -196,7 +192,6 @@ async fn test_modify_user() {
         first_name: Some("first_name_different".to_owned()),
         last_name: Some("last_name_different".to_owned()),
         auth0_id: Some("auth0_id".to_owned()),
-        dwolla_customer_id: Some("dwolla_customer_id_different".to_owned()),
         created_at: chrono::Utc::now().into(),
         updated_at: chrono::Utc::now().into(),
     };

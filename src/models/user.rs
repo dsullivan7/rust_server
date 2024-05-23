@@ -10,7 +10,6 @@ pub struct Model {
     pub auth0_id: Option<String>,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
-    pub dwolla_customer_id: Option<String>,
     pub created_at: chrono::DateTime<chrono::FixedOffset>,
     pub updated_at: chrono::DateTime<chrono::FixedOffset>,
 }

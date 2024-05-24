@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use actix_cors::Cors;
 use actix_web::{middleware, web, App, HttpServer};
 use anyhow::anyhow;

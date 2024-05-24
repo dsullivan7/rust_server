@@ -1,6 +1,8 @@
 on: [push]
 jobs:
   pipeline:
+    # delete to enable deploy
+    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

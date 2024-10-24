@@ -8,15 +8,15 @@ TESTS ?= ./test/...
 
 .PHONY: db-stop
 db-stop:
-	docker-compose -f docker-compose.yml stop postgres
+	docker compose stop postgres
 
 .PHONY: db-start
 db-start:
-	docker-compose -f docker-compose.yml up -d postgres
+	docker compose up -d postgres
 
 .PHONY: db-remove
 db-remove:
-	docker-compose -f docker-compose.yml rm -s -v postgres && docker volume rm go_server_dbdata_12.7
+	docker compose rm -s -v postgres && docker volume rm go_server_dbdata_12.7
 
 .PHONY: db-migrate
 db-migrate:
@@ -24,7 +24,7 @@ db-migrate:
 
 .PHONY: db-seed
 db-seed:
-	docker-compose up --build db-seed
+	docker compose up --build db-seed
 
 .PHONY: db-init
 db-init:
@@ -36,15 +36,15 @@ run:
 
 .PHONY: run-docker
 run-docker:
-	docker-compose up --build run
+	docker compose up --build run
 
 .PHONY: build-docker
 build-docker:
-	docker-compose up --build build
+	docker compose up --build build
 
 .PHONY: test-docker
 test-docker:
-	docker-compose up --build test
+	docker compose up --build test
 
 .PHONY: docs
 docs:

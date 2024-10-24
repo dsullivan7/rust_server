@@ -56,4 +56,5 @@ lint:
 
 .PHONY: lint-docker
 lint-docker:
-	docker-compose run ci cargo clippy --all-targets --all-features -- -D warnings
+	docker compose up --build ci
+	docker compose run ci cargo clippy --all-targets --all-features -- -D warnings

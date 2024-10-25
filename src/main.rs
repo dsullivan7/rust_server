@@ -1,10 +1,9 @@
 #![allow(dead_code)]
 
-use actix_cors::Cors;
-use actix_web::{middleware, web, App, HttpServer};
 use anyhow::anyhow;
 use sea_orm::DatabaseConnection;
 use std::env;
+use tower_http::trace::TraceLayer;
 
 mod auth0;
 mod authentication;
@@ -24,9 +23,11 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<(), anyhow::Error> {
-    env_logger::init();
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
 
-    log::info!("initializing the web server...");
+    tracing::info!("initializing the web server...");
 
     let db_name = env::var("DB_NAME").expect("DB_NAME must be set");
     let db_port = env::var("DB_PORT").expect("DB_PORT must be set");
@@ -36,14 +37,14 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
 
     let db_url = format!("postgres://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}");
 
-    log::info!("connecting to database");
+    tracing::info!("connecting to database");
 
     let conn = sea_orm::Database::connect(&db_url).await.map_err(|err| {
-        log::error!("error connecting to the database: {:?}", err);
+        tracing::error!("error connecting to the database: {:?}", err);
         anyhow!(err)
     })?;
 
-    log::info!("connected to database");
+    tracing::info!("connected to database");
 
     let auth0_domain = std::env::var("AUTH0_DOMAIN").expect("AUTH0_DOMAIN must be set");
     let auth0_audience = std::env::var("AUTH0_AUDIENCE").expect("AUTH0_AUDIENCE must be set");
@@ -58,25 +59,38 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         .parse::<u16>()
         .expect("PORT must be a number");
 
-    let state = web::Data::new(AppState {
-        conn,
-        authentication: Box::new(auth),
-    });
+    // let state = web::Data::new(AppState {
+    //     conn,
+    //     authentication: Box::new(auth),
+    // });
 
-    log::info!("starting the web server...");
+    tracing::info!("starting the web server...");
 
-    HttpServer::new(move || {
-        let cors = Cors::permissive();
+    let listener = tokio::net::TcpListener::bind(("0.0.0.0", port))
+        .await
+        .map_err(|err| anyhow!(err))?;
 
-        App::new()
-            .app_data(state.clone())
-            .wrap(middleware::Logger::default())
-            .wrap(cors)
-            .service(handlers::routes())
-            .service(handlers::health::get_health)
-    })
-    .bind(("0.0.0.0", port))?
-    .run()
+    axum::serve(
+        listener,
+        handlers::router()
+            .layer(TraceLayer::new_for_http())
+            .into_make_service(),
+    )
     .await
     .map_err(|err| anyhow!(err))
+
+    // HttpServer::new(move || {
+    //     let cors = Cors::permissive();
+
+    //     App::new()
+    //         .app_data(state.clone())
+    //         .wrap(middleware::Logger::default())
+    //         .wrap(cors)
+    //         .service(handlers::routes())
+    //         .service(handlers::health::get_health)
+    // })
+    // .bind(("0.0.0.0", port))?
+    // .run()
+    // .await
+    // .map_err(|err| anyhow!(err))
 }

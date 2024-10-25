@@ -31,6 +31,8 @@ thiserror = "1.0.65"
 tokio = { version = "1", features = ["full"] }
 async-mutex = "1.4.0"
 scraper = "0.14.0"
+axum = "0.7.7"
+tower-http = { version = "0.6.1", features = ["trace"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.1"

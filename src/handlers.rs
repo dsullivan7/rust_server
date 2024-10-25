@@ -1,8 +1,4 @@
-mod group_users;
-mod groups;
-pub mod health;
-mod users;
-
+mod health;
 mod routes;
 
-pub use self::routes::routes;
+pub use self::routes::router;

@@ -1,14 +1,14 @@
-use actix_web::{get, web, Error, Responder};
+use axum::Json;
+
 use serde::Serialize;
 
 #[derive(Serialize)]
-struct Response {
+pub struct HealthResponse {
     status: String,
 }
 
-#[get("/")]
-async fn get_health() -> Result<impl Responder, Error> {
-    Ok(web::Json(Response {
+pub async fn get_health() -> Json<HealthResponse> {
+    Json(HealthResponse {
         status: "healthy".to_owned(),
-    }))
+    })
 }

@@ -22,7 +22,7 @@ impl FromRequest for Claims {
                 .await
                 .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
             let token = credentials.token();
-            let claims = app_state
+            let claims: Claims = app_state
                 .authentication
                 .validate_token(token.to_string())
                 .await

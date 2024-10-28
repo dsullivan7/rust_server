@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use anyhow::anyhow;
-use sea_orm::DatabaseConnection;
+use handlers::{AppState, State};
 use std::env;
 use tower_http::trace::TraceLayer;
 
@@ -15,11 +15,6 @@ mod models;
 
 #[cfg(test)]
 mod test_utils;
-
-pub struct AppState {
-    conn: DatabaseConnection,
-    authentication: Box<dyn authentication::IAuthentication>,
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<(), anyhow::Error> {
@@ -59,10 +54,12 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         .parse::<u16>()
         .expect("PORT must be a number");
 
-    // let state = web::Data::new(AppState {
-    //     conn,
-    //     authentication: Box::new(auth),
-    // });
+    let state = State {
+        app_state: AppState {
+            authentication: auth,
+            conn: conn,
+        },
+    };
 
     tracing::info!("starting the web server...");
 
@@ -73,6 +70,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
     axum::serve(
         listener,
         handlers::router()
+            .with_state(state)
             .layer(TraceLayer::new_for_http())
             .into_make_service(),
     )

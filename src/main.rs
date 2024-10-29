@@ -2,7 +2,7 @@
 
 use anyhow::anyhow;
 use handlers::{AppState, State};
-use std::env;
+use std::{env, rc::Rc, sync::Arc};
 use tower_http::trace::TraceLayer;
 
 mod auth0;
@@ -56,7 +56,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
 
     let state = State {
         app_state: AppState {
-            authentication: auth,
+            authentication: Arc::new(auth),
             conn: conn,
         },
     };

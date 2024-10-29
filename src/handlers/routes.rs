@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{extract::FromRef, routing::get, Router};
 use sea_orm::DatabaseConnection;
 
@@ -13,7 +15,7 @@ pub struct State {
 #[derive(Clone)]
 pub struct AppState {
     pub conn: DatabaseConnection,
-    pub authentication: authentication::Authentication,
+    pub authentication: Arc<dyn authentication::IAuthentication>,
 }
 
 impl FromRef<State> for AppState {

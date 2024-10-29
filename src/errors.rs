@@ -1,5 +1,11 @@
-use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
+use axum::{
+    body::Body,
+    http::{Response, StatusCode},
+    response::IntoResponse,
+    Json,
+};
 use serde::Serialize;
+use serde_json::json;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -14,6 +20,10 @@ pub enum ServerError {
     BadReqest,
     #[error("internal error")]
     Internal(anyhow::Error),
+    #[error("unauthenticated_reason")]
+    UnauthenticatedReason(anyhow::Error),
+    #[error("unauthenticated")]
+    Unauthenticated,
 }
 
 impl ServerError {
@@ -24,6 +34,8 @@ impl ServerError {
             Self::Internal(_) => "internal".to_owned(),
             Self::InvalidUUID(_) => "invalid_uuid".to_owned(),
             Self::RequiredBodyParameter => "required_body_param".to_owned(),
+            Self::UnauthenticatedReason(_) => "unauthenticated".to_owned(),
+            Self::Unauthenticated => "unauthenticated".to_owned(),
         }
     }
     pub fn message(&self) -> String {
@@ -33,6 +45,8 @@ impl ServerError {
             Self::Internal(_) => "internal".to_owned(),
             Self::InvalidUUID(_) => "invalid uuid".to_owned(),
             Self::RequiredBodyParameter => "required body parameter".to_owned(),
+            Self::UnauthenticatedReason(_) => "unauthenticated".to_owned(),
+            Self::Unauthenticated => "unauthenticated".to_owned(),
         }
     }
 }
@@ -43,22 +57,23 @@ struct ErrorResponse {
     message: String,
 }
 
-impl ResponseError for ServerError {
-    fn error_response(&self) -> HttpResponse {
-        let status_code = self.status_code();
-        HttpResponse::build(status_code).json(ErrorResponse {
-            code: self.code(),
-            message: self.message(),
-        })
-    }
+impl IntoResponse for ServerError {
+    fn into_response(self) -> Response<Body> {
+        let body = Json(json!({
+            "error": self.code(),
+            "message": self.message(),
+        }));
 
-    fn status_code(&self) -> StatusCode {
-        match self {
+        let status_code = match self {
             Self::NotFound => StatusCode::NOT_FOUND,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::InvalidUUID(_) => StatusCode::BAD_REQUEST,
             Self::BadReqest => StatusCode::BAD_REQUEST,
             Self::RequiredBodyParameter => StatusCode::BAD_REQUEST,
-        }
+            Self::Unauthenticated => StatusCode::UNAUTHORIZED,
+            Self::UnauthenticatedReason(_) => StatusCode::UNAUTHORIZED,
+        };
+
+        (status_code, body).into_response()
     }
 }

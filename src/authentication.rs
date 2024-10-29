@@ -44,33 +44,6 @@ pub struct Authentication {
     pub domain: String,
 }
 
-async fn authentication_middleware(
-    mut req: Request,
-    next: Next,
-) -> Result<Response<Body>, AuthError> {
-    let mut auth_header = req
-        .headers_mut()
-        .get(http::header::AUTHORIZATION)
-        .ok_or_else(|| AuthError::NoToken())?
-        .to_str()
-        .map_err(|err| AuthError::Decode(anyhow!(err)))?
-        .split_whitespace();
-    let (bearer, token) = (auth_header.next(), auth_header.next());
-    // let auth_header = match auth_header {
-    //     Some(header) => header
-    //         .to_str()
-    //         .map_err(|err| AuthError::Decode(anyhow!(err)))?,
-    //     None => return Err(AuthError::NoToken()),
-    // };
-    // let mut header = auth_header.split_whitespace();
-    // let (bearer, token) = (header.next(), header.next());
-    // let token_data = match decode_jwt(token.unwrap().to_string()) {
-    //     Ok(data) => data,
-    //     Err(err) => return Err(AuthError::Decode(err)),
-    // };
-    Ok(next.run(req).await)
-}
-
 #[async_trait]
 impl IAuthentication for Authentication {
     async fn validate_token(&self, token: String) -> Result<Claims, AuthError> {

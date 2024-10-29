@@ -1,16 +1,13 @@
 use std::sync::Arc;
 
-use axum::{extract::FromRef, routing::get, Router};
+use axum::{middleware, routing::get, Router};
 use sea_orm::DatabaseConnection;
 
 use crate::authentication;
 
-use super::health;
+use super::authentication as authentication_middleware;
 
-#[derive(Clone)]
-pub struct State {
-    pub app_state: AppState,
-}
+use super::health;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -18,12 +15,9 @@ pub struct AppState {
     pub authentication: Arc<dyn authentication::IAuthentication>,
 }
 
-impl FromRef<State> for AppState {
-    fn from_ref(state: &State) -> AppState {
-        state.app_state.clone()
-    }
-}
-
-pub fn router() -> Router<State> {
-    Router::new().route("/", get(health::get_health))
+pub fn router() -> Router<AppState> {
+    Router::new().route("/", get(health::get_health)).route(
+        "/protected/",
+        get(health::get_health).layer(middleware::from_fn(authentication_middleware::middleware)),
+    )
 }

@@ -1,15 +1,15 @@
 #![allow(dead_code)]
 
 use anyhow::anyhow;
-use handlers::{AppState, State};
-use std::{env, rc::Rc, sync::Arc};
+use handlers::AppState;
+use std::{env, sync::Arc};
 use tower_http::trace::TraceLayer;
 
 mod auth0;
 mod authentication;
-mod authorization;
+// mod authorization;
 mod errors;
-mod extractors;
+// mod extractors;
 mod handlers;
 mod models;
 
@@ -54,11 +54,9 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         .parse::<u16>()
         .expect("PORT must be a number");
 
-    let state = State {
-        app_state: AppState {
-            authentication: Arc::new(auth),
-            conn: conn,
-        },
+    let app_state = AppState {
+        authentication: Arc::new(auth),
+        conn: conn,
     };
 
     tracing::info!("starting the web server...");
@@ -70,7 +68,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
     axum::serve(
         listener,
         handlers::router()
-            .with_state(state)
+            .with_state(app_state)
             .layer(TraceLayer::new_for_http())
             .into_make_service(),
     )

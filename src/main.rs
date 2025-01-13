@@ -13,8 +13,8 @@ mod errors;
 mod handlers;
 mod models;
 
-#[cfg(test)]
-mod test_utils;
+// #[cfg(test)]
+// mod test_utils;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<(), anyhow::Error> {
@@ -67,8 +67,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
 
     axum::serve(
         listener,
-        handlers::router()
-            .with_state(app_state)
+        handlers::router(app_state)
             .layer(TraceLayer::new_for_http())
             .into_make_service(),
     )

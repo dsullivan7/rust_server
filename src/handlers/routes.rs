@@ -15,9 +15,15 @@ pub struct AppState {
     pub authentication: Arc<dyn authentication::IAuthentication>,
 }
 
-pub fn router() -> Router<AppState> {
-    Router::new().route("/", get(health::get_health)).route(
-        "/protected/",
-        get(health::get_health).layer(middleware::from_fn(authentication_middleware::middleware)),
-    )
+pub fn router(app_state: AppState) -> Router {
+    Router::new()
+        .route("/", get(health::get_health))
+        .route(
+            "/protected",
+            get(health::get_health).layer(middleware::from_fn_with_state(
+                app_state.clone(),
+                authentication_middleware::middleware,
+            )),
+        )
+        .with_state(app_state)
 }

@@ -22,7 +22,7 @@ pub enum AuthError {
 }
 
 pub async fn middleware(
-    // State(AppState { authentication, .. }): State<AppState>,
+    State(AppState { authentication, .. }): State<AppState>,
     mut req: Request,
     next: Next,
 ) -> Result<Response<Body>, errors::ServerError> {
@@ -35,10 +35,10 @@ pub async fn middleware(
         .split_whitespace();
     let (bearer, token) = (auth_header.next(), auth_header.next());
     let token = token.ok_or_else(|| errors::ServerError::Unauthenticated)?;
-    // let claims = authentication
-    //     .validate_token(token.to_string())
-    //     .await
-    //     .map_err(|err| errors::ServerError::UnauthenticatedReason(anyhow!(err)))?;
+    let claims = authentication
+        .validate_token(token.to_string())
+        .await
+        .map_err(|err| errors::ServerError::UnauthenticatedReason(anyhow!(err)))?;
 
     // let auth_header = match auth_header {
     //     Some(header) => header

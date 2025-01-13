@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 #[cfg(test)]
 use super::AppState;
 use crate::authentication;
 
-use sea_orm::{DatabaseBackend, MockDatabase};
+use sea_orm::DatabaseBackend;
 
 use mockall::predicate::*;
 
@@ -11,7 +13,7 @@ const DEFAULT_AUTH0_TOKEN: &str = "default_auth0_token";
 
 pub struct TestState {
     pub conn: sea_orm::DatabaseConnection,
-    pub authentication: Box<dyn authentication::IAuthentication>,
+    pub authentication: Arc<dyn authentication::IAuthentication>,
 }
 
 impl Default for TestState {

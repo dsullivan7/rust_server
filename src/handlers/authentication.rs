@@ -33,9 +33,9 @@ pub async fn middleware(
         .to_str()
         .map_err(|err| errors::ServerError::UnauthenticatedReason(anyhow!(err)))?
         .split_whitespace();
-    let (bearer, token) = (auth_header.next(), auth_header.next());
+    let (_bearer, token) = (auth_header.next(), auth_header.next());
     let token = token.ok_or_else(|| errors::ServerError::Unauthenticated)?;
-    let claims = authentication
+    let _claims = authentication
         .validate_token(token.to_string())
         .await
         .map_err(|err| errors::ServerError::UnauthenticatedReason(anyhow!(err)))?;

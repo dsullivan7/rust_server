@@ -1,11 +1,5 @@
 use anyhow::anyhow;
 use async_trait::async_trait;
-use axum::{
-    body::Body,
-    extract::Request,
-    http::{self, Response},
-    middleware::Next,
-};
 use derive_more::Display;
 use jsonwebtoken::{
     decode, decode_header,

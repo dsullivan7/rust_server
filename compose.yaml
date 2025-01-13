@@ -32,14 +32,14 @@ services:
     environment: *app-environment
 
   build:
-    image: rust:latest
+    image: rust:1.84
     command: "cargo build --release"
     working_dir: /app
     volumes:
       - ./:/app
 
   test:
-    image: rust:latest
+    image: rust:1.84
     command: "cargo test"
     working_dir: /app
     volumes:

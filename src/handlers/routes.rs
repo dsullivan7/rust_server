@@ -9,6 +9,8 @@ use super::authentication as authentication_middleware;
 
 use super::health;
 
+use super::users;
+
 #[derive(Clone)]
 pub struct AppState {
     pub conn: DatabaseConnection,
@@ -25,5 +27,6 @@ pub fn router(app_state: AppState) -> Router {
                 authentication_middleware::middleware,
             )),
         )
+        .route("/users", get(users::list_users))
         .with_state(app_state)
 }

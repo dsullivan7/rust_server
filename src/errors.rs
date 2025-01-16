@@ -65,7 +65,7 @@ impl IntoResponse for ServerError {
         }));
 
         let status_code = match self {
-            Self::NotFound => StatusCode::NOT_FOUND,
+            Self::NotFound => StatusCode::BAD_REQUEST,
             Self::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::InvalidUUID(_) => StatusCode::BAD_REQUEST,
             Self::BadReqest => StatusCode::BAD_REQUEST,

@@ -28,5 +28,6 @@ pub fn router(app_state: AppState) -> Router {
             )),
         )
         .route("/users", get(users::list_users))
+        .route("/users/{user_id}", get(users::get_user))
         .with_state(app_state)
 }

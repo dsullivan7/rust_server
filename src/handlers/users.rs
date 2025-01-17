@@ -51,25 +51,14 @@ pub async fn list_users(
 pub async fn get_user(
     State(state): State<AppState>,
     Path(user_id): Path<String>,
-    Extension(claims): Extension<Arc<Option<Claims>>>,
+    Extension(claims): Extension<Claims>,
 ) -> Result<Json<UserRespose>, ServerError> {
     let conn = &state.conn;
 
     let user: UserRespose = (|| -> Result<_, ServerError> {
         if user_id == "me" {
-            println!("get_user");
-            println!("{:#?}", claims.as_ref());
-            if let Some(claims1) = claims.as_ref() {
-                println!("{}", claims1.sub);
-            }
             return Ok(User::find()
-                .filter(
-                    models::user::Column::Auth0Id.eq((*claims)
-                        .as_ref()
-                        .ok_or(errors::ServerError::BadReqest)?
-                        .sub
-                        .to_owned()),
-                )
+                .filter(models::user::Column::Auth0Id.eq(claims.sub.to_owned()))
                 .one(conn));
         }
         let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())

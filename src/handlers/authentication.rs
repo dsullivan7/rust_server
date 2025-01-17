@@ -42,9 +42,7 @@ pub async fn middleware(
         .await
         .map_err(|err| errors::ServerError::UnauthenticatedReason(anyhow!(err)))?;
 
-    println!("claims");
-    println!("{}", claims.sub);
-    req.extensions_mut().insert(Arc::new(Some(claims)));
+    req.extensions_mut().insert(claims);
     // let auth_header = match auth_header {
     //     Some(header) => header
     //         .to_str()

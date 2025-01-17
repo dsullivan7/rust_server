@@ -63,7 +63,13 @@ pub async fn get_user(
                 println!("{}", claims1.sub);
             }
             return Ok(User::find()
-                .filter(models::user::Column::Auth0Id.eq("blah".to_owned()))
+                .filter(
+                    models::user::Column::Auth0Id.eq((*claims)
+                        .as_ref()
+                        .ok_or(errors::ServerError::BadReqest)?
+                        .sub
+                        .to_owned()),
+                )
                 .one(conn));
         }
         let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())

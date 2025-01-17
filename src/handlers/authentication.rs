@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::anyhow;
 use axum::{
     body::Body,
@@ -42,7 +44,7 @@ pub async fn middleware(
 
     println!("claims");
     println!("{}", claims.sub);
-    req.extensions_mut().insert(Some(claims));
+    req.extensions_mut().insert(Arc::new(Some(claims)));
     // let auth_header = match auth_header {
     //     Some(header) => header
     //         .to_str()

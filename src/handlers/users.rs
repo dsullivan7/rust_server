@@ -1,5 +1,7 @@
+use std::sync::Arc;
+
 use axum::extract::{Path, State};
-use axum::Json;
+use axum::{Extension, Json};
 
 use sea_orm::entity::*;
 use sea_orm::EntityTrait;
@@ -7,6 +9,7 @@ use sea_orm::QueryFilter;
 use serde::Serialize;
 use uuid::Uuid;
 
+use crate::authentication::Claims;
 use crate::errors::{self, ServerError};
 use crate::models;
 use crate::models::user::Entity as User;
@@ -26,8 +29,6 @@ pub struct UserRespose {
 pub async fn list_users(
     State(state): State<AppState>,
 ) -> Result<Json<Vec<UserRespose>>, ServerError> {
-    println!("list_users");
-
     let conn = &state.conn;
 
     let users: Vec<UserRespose> = User::find()
@@ -50,14 +51,19 @@ pub async fn list_users(
 pub async fn get_user(
     State(state): State<AppState>,
     Path(user_id): Path<String>,
+    Extension(claims): Extension<Arc<Option<Claims>>>,
 ) -> Result<Json<UserRespose>, ServerError> {
-    println!("get_user");
     let conn = &state.conn;
 
     let user: UserRespose = (|| -> Result<_, ServerError> {
         if user_id == "me" {
+            println!("get_user");
+            println!("{:#?}", claims.as_ref());
+            if let Some(claims1) = claims.as_ref() {
+                println!("{}", claims1.sub);
+            }
             return Ok(User::find()
-                .filter(models::user::Column::Auth0Id.eq("something".to_owned()))
+                .filter(models::user::Column::Auth0Id.eq("blah".to_owned()))
                 .one(conn));
         }
         let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())

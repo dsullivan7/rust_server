@@ -35,11 +35,14 @@ pub async fn middleware(
         .split_whitespace();
     let (_bearer, token) = (auth_header.next(), auth_header.next());
     let token = token.ok_or_else(|| errors::ServerError::Unauthenticated)?;
-    let _claims = authentication
+    let claims = authentication
         .validate_token(token.to_string())
         .await
         .map_err(|err| errors::ServerError::UnauthenticatedReason(anyhow!(err)))?;
 
+    println!("claims");
+    println!("{}", claims.sub);
+    req.extensions_mut().insert(Some(claims));
     // let auth_header = match auth_header {
     //     Some(header) => header
     //         .to_str()

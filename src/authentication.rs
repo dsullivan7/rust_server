@@ -22,7 +22,7 @@ pub enum AuthError {
     RequestFailed(anyhow::Error),
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String,
 }

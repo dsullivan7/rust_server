@@ -14,7 +14,7 @@ use super::users;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub conn: DatabaseConnection,
+    pub conn: Arc<DatabaseConnection>,
     pub authentication: Arc<dyn authentication::IAuthentication>,
 }
 

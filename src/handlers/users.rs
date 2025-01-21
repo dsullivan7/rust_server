@@ -1,3 +1,7 @@
+#[path = "users_test.rs"]
+#[cfg(test)]
+mod users_test;
+
 use axum::extract::{Path, State};
 use axum::{Extension, Json};
 
@@ -27,10 +31,10 @@ pub struct UserRespose {
 pub async fn list_users(
     State(state): State<AppState>,
 ) -> Result<Json<Vec<UserRespose>>, ServerError> {
-    let conn = &state.conn;
+    let conn = state.conn.clone();
 
     let users: Vec<UserRespose> = User::find()
-        .all(conn)
+        .all(&*conn)
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
         .iter()
@@ -51,17 +55,17 @@ pub async fn get_user(
     Path(user_id): Path<String>,
     Extension(claims): Extension<Claims>,
 ) -> Result<Json<UserRespose>, ServerError> {
-    let conn = &state.conn;
+    let conn = state.conn.clone();
 
     let user: UserRespose = (|| -> Result<_, ServerError> {
         if user_id == "me" {
             return Ok(User::find()
                 .filter(models::user::Column::Auth0Id.eq(claims.sub.to_owned()))
-                .one(conn));
+                .one(&*conn));
         }
         let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())
             .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
-        Ok(User::find_by_id(user_id_uuid).one(conn))
+        Ok(User::find_by_id(user_id_uuid).one(&*conn))
     })()?
     .await
     .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?

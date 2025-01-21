@@ -6,6 +6,7 @@ use jsonwebtoken::{
     jwk::{AlgorithmParameters, JwkSet},
     Algorithm, DecodingKey, Validation,
 };
+use mockall::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Display)]
@@ -28,6 +29,7 @@ pub struct Claims {
 }
 
 #[async_trait]
+#[automock]
 pub trait IAuthentication: Send + Sync {
     async fn validate_token(&self, token: String) -> Result<Claims, AuthError>;
 }

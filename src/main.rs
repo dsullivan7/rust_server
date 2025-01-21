@@ -56,7 +56,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
 
     let app_state = AppState {
         authentication: Arc::new(auth),
-        conn,
+        conn: Arc::new(conn),
     };
 
     tracing::info!("starting the web server...");

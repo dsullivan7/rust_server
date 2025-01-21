@@ -1,8 +1,12 @@
+#[path = "health_test.rs"]
+#[cfg(test)]
+mod health_test;
+
 use axum::Json;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct HealthResponse {
     status: String,
 }

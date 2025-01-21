@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use anyhow::anyhow;
 use axum::{
     body::Body,
@@ -43,17 +41,5 @@ pub async fn middleware(
         .map_err(|err| errors::ServerError::UnauthenticatedReason(anyhow!(err)))?;
 
     req.extensions_mut().insert(claims);
-    // let auth_header = match auth_header {
-    //     Some(header) => header
-    //         .to_str()
-    //         .map_err(|err| AuthError::Decode(anyhow!(err)))?,
-    //     None => return Err(AuthError::NoToken()),
-    // };
-    // let mut header = auth_header.split_whitespace();
-    // let (bearer, token) = (header.next(), header.next());
-    // let token_data = match decode_jwt(token.unwrap().to_string()) {
-    //     Ok(data) => data,
-    //     Err(err) => return Err(AuthError::Decode(err)),
-    // };
     Ok(next.run(req).await)
 }

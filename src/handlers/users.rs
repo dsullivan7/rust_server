@@ -8,7 +8,7 @@ use axum::{Extension, Json};
 use sea_orm::entity::*;
 use sea_orm::EntityTrait;
 use sea_orm::QueryFilter;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::authentication::Claims;
@@ -19,7 +19,7 @@ use anyhow::anyhow;
 
 use super::AppState;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct UserRespose {
     user_id: Uuid,
     first_name: Option<String>,

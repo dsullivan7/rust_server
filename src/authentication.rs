@@ -6,7 +6,9 @@ use jsonwebtoken::{
     jwk::{AlgorithmParameters, JwkSet},
     Algorithm, DecodingKey, Validation,
 };
+use mockall::predicate::*;
 use mockall::*;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Display)]

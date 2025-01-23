@@ -118,6 +118,9 @@ mod tests {
 
         let body = response.into_body().collect().await.unwrap().to_bytes();
         let body: Vec<UserRespose> = serde_json::from_slice(&body).unwrap();
+
+        assert_eq!(body.len(), 2);
+
         assert_eq!(body[0].user_id, user_id_1);
         assert_eq!(body[0].first_name, Some("first_name_1".to_owned()));
         assert_eq!(body[0].last_name, Some("last_name_1".to_owned()));

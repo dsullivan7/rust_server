@@ -13,8 +13,8 @@ mod errors;
 mod handlers;
 mod models;
 
-// #[cfg(test)]
-// mod test_utils;
+#[cfg(test)]
+mod test_utils;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<(), anyhow::Error> {

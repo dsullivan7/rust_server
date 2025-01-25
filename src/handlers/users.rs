@@ -37,10 +37,10 @@ pub struct ModifyUser {
 pub async fn list_users(
     State(state): State<AppState>,
 ) -> Result<Json<Vec<UserRespose>>, ServerError> {
-    let conn = state.conn.clone();
+    let conn = &*state.conn.clone();
 
     let users: Vec<models::user::Model> = User::find()
-        .all(&*conn)
+        .all(conn)
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
@@ -69,7 +69,7 @@ pub async fn get_user(
         if user_id == "me" {
             return Ok(User::find()
                 .filter(models::user::Column::Auth0Id.eq(claims.sub.to_owned()))
-                .one(&*conn));
+                .one(conn));
         }
         let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())
             .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
@@ -100,11 +100,11 @@ pub async fn modify_user(
         if user_id == "me" {
             return Ok(User::find()
                 .filter(models::user::Column::Auth0Id.eq(claims.sub.to_owned()))
-                .one(&*conn));
+                .one(conn));
         }
         let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())
             .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
-        Ok(User::find_by_id(user_id_uuid).one(&*conn))
+        Ok(User::find_by_id(user_id_uuid).one(conn))
     })()?
     .await
     .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?

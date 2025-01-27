@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{middleware, routing::get, Router};
+use axum::{middleware, routing::get, routing::put, Router};
 use sea_orm::DatabaseConnection;
 
 use crate::authentication;
@@ -23,6 +23,7 @@ pub fn router(app_state: AppState) -> Router {
         Router::new()
             .route("/users", get(users::list_users))
             .route("/users/{user_id}", get(users::get_user))
+            .route("/users/{user_id}", put(users::modify_user))
             .layer(ServiceBuilder::new().layer(middleware::from_fn_with_state(
                 app_state.clone(),
                 authentication_middleware::middleware,

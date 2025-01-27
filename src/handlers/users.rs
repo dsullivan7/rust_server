@@ -20,7 +20,7 @@ use anyhow::anyhow;
 use super::AppState;
 
 #[derive(Serialize, Deserialize)]
-pub struct UserRespose {
+pub struct UserResponse {
     user_id: Uuid,
     first_name: Option<String>,
     last_name: Option<String>,
@@ -36,7 +36,7 @@ pub struct ModifyUser {
 
 pub async fn list_users(
     State(state): State<AppState>,
-) -> Result<Json<Vec<UserRespose>>, ServerError> {
+) -> Result<Json<Vec<UserResponse>>, ServerError> {
     let conn = &*state.conn.clone();
 
     let users: Vec<models::user::Model> = User::find()
@@ -47,7 +47,7 @@ pub async fn list_users(
     Ok(Json(
         users
             .iter()
-            .map(|user| UserRespose {
+            .map(|user| UserResponse {
                 user_id: user.user_id.to_owned(),
                 first_name: user.first_name.to_owned(),
                 last_name: user.last_name.to_owned(),
@@ -62,7 +62,7 @@ pub async fn get_user(
     State(state): State<AppState>,
     Path(user_id): Path<String>,
     Extension(claims): Extension<Claims>,
-) -> Result<Json<UserRespose>, ServerError> {
+) -> Result<Json<UserResponse>, ServerError> {
     let conn = &*state.conn.clone();
 
     let user: models::user::Model = (|| -> Result<_, ServerError> {
@@ -79,7 +79,7 @@ pub async fn get_user(
     .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
     .ok_or(errors::ServerError::NotFound)?;
 
-    Ok(Json(UserRespose {
+    Ok(Json(UserResponse {
         user_id: user.user_id.to_owned(),
         first_name: user.first_name.to_owned(),
         last_name: user.last_name.to_owned(),
@@ -93,7 +93,7 @@ pub async fn modify_user(
     Path(user_id): Path<String>,
     Extension(claims): Extension<Claims>,
     Json(body): Json<ModifyUser>,
-) -> Result<Json<UserRespose>, ServerError> {
+) -> Result<Json<UserResponse>, ServerError> {
     let conn = &*state.conn.clone();
 
     let mut user: models::user::ActiveModel = (|| -> Result<_, ServerError> {
@@ -124,7 +124,7 @@ pub async fn modify_user(
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
 
-    Ok(Json(UserRespose {
+    Ok(Json(UserResponse {
         user_id: user_updated.user_id.to_owned(),
         first_name: user_updated.first_name.to_owned(),
         last_name: user_updated.last_name.to_owned(),

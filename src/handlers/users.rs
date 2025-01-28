@@ -3,6 +3,8 @@
 mod users_test;
 
 use axum::extract::{Path, State};
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::{Extension, Json};
 
 use sea_orm::entity::*;
@@ -34,9 +36,14 @@ pub struct ModifyUser {
     last_name: Option<String>,
 }
 
-pub async fn list_users(
-    State(state): State<AppState>,
-) -> Result<Json<Vec<UserResponse>>, ServerError> {
+#[derive(Serialize, Deserialize)]
+pub struct CreateUser {
+    auth0_id: String,
+    first_name: Option<String>,
+    last_name: Option<String>,
+}
+
+pub async fn list_users(State(state): State<AppState>) -> Result<impl IntoResponse, ServerError> {
     let conn = &*state.conn.clone();
 
     let users: Vec<models::user::Model> = User::find()
@@ -54,7 +61,7 @@ pub async fn list_users(
                 created_at: user.created_at.to_owned(),
                 updated_at: user.updated_at.to_owned(),
             })
-            .collect(),
+            .collect::<Vec<UserResponse>>(),
     ))
 }
 
@@ -62,7 +69,7 @@ pub async fn get_user(
     State(state): State<AppState>,
     Path(user_id): Path<String>,
     Extension(claims): Extension<Claims>,
-) -> Result<Json<UserResponse>, ServerError> {
+) -> Result<impl IntoResponse, ServerError> {
     let conn = &*state.conn.clone();
 
     let user: models::user::Model = (|| -> Result<_, ServerError> {
@@ -88,12 +95,73 @@ pub async fn get_user(
     }))
 }
 
+pub async fn create_user(
+    State(state): State<AppState>,
+    Json(body): Json<CreateUser>,
+) -> Result<impl IntoResponse, ServerError> {
+    let conn = &*state.conn.clone();
+
+    let user_found_res = User::find()
+        .filter(models::user::Column::Auth0Id.eq(body.auth0_id.to_owned()))
+        .one(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
+    if let Some(user_found) = user_found_res {
+        return Ok((
+            StatusCode::OK,
+            Json(UserResponse {
+                user_id: user_found.user_id.to_owned(),
+                first_name: user_found.first_name.to_owned(),
+                last_name: user_found.last_name.to_owned(),
+                created_at: user_found.created_at.to_owned(),
+                updated_at: user_found.updated_at.to_owned(),
+            }),
+        ));
+    }
+
+    let mut first_name = NotSet;
+
+    if body.first_name.is_some() {
+        first_name = Set(body.first_name.to_owned());
+    }
+
+    let mut last_name = NotSet;
+
+    if body.last_name.is_some() {
+        last_name = Set(body.last_name.to_owned());
+    }
+
+    let user: models::user::Model = models::user::ActiveModel {
+        user_id: NotSet,
+        auth0_id: Set(Some(body.auth0_id.to_owned())),
+        first_name,
+        last_name,
+        created_at: NotSet,
+        updated_at: NotSet,
+    }
+    .insert(conn)
+    .await
+    .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
+    Ok((
+        StatusCode::CREATED,
+        Json(UserResponse {
+            user_id: user.user_id.to_owned(),
+            first_name: user.first_name.to_owned(),
+            last_name: user.last_name.to_owned(),
+            created_at: user.created_at.to_owned(),
+            updated_at: user.updated_at.to_owned(),
+        }),
+    ))
+}
+
 pub async fn modify_user(
     State(state): State<AppState>,
     Path(user_id): Path<String>,
     Extension(claims): Extension<Claims>,
     Json(body): Json<ModifyUser>,
-) -> Result<Json<UserResponse>, ServerError> {
+) -> Result<impl IntoResponse, ServerError> {
     let conn = &*state.conn.clone();
 
     let mut user: models::user::ActiveModel = (|| -> Result<_, ServerError> {

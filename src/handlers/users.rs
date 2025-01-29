@@ -200,3 +200,20 @@ pub async fn modify_user(
         updated_at: user_updated.updated_at.to_owned(),
     }))
 }
+
+pub async fn delete_user(
+    State(state): State<AppState>,
+    Path(user_id): Path<String>,
+) -> Result<impl IntoResponse, ServerError> {
+    let conn = &*state.conn.clone();
+
+    let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())
+        .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
+
+    User::delete_by_id(user_id_uuid)
+        .exec(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
+    Ok(StatusCode::NO_CONTENT)
+}

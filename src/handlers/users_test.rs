@@ -272,4 +272,42 @@ mod tests {
         assert_eq!(user_resp.created_at, user_db_modified.created_at);
         assert_eq!(user_resp.updated_at, user_db_modified.updated_at);
     }
+
+    #[cfg(test)]
+    #[tokio::test]
+    async fn test_delete_user() {
+        let user_id = Uuid::new_v4();
+
+        let conn = MockDatabase::new(DatabaseBackend::Postgres)
+            .append_exec_results(vec![MockExecResult {
+                last_insert_id: 1,
+                rows_affected: 1,
+            }])
+            .into_connection();
+
+        let auth = test_utils::get_default_auth();
+
+        let (default_auth_header, default_auth_header_value) =
+            test_utils::get_default_auth_header();
+
+        let router = router(AppState {
+            conn: Arc::new(conn),
+            authentication: Arc::from(auth),
+        });
+
+        let response = router
+            .oneshot(
+                Request::builder()
+                    .method(Method::DELETE)
+                    .uri(format!("/users/{}", user_id))
+                    .header(default_auth_header, default_auth_header_value)
+                    .header("content-type", "application/json")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::NO_CONTENT);
+    }
 }

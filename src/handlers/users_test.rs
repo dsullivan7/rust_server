@@ -13,6 +13,7 @@ mod tests {
     use uuid::Uuid;
 
     use crate::{
+        authorization,
         handlers::{router, users::UserResponse, AppState},
         models, test_utils,
     };
@@ -35,6 +36,7 @@ mod tests {
             .into_connection();
 
         let auth = test_utils::get_default_auth();
+        let authz = authorization::Authorization {};
 
         let (default_auth_header, default_auth_header_value) =
             test_utils::get_default_auth_header();
@@ -42,6 +44,7 @@ mod tests {
         let router = router(AppState {
             conn: Arc::new(conn),
             authentication: Arc::from(auth),
+            authorization: Arc::from(authz),
         });
 
         let response = router
@@ -94,6 +97,7 @@ mod tests {
             .into_connection();
 
         let auth = test_utils::get_default_auth();
+        let authz = authorization::Authorization {};
 
         let (default_auth_header, default_auth_header_value) =
             test_utils::get_default_auth_header();
@@ -101,6 +105,7 @@ mod tests {
         let router = router(AppState {
             conn: Arc::new(conn),
             authentication: Arc::from(auth),
+            authorization: Arc::from(authz),
         });
 
         let response = router
@@ -158,6 +163,7 @@ mod tests {
             .into_connection();
 
         let auth = test_utils::get_default_auth();
+        let authz = authorization::Authorization {};
 
         let (default_auth_header, default_auth_header_value) =
             test_utils::get_default_auth_header();
@@ -165,6 +171,7 @@ mod tests {
         let router = router(AppState {
             conn: Arc::new(conn),
             authentication: Arc::from(auth),
+            authorization: Arc::from(authz),
         });
 
         let body = serde_json::json!({
@@ -231,6 +238,7 @@ mod tests {
             .into_connection();
 
         let auth = test_utils::get_default_auth();
+        let authz = authorization::Authorization {};
 
         let (default_auth_header, default_auth_header_value) =
             test_utils::get_default_auth_header();
@@ -238,6 +246,7 @@ mod tests {
         let router = router(AppState {
             conn: Arc::new(conn),
             authentication: Arc::from(auth),
+            authorization: Arc::from(authz),
         });
 
         let body = serde_json::json!({
@@ -286,6 +295,7 @@ mod tests {
             .into_connection();
 
         let auth = test_utils::get_default_auth();
+        let authz = authorization::Authorization {};
 
         let (default_auth_header, default_auth_header_value) =
             test_utils::get_default_auth_header();
@@ -293,6 +303,7 @@ mod tests {
         let router = router(AppState {
             conn: Arc::new(conn),
             authentication: Arc::from(auth),
+            authorization: Arc::from(authz),
         });
 
         let response = router

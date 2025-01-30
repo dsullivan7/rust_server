@@ -7,9 +7,8 @@ use tower_http::trace::TraceLayer;
 
 mod auth0;
 mod authentication;
-// mod authorization;
+mod authorization;
 mod errors;
-// mod extractors;
 mod handlers;
 mod models;
 
@@ -49,6 +48,8 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
         domain: auth0_domain,
     };
 
+    let authz = authorization::Authorization {};
+
     let port = std::env::var("PORT")
         .unwrap_or_else(|_| "7000".to_owned())
         .parse::<u16>()
@@ -56,6 +57,7 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
 
     let app_state = AppState {
         authentication: Arc::new(auth),
+        authorization: Arc::new(authz),
         conn: Arc::new(conn),
     };
 
@@ -73,19 +75,4 @@ async fn main() -> anyhow::Result<(), anyhow::Error> {
     )
     .await
     .map_err(|err| anyhow!(err))
-
-    // HttpServer::new(move || {
-    //     let cors = Cors::permissive();
-
-    //     App::new()
-    //         .app_data(state.clone())
-    //         .wrap(middleware::Logger::default())
-    //         .wrap(cors)
-    //         .service(handlers::routes())
-    //         .service(handlers::health::get_health)
-    // })
-    // .bind(("0.0.0.0", port))?
-    // .run()
-    // .await
-    // .map_err(|err| anyhow!(err))
 }

@@ -24,6 +24,8 @@ pub enum ServerError {
     UnauthenticatedReason(anyhow::Error),
     #[error("unauthenticated")]
     Unauthenticated,
+    #[error("unauthorized")]
+    Unauthorized,
 }
 
 impl ServerError {
@@ -36,6 +38,7 @@ impl ServerError {
             Self::RequiredBodyParameter => "required_body_param".to_owned(),
             Self::UnauthenticatedReason(_) => "unauthenticated".to_owned(),
             Self::Unauthenticated => "unauthenticated".to_owned(),
+            Self::Unauthorized => "unauthorized".to_owned(),
         }
     }
     pub fn message(&self) -> String {
@@ -47,6 +50,7 @@ impl ServerError {
             Self::RequiredBodyParameter => "required body parameter".to_owned(),
             Self::UnauthenticatedReason(_) => "unauthenticated".to_owned(),
             Self::Unauthenticated => "unauthenticated".to_owned(),
+            Self::Unauthorized => "unauthorized".to_owned(),
         }
     }
 }
@@ -71,6 +75,7 @@ impl IntoResponse for ServerError {
             Self::BadReqest => StatusCode::BAD_REQUEST,
             Self::RequiredBodyParameter => StatusCode::BAD_REQUEST,
             Self::Unauthenticated => StatusCode::UNAUTHORIZED,
+            Self::Unauthorized => StatusCode::UNAUTHORIZED,
             Self::UnauthenticatedReason(_) => StatusCode::UNAUTHORIZED,
         };
 

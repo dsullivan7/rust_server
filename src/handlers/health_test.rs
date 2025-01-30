@@ -1,24 +1,25 @@
-use crate::authentication;
-use crate::handlers::router;
-use crate::handlers::{health::HealthResponse, AppState};
-use axum::{
-    body::Body,
-    http::{Request, StatusCode},
-};
-use http_body_util::BodyExt;
-use sea_orm::{DatabaseBackend, MockDatabase};
-use tower::ServiceExt;
-
 #[cfg(test)]
 #[tokio::test]
 async fn test_health() {
+    use crate::authentication;
+    use crate::authorization;
+    use crate::handlers::router;
+    use crate::handlers::{health::HealthResponse, AppState};
+    use axum::{
+        body::Body,
+        http::{Request, StatusCode},
+    };
+    use http_body_util::BodyExt;
+    use sea_orm::{DatabaseBackend, MockDatabase};
     use std::sync::Arc;
+    use tower::ServiceExt;
 
     let conn = MockDatabase::new(DatabaseBackend::Postgres).into_connection();
 
     let my_router = router(AppState {
         conn: Arc::new(conn),
         authentication: Arc::new(authentication::MockIAuthentication::new()),
+        authorization: Arc::new(authorization::MockIAuthorization::new()),
     });
 
     let response = my_router

@@ -1,4 +1,5 @@
 mod authentication;
+mod authorization;
 mod health;
 mod routes;
 mod users;

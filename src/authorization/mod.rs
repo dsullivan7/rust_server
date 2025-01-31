@@ -6,7 +6,7 @@ use uuid::Uuid;
 #[derive(Error, Debug)]
 pub enum AuthorizationError {
     #[error("authorization error")]
-    Error(anyhow::Error),
+    Error,
 }
 
 pub struct User {
@@ -23,7 +23,10 @@ pub trait IAuthorization: Send + Sync {
 pub struct Authorization;
 
 impl IAuthorization for Authorization {
-    fn is_action_allowed(&self, _actor: User, _action: String) -> Result<bool, AuthorizationError> {
-        Ok(true)
+    fn is_action_allowed(&self, actor: User, _action: String) -> Result<bool, AuthorizationError> {
+        if actor.role == "admin" {
+            return Ok(true);
+        }
+        Err(AuthorizationError::Error)
     }
 }

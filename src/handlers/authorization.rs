@@ -37,7 +37,7 @@ pub async fn can_list_users(
         .is_action_allowed(
             AuthzUser {
                 user_id: user.user_id.to_owned(),
-                role: "random".to_owned(),
+                role: user.role.to_owned(),
             },
             "list_users".to_owned(),
         )

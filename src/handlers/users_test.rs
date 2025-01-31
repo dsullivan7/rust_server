@@ -27,6 +27,7 @@ mod tests {
             first_name: Some("first_name".to_owned()),
             last_name: Some("last_name".to_owned()),
             auth0_id: Some("auth0_id".to_owned()),
+            role: "user".to_owned(),
             created_at: chrono::Utc::now().into(),
             updated_at: chrono::Utc::now().into(),
         };
@@ -79,6 +80,7 @@ mod tests {
             first_name: Some("first_name_1".to_owned()),
             last_name: Some("last_name_1".to_owned()),
             auth0_id: Some("auth0_id_1".to_owned()),
+            role: "admin".to_owned(),
             created_at: chrono::Utc::now().into(),
             updated_at: chrono::Utc::now().into(),
         };
@@ -88,6 +90,7 @@ mod tests {
             first_name: Some("first_name_2".to_owned()),
             last_name: Some("last_name_2".to_owned()),
             auth0_id: Some("auth0_id_2".to_owned()),
+            role: "user".to_owned(),
             created_at: chrono::Utc::now().into(),
             updated_at: chrono::Utc::now().into(),
         };
@@ -150,6 +153,7 @@ mod tests {
             first_name: Some("first_name".to_owned()),
             last_name: Some("last_name".to_owned()),
             auth0_id: Some("auth0_id".to_owned()),
+            role: "user".to_owned(),
             created_at: chrono::Utc::now().into(),
             updated_at: chrono::Utc::now().into(),
         };
@@ -216,6 +220,7 @@ mod tests {
             first_name: Some("first_name".to_owned()),
             last_name: Some("last_name".to_owned()),
             auth0_id: Some("auth0_id".to_owned()),
+            role: "user".to_owned(),
             created_at: chrono::Utc::now().into(),
             updated_at: chrono::Utc::now().into(),
         };
@@ -225,6 +230,7 @@ mod tests {
             first_name: Some("first_name_different".to_owned()),
             last_name: Some("last_name_different".to_owned()),
             auth0_id: Some("auth0_id".to_owned()),
+            role: "user".to_owned(),
             created_at: chrono::Utc::now().into(),
             updated_at: chrono::Utc::now().into(),
         };

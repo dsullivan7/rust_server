@@ -135,6 +135,7 @@ pub async fn create_user(
     let user: models::user::Model = models::user::ActiveModel {
         user_id: NotSet,
         auth0_id: Set(Some(body.auth0_id.to_owned())),
+        role: Set("user".to_owned()),
         first_name,
         last_name,
         created_at: NotSet,

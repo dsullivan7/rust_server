@@ -93,6 +93,7 @@ mod tests {
         };
 
         let conn = MockDatabase::new(DatabaseBackend::Postgres)
+            .append_query_results(vec![vec![user_db_1.clone()]])
             .append_query_results(vec![vec![user_db_1.clone(), user_db_2.clone()]])
             .into_connection();
 

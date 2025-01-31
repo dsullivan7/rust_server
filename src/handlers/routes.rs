@@ -32,7 +32,7 @@ pub fn router(app_state: AppState) -> Router {
                 "/users",
                 get(users::list_users).layer(middleware::from_fn_with_state(
                     app_state.clone(),
-                    authorization_middleware::is_user_action_allowed,
+                    authorization_middleware::can_list_users,
                 )),
             )
             .route("/users/{user_id}", get(users::get_user))

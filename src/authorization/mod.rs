@@ -1,6 +1,7 @@
 use mockall::*;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use uuid::Uuid;
 
 #[derive(Error, Debug)]
 pub enum AuthorizationError {
@@ -9,7 +10,7 @@ pub enum AuthorizationError {
 }
 
 pub struct User {
-    pub user_id: String,
+    pub user_id: Uuid,
     pub role: String,
 }
 

@@ -26,6 +26,8 @@ pub enum ServerError {
     Unauthenticated,
     #[error("unauthorized")]
     Unauthorized,
+    #[error("unauthorized")]
+    UnauthorizedReason(anyhow::Error),
 }
 
 impl ServerError {
@@ -39,6 +41,7 @@ impl ServerError {
             Self::UnauthenticatedReason(_) => "unauthenticated".to_owned(),
             Self::Unauthenticated => "unauthenticated".to_owned(),
             Self::Unauthorized => "unauthorized".to_owned(),
+            Self::UnauthorizedReason(_) => "unauthorized".to_owned(),
         }
     }
     pub fn message(&self) -> String {
@@ -51,6 +54,7 @@ impl ServerError {
             Self::UnauthenticatedReason(_) => "unauthenticated".to_owned(),
             Self::Unauthenticated => "unauthenticated".to_owned(),
             Self::Unauthorized => "unauthorized".to_owned(),
+            Self::UnauthorizedReason(_) => "unauthorized".to_owned(),
         }
     }
 }
@@ -75,8 +79,9 @@ impl IntoResponse for ServerError {
             Self::BadReqest => StatusCode::BAD_REQUEST,
             Self::RequiredBodyParameter => StatusCode::BAD_REQUEST,
             Self::Unauthenticated => StatusCode::UNAUTHORIZED,
-            Self::Unauthorized => StatusCode::UNAUTHORIZED,
             Self::UnauthenticatedReason(_) => StatusCode::UNAUTHORIZED,
+            Self::Unauthorized => StatusCode::UNAUTHORIZED,
+            Self::UnauthorizedReason(_) => StatusCode::UNAUTHORIZED,
         };
 
         (status_code, body).into_response()

@@ -34,14 +34,11 @@ pub async fn can_list_users(
         .ok_or(errors::ServerError::Unauthorized)?;
 
     let is_authorized = authorization
-        .is_action_allowed(
-            AuthzUser {
-                user_id: user.user_id.to_owned(),
-                role: user.role.to_owned(),
-            },
-            "list_users".to_owned(),
-        )
-        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+        .can_list_users(AuthzUser {
+            user_id: user.user_id.to_owned(),
+            role: user.role.to_owned(),
+        })
+        .or(Err(errors::ServerError::Unauthorized))?;
 
     if is_authorized {
         return Ok(next.run(req).await);

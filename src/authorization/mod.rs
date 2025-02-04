@@ -22,13 +22,13 @@ pub struct Authorization;
 
 impl Authorization {
     fn is_user_admin(&self, actor: User) -> bool {
-        return actor.role == "admin";
+        actor.role == "admin"
     }
 }
 
 impl IAuthorization for Authorization {
     fn can_get_user(&self, actor: User, resource_id: Uuid) -> bool {
-        return self.is_user_admin(actor.clone()) || actor.user_id == resource_id;
+        self.is_user_admin(actor.clone()) || actor.user_id == resource_id
     }
 
     fn can_list_users(&self, actor: User) -> bool {

@@ -35,7 +35,13 @@ pub fn router(app_state: AppState) -> Router {
                     authorization_middleware::can_list_users,
                 )),
             )
-            .route("/users/{user_id}", get(users::get_user))
+            .route(
+                "/users/{user_id}",
+                get(users::get_user).layer(middleware::from_fn_with_state(
+                    app_state.clone(),
+                    authorization_middleware::can_get_user,
+                )),
+            )
             .route("/users", post(users::create_user))
             .route("/users/{user_id}", put(users::modify_user))
             .route("/users/{user_id}", delete(users::delete_user))

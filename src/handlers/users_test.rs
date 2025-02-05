@@ -34,6 +34,8 @@ mod tests {
 
         let conn = MockDatabase::new(DatabaseBackend::Postgres)
             .append_query_results(vec![vec![user_db.clone()]])
+            .append_query_results(vec![vec![user_db.clone()]])
+            .append_query_results(vec![vec![user_db.clone()]])
             .into_connection();
 
         let auth = test_utils::get_default_auth();

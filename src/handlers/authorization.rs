@@ -6,7 +6,8 @@ use axum::{
     middleware::Next,
     Extension,
 };
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
+use uuid::Uuid;
 
 use crate::{
     authentication::Claims,
@@ -17,6 +18,27 @@ use crate::{
 
 use super::AppState;
 
+pub async fn fetch_user_by_auth_id(
+    conn: &DatabaseConnection,
+    auth0_id: &str,
+) -> Result<Option<models::user::Model>, errors::ServerError> {
+    User::find()
+        .filter(models::user::Column::Auth0Id.eq(auth0_id.to_owned()))
+        .one(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))
+}
+
+pub async fn fetch_user_by_user_id(
+    conn: &DatabaseConnection,
+    user_id: Uuid,
+) -> Result<Option<models::user::Model>, errors::ServerError> {
+    User::find_by_id(user_id)
+        .one(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))
+}
+
 pub async fn can_list_users(
     State(state): State<AppState>,
     Extension(claims): Extension<Claims>,
@@ -26,11 +48,8 @@ pub async fn can_list_users(
     let conn = &*state.conn.clone();
     let authorization = state.authorization.clone();
 
-    let user = User::find()
-        .filter(models::user::Column::Auth0Id.eq(claims.sub.to_owned()))
-        .one(conn)
-        .await
-        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
+    let user = fetch_user_by_auth_id(conn, claims.sub.as_str())
+        .await?
         .ok_or(errors::ServerError::Unauthorized)?;
 
     let is_authorized = authorization.can_list_users(AuthzUser {
@@ -55,26 +74,20 @@ pub async fn can_get_user(
     let conn = &*state.conn.clone();
     let authorization = state.authorization.clone();
 
-    let user_actor = User::find()
-        .filter(models::user::Column::Auth0Id.eq(claims.sub.to_owned()))
-        .one(conn)
-        .await
-        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
+    let user_actor = fetch_user_by_auth_id(conn, claims.sub.as_str())
+        .await?
         .ok_or(errors::ServerError::Unauthorized)?;
 
-    let user_resource: models::user::Model = (|| -> Result<_, errors::ServerError> {
-        if user_id == "me" {
-            return Ok(User::find()
-                .filter(models::user::Column::Auth0Id.eq(claims.sub.to_owned()))
-                .one(conn));
+    let user_resource = match user_id.as_str() {
+        "me" => user_actor.clone(),
+        _ => {
+            let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())
+                .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
+            fetch_user_by_user_id(conn, user_id_uuid)
+                .await?
+                .ok_or(errors::ServerError::NotFound)?
         }
-        let user_id_uuid = uuid::Uuid::parse_str(user_id.as_str())
-            .map_err(|err| errors::ServerError::InvalidUUID(anyhow!(err)))?;
-        Ok(User::find_by_id(user_id_uuid).one(conn))
-    })()?
-    .await
-    .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
-    .ok_or(errors::ServerError::NotFound)?;
+    };
 
     let is_authorized = authorization.can_get_user(
         AuthzUser {

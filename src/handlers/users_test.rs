@@ -35,7 +35,6 @@ mod tests {
         let conn = MockDatabase::new(DatabaseBackend::Postgres)
             .append_query_results(vec![vec![user_db.clone()]])
             .append_query_results(vec![vec![user_db.clone()]])
-            .append_query_results(vec![vec![user_db.clone()]])
             .into_connection();
 
         let auth = test_utils::get_default_auth();
@@ -98,8 +97,8 @@ mod tests {
         };
 
         let conn = MockDatabase::new(DatabaseBackend::Postgres)
-            .append_query_results(vec![vec![user_db_1.clone()]])
             .append_query_results(vec![vec![user_db_1.clone(), user_db_2.clone()]])
+            .append_query_results(vec![vec![user_db_1.clone()]])
             .into_connection();
 
         let auth = test_utils::get_default_auth();

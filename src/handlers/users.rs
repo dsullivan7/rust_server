@@ -15,8 +15,8 @@ use uuid::Uuid;
 
 use crate::authentication::Claims;
 use crate::errors::{self, ServerError};
-use crate::models;
 use crate::models::user::Entity as User;
+use crate::{authorization, models};
 use anyhow::anyhow;
 
 use super::AppState;
@@ -43,13 +43,34 @@ pub struct CreateUser {
     last_name: Option<String>,
 }
 
-pub async fn list_users(State(state): State<AppState>) -> Result<impl IntoResponse, ServerError> {
+pub async fn list_users(
+    State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
+) -> Result<impl IntoResponse, ServerError> {
     let conn = &*state.conn.clone();
+    let authorization = state.authorization.clone();
 
     let users: Vec<models::user::Model> = User::find()
         .all(conn)
         .await
         .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?;
+
+    let user = User::find()
+        .filter(models::user::Column::Auth0Id.eq(claims.sub.to_owned()))
+        .one(conn)
+        .await
+        .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
+        .ok_or(errors::ServerError::Unauthorized)?;
+
+    authorization
+        .can_get_user(
+            authorization::User {
+                user_id: user.user_id.to_owned(),
+                role: user.role.to_owned(),
+            },
+            user.user_id.to_owned(),
+        )
+        .map_err(|err| errors::ServerError::UnauthorizedReason(anyhow!(err)))?;
 
     Ok(Json(
         users
@@ -71,6 +92,7 @@ pub async fn get_user(
     Extension(claims): Extension<Claims>,
 ) -> Result<impl IntoResponse, ServerError> {
     let conn = &*state.conn.clone();
+    let authorization = state.authorization.clone();
 
     let user: models::user::Model = (|| -> Result<_, ServerError> {
         if user_id == "me" {
@@ -85,6 +107,16 @@ pub async fn get_user(
     .await
     .map_err(|err| errors::ServerError::Internal(anyhow!(err)))?
     .ok_or(errors::ServerError::NotFound)?;
+
+    authorization
+        .can_get_user(
+            authorization::User {
+                user_id: user.user_id.to_owned(),
+                role: user.role.to_owned(),
+            },
+            user.user_id.to_owned(),
+        )
+        .map_err(|err| errors::ServerError::UnauthorizedReason(anyhow!(err)))?;
 
     Ok(Json(UserResponse {
         user_id: user.user_id.to_owned(),

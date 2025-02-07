@@ -12,7 +12,6 @@ use crate::authorization;
 use tower::ServiceBuilder;
 
 use super::authentication as authentication_middleware;
-use super::authorization as authorization_middleware;
 
 use super::health;
 
@@ -28,20 +27,8 @@ pub struct AppState {
 pub fn router(app_state: AppState) -> Router {
     Router::new().route("/", get(health::get_health)).merge(
         Router::new()
-            .route(
-                "/users",
-                get(users::list_users).layer(middleware::from_fn_with_state(
-                    app_state.clone(),
-                    authorization_middleware::can_list_users,
-                )),
-            )
-            .route(
-                "/users/{user_id}",
-                get(users::get_user).layer(middleware::from_fn_with_state(
-                    app_state.clone(),
-                    authorization_middleware::can_get_user,
-                )),
-            )
+            .route("/users", get(users::list_users))
+            .route("/users/{user_id}", get(users::get_user))
             .route("/users", post(users::create_user))
             .route("/users/{user_id}", put(users::modify_user))
             .route("/users/{user_id}", delete(users::delete_user))
